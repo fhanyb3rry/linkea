@@ -1,13 +1,15 @@
-import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
-import { Plus } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
 import StudentCard from '../components/cards/StudentCard'
+import ListState from '../components/layout/ListState'
+import PageHeader from '../components/layout/PageHeader'
 import { getStudents } from '../services/api'
 
 export default function Estudiantes() {
   const [students, setStudents] = useState([])
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [search, setSearch] = useState('')
+  const [carrera, setCarrera] = useState('Todas')
 
   useEffect(() => {
     getStudents()
@@ -16,30 +18,72 @@ export default function Estudiantes() {
       .finally(() => setLoading(false))
   }, [])
 
-  return (
-    <section className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl">Estudiantes</h1>
-        <Link
-          to="/perfil/crear"
-          className="flex items-center gap-1.5 rounded-full bg-brand px-4 py-2 font-body text-sm font-semibold text-on-brand transition-all hover:scale-[1.03] hover:opacity-90"
-        >
-          <Plus className="h-4 w-4" />
-          Crear perfil
-        </Link>
-      </div>
+  const carreras = useMemo(() => ['Todas', ...new Set(students.map((s) => s.carrera))], [students])
 
-      {loading && <p className="mt-4 font-body text-sm text-muted">Cargando estudiantes...</p>}
-      {error && <p className="mt-4 font-body text-sm text-red-600">{error}</p>}
-      {!loading && !error && students.length === 0 && (
-        <p className="mt-4 font-body text-sm text-muted">Aún no hay estudiantes registrados.</p>
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase()
+    return students.filter((s) => {
+      if (carrera !== 'Todas' && s.carrera !== carrera) return false
+      if (!q) return true
+      const text = [s.nombre, s.carrera, s.ubicacion?.zona, ...(s.skills ?? [])].join(' ').toLowerCase()
+      return text.includes(q)
+    })
+  }, [students, search, carrera])
+
+  return (
+    <section className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-8 sm:px-6">
+      <PageHeader
+        title="Estudiantes"
+        subtitle="Perfiles de estudiantes que buscan una práctica profesional."
+        count={loading || error ? undefined : students.length}
+        actionTo="/perfil/crear"
+        actionLabel="Crear perfil"
+        search={search}
+        onSearch={setSearch}
+        searchPlaceholder="Buscar por nombre, carrera, zona o skill..."
+      />
+
+      {carreras.length > 2 && (
+        <div className="flex flex-wrap gap-2" role="tablist" aria-label="Filtrar por carrera">
+          {carreras.map((c) => (
+            <button
+              key={c}
+              type="button"
+              role="tab"
+              aria-selected={c === carrera}
+              onClick={() => setCarrera(c)}
+              className={`rounded-full border px-4 py-1.5 font-body text-xs font-medium transition-colors ${
+                c === carrera
+                  ? 'border-brand bg-brand text-on-brand'
+                  : 'border-line bg-surface text-muted hover:text-ink'
+              }`}
+            >
+              {c}
+            </button>
+          ))}
+        </div>
       )}
 
-      <div className="mt-6 grid gap-6 [grid-template-columns:repeat(auto-fit,minmax(280px,1fr))]">
-        {students.map((student) => (
-          <StudentCard key={student.id} student={student} />
-        ))}
-      </div>
+      <ListState
+        loading={loading}
+        error={error}
+        empty={!loading && !error && filtered.length === 0}
+        emptyText={
+          students.length === 0
+            ? 'Aún no hay estudiantes registrados.'
+            : 'Ningún estudiante coincide con tu búsqueda.'
+        }
+        actionTo={students.length === 0 ? '/perfil/crear' : undefined}
+        actionLabel="Crear el primer perfil"
+      />
+
+      {!loading && !error && filtered.length > 0 && (
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {filtered.map((student) => (
+            <StudentCard key={student.id} student={student} />
+          ))}
+        </div>
+      )}
     </section>
   )
 }
