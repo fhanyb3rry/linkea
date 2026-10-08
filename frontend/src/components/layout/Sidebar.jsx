@@ -13,7 +13,7 @@ import {
 
 // `to` = ruta real. Sin `to` = pantalla de diseño todavía sin función.
 const items = [
-  { to: '/', label: 'Inicio', icon: Home, end: true },
+  { to: '/inicio', label: 'Inicio', icon: Home },
   { to: '/vacantes', label: 'Vacantes', icon: Briefcase },
   { to: '/estudiantes', label: 'Estudiantes', icon: GraduationCap },
   { label: 'Postulaciones', icon: Send },
@@ -58,7 +58,7 @@ export default function Sidebar({ onNavigate, onClose }) {
   return (
     <div className="flex h-full flex-col gap-6 px-4 py-6">
       <div className="flex items-center justify-between px-2">
-        <Link to="/" onClick={onNavigate} className="font-heading text-3xl font-semibold text-ink">
+        <Link to="/inicio" onClick={onNavigate} className="font-heading text-3xl font-semibold text-ink">
           Linkea<span className="text-brand">✦</span>
         </Link>
         {onClose && (
