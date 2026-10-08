@@ -1,8 +1,16 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { ArrowRight, Sparkles } from 'lucide-react'
 import { FormRow, TextInput } from '../components/forms/FormField'
 
 export default function Login() {
+  const navigate = useNavigate()
+
+  // Prototipo: aún no hay autenticación en el backend, solo se entra al panel.
+  function onSubmit(event) {
+    event.preventDefault()
+    navigate('/inicio')
+  }
+
   return (
     <section className="mx-auto flex min-h-[70vh] max-w-md flex-col justify-center px-4 py-16 sm:px-6">
       <div className="mb-6 flex items-center gap-2 font-heading text-xl font-semibold text-ink">
@@ -15,7 +23,7 @@ export default function Login() {
         Accede a tu cuenta para ver tus recomendaciones y vacantes.
       </p>
 
-      <form className="mt-6 flex flex-col gap-4">
+      <form onSubmit={onSubmit} className="mt-6 flex flex-col gap-4">
         <FormRow label="Correo electrónico">
           <TextInput type="email" placeholder="tucorreo@ejemplo.com" required />
         </FormRow>
