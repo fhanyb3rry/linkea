@@ -58,11 +58,11 @@ export default function PublicarVacante() {
   return (
     <section className="mx-auto max-w-2xl px-4 py-12 sm:px-6">
       <h1 className="text-2xl">Publica una vacante</h1>
-      <p className="mt-1 font-body text-sm text-gris-pizarra">
+      <p className="mt-1 font-body text-sm text-muted">
         Al publicar, Linkea evalúa automáticamente qué estudiantes son compatibles.
       </p>
 
-      <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-5 rounded-2xl bg-blanco p-6 shadow-sm">
+      <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-5 rounded-2xl bg-surface p-6 shadow-sm">
         <div className="grid gap-5 sm:grid-cols-2">
           <FormRow label="Nombre de la empresa">
             <TextInput
@@ -107,12 +107,12 @@ export default function PublicarVacante() {
           />
         </FormRow>
 
-        <label className="flex items-center gap-2 font-body text-sm text-gris-pizarra">
+        <label className="flex items-center gap-2 font-body text-sm text-muted">
           <input
             type="checkbox"
             checked={form.apoyoEconomico}
             onChange={handleChange('apoyoEconomico')}
-            className="h-4 w-4 rounded border-azul-marino/30 text-cafe-avellana focus:ring-cafe-avellana/30"
+            className="h-4 w-4 rounded border-ink/30 text-brand focus:ring-brand/30"
           />
           Ofrece apoyo económico
         </label>
@@ -126,7 +126,7 @@ export default function PublicarVacante() {
         {error && <p className="font-body text-sm text-red-600">{error}</p>}
 
         {status === 'success' ? (
-          <div className="flex items-center gap-2 rounded-xl bg-cafe-avellana/10 px-4 py-3 font-body text-sm font-medium text-cafe-avellana">
+          <div className="flex items-center gap-2 rounded-xl bg-brand/10 px-4 py-3 font-body text-sm font-medium text-brand">
             <CheckCircle2 className="h-4 w-4" />
             ¡Vacante publicada! Redirigiendo...
           </div>
@@ -134,7 +134,7 @@ export default function PublicarVacante() {
           <button
             type="submit"
             disabled={status === 'loading'}
-            className="group flex items-center justify-center gap-2 rounded-full bg-cafe-avellana px-5 py-3 font-body text-sm font-semibold text-blanco transition-all duration-300 hover:scale-[1.02] hover:opacity-90 active:scale-95 disabled:opacity-60"
+            className="group flex items-center justify-center gap-2 rounded-full bg-brand px-5 py-3 font-body text-sm font-semibold text-on-brand transition-all duration-300 hover:scale-[1.02] hover:opacity-90 active:scale-95 disabled:opacity-60"
           >
             {status === 'loading' ? 'Publicando...' : 'Publicar vacante'}
             <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />

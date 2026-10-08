@@ -48,12 +48,12 @@ export default function CrearPerfilEstudiante() {
   return (
     <section className="mx-auto max-w-2xl px-4 py-12 sm:px-6">
       <h1 className="text-2xl">Crea tu perfil de estudiante</h1>
-      <p className="mt-1 font-body text-sm text-gris-pizarra">
+      <p className="mt-1 font-body text-sm text-muted">
         Con esta información, nuestro motor de matching encuentra las vacantes más compatibles
         contigo.
       </p>
 
-      <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-5 rounded-2xl bg-blanco p-6 shadow-sm">
+      <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-5 rounded-2xl bg-surface p-6 shadow-sm">
         <div className="grid gap-5 sm:grid-cols-2">
           <FormRow label="Nombre completo">
             <TextInput value={form.nombre} onChange={handleChange('nombre')} placeholder="Ana Pérez" required />
@@ -104,7 +104,7 @@ export default function CrearPerfilEstudiante() {
         {error && <p className="font-body text-sm text-red-600">{error}</p>}
 
         {status === 'success' ? (
-          <div className="flex items-center gap-2 rounded-xl bg-cafe-avellana/10 px-4 py-3 font-body text-sm font-medium text-cafe-avellana">
+          <div className="flex items-center gap-2 rounded-xl bg-brand/10 px-4 py-3 font-body text-sm font-medium text-brand">
             <CheckCircle2 className="h-4 w-4" />
             ¡Perfil creado! Redirigiendo...
           </div>
@@ -112,7 +112,7 @@ export default function CrearPerfilEstudiante() {
           <button
             type="submit"
             disabled={status === 'loading'}
-            className="group flex items-center justify-center gap-2 rounded-full bg-cafe-avellana px-5 py-3 font-body text-sm font-semibold text-blanco transition-all duration-300 hover:scale-[1.02] hover:opacity-90 active:scale-95 disabled:opacity-60"
+            className="group flex items-center justify-center gap-2 rounded-full bg-brand px-5 py-3 font-body text-sm font-semibold text-on-brand transition-all duration-300 hover:scale-[1.02] hover:opacity-90 active:scale-95 disabled:opacity-60"
           >
             {status === 'loading' ? 'Guardando...' : 'Crear perfil'}
             <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />

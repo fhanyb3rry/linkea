@@ -1,28 +1,60 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=Inter:wght@300..800&display=swap');
 @import "tailwindcss";
 
-@theme {
-  --color-azul-marino: #1C2A3A;
-  --color-cafe-avellana: #705238;
-  --color-beige-almendra: #F2ECE4;
-  --color-blanco: #FFFFFF;
-  --color-gris-pizarra: #3B424C;
+/* Tema por variables: claro por defecto, oscuro con <html data-theme="dark"> */
+:root {
+  --canvas: #faf8f7;
+  --surface: #ffffff;
+  --ink: #1a1517;
+  --muted: #6b6366;
+  --line: #ece6e4;
+  --brand: #b3191f;
+  --brand-soft: #fbe9e9;
+  --on-brand: #ffffff;
+  --night: #17110f;
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  --canvas: #0d0d0f;
+  --surface: #17171a;
+  --ink: #f4f0ef;
+  --muted: #a39a9d;
+  --line: #2a2a2e;
+  --brand: #d02a30;
+  --brand-soft: #2d1416;
+  --on-brand: #ffffff;
+  --night: #09090b;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-brand: var(--brand);
+  --color-brand-soft: var(--brand-soft);
+  --color-on-brand: var(--on-brand);
+  --color-night: var(--night);
 
   --font-system: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --font-heading: var(--font-system);
+  --font-heading: "Fraunces", Georgia, "Times New Roman", serif;
   --font-body: var(--font-system);
 }
 
 @layer base {
   body {
-    background-color: var(--color-beige-almendra);
-    color: var(--color-gris-pizarra);
+    background-color: var(--canvas);
+    color: var(--muted);
     font-family: var(--font-body);
+    transition: background-color 0.2s, color 0.2s;
   }
 
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
-    color: var(--color-cafe-avellana);
+    color: var(--ink);
   }
 }
 
@@ -94,13 +126,5 @@
     animation: shimmer 3s linear infinite;
   }
 
-  .bg-dot-grid {
-    background-image: radial-gradient(rgba(255, 255, 255, 0.35) 1px, transparent 1px);
-    background-size: 22px 22px;
-  }
 
-  .bg-dot-grid-warm {
-    background-image: radial-gradient(rgba(112, 82, 56, 0.35) 1px, transparent 1px);
-    background-size: 22px 22px;
-  }
 }

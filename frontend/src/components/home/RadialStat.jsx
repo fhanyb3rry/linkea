@@ -13,7 +13,7 @@ export default function RadialStat({ value = 92, size = 52, stroke = 5 }) {
           fill="none"
           stroke="currentColor"
           strokeWidth={stroke}
-          className="text-beige-almendra"
+          className="text-canvas"
         />
         <circle
           cx={size / 2}
@@ -25,10 +25,10 @@ export default function RadialStat({ value = 92, size = 52, stroke = 5 }) {
           strokeLinecap="round"
           strokeDasharray={circumference}
           strokeDashoffset={offset}
-          className="text-cafe-avellana transition-[stroke-dashoffset] duration-1000 ease-out"
+          className="text-brand transition-[stroke-dashoffset] duration-1000 ease-out"
         />
       </svg>
-      <span className="absolute font-heading text-xs font-bold text-cafe-avellana">{value}%</span>
+      <span className="absolute font-heading text-xs font-bold text-brand">{value}%</span>
     </div>
   )
 }
