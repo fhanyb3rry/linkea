@@ -2,7 +2,12 @@ from fastapi import APIRouter, Depends, HTTPException
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from app.core.database import get_database
-from app.logic.logic_rules import EligibilityResult, evaluar_elegibilidad, generar_tabla_verdad
+from app.logic.logic_rules import (
+    EligibilityResult,
+    evaluar_elegibilidad,
+    generar_tabla_verdad,
+    verificar_equivalencias,
+)
 from app.models.company import Vacancy
 from app.models.student import Student
 from app.routers.companies import _oid as vacancy_oid
@@ -14,6 +19,11 @@ router = APIRouter(prefix="/eligibility", tags=["eligibility"])
 @router.get("/truth-table")
 async def truth_table():
     return generar_tabla_verdad()
+
+
+@router.get("/equivalences")
+async def equivalences():
+    return verificar_equivalencias()
 
 
 @router.get("/check/{student_id}/{vacancy_id}", response_model=EligibilityResult)
