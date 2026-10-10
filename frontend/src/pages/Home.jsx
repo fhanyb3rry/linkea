@@ -9,13 +9,16 @@ import {
   GraduationCap,
   MoreVertical,
   Plus,
+  SearchX,
   Sparkles,
   Users,
 } from 'lucide-react'
 import CountUp from '../components/home/CountUp'
 import Reveal from '../components/home/Reveal'
 import useInView from '../hooks/useInView'
+import AreaFilter from '../components/home/AreaFilter'
 import useStoredSet from '../hooks/useStoredSet'
+import { AREAS, OTROS, areaOf, countByArea } from '../lib/areas'
 import { getStudents, getVacancies } from '../services/api'
 import {
   featuredVacancies,
@@ -227,8 +230,9 @@ function useHomeData() {
       })),
     }
 
-    const destacadas = vacancies.slice(0, 3).map((v) => ({
+    const destacadas = vacancies.map((v) => ({
       id: v.id,
+      area: areaOf(v.sector),
       titulo: v.nombre_empresa,
       empresa: v.sector,
       descripcion: `${v.ubicacion.zona} · ${v.horarios.horas_por_semana} hrs/semana · ${
@@ -422,8 +426,26 @@ function FeaturedCard({ vacancy, saved, onToggle }) {
   )
 }
 
+const MAX_FEATURED = 7
+
 function Featured({ vacancies, fallback }) {
   const [saved, toggleSaved] = useStoredSet('linkea-saved')
+  const [area, setArea] = useState('todas')
+
+  const counts = useMemo(() => countByArea(vacancies), [vacancies])
+
+  // "Todas" y las áreas fijas siempre aparecen; "Otros" solo si hay vacantes sin área conocida.
+  const options = useMemo(() => {
+    const areas = counts[OTROS.id] ? [...AREAS, OTROS] : AREAS
+    return [
+      { id: 'todas', label: 'Todas', count: vacancies.length },
+      ...areas.map((a) => ({ id: a.id, label: a.label, count: counts[a.id] ?? 0 })),
+    ]
+  }, [counts, vacancies.length])
+
+  const matching = area === 'todas' ? vacancies : vacancies.filter((v) => v.area === area)
+  const visible = matching.slice(0, MAX_FEATURED)
+  const areaLabel = options.find((o) => o.id === area)?.label
 
   return (
     <section>
@@ -442,32 +464,65 @@ function Featured({ vacancies, fallback }) {
         </div>
       </Reveal>
 
-      <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {vacancies.map((v, i) => {
-          const id = v.id ?? v.titulo
-          return (
-            <Reveal key={id} delay={i * 100}>
-              <FeaturedCard vacancy={v} saved={saved.has(id)} onToggle={() => toggleSaved(id)} />
-            </Reveal>
-          )
-        })}
-
-        <Reveal delay={vacancies.length * 100}>
-          <div className="group flex h-full flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-line p-6 text-center transition-colors duration-300 hover:border-brand hover:bg-brand-soft/40">
-            <span className="flex h-11 w-11 items-center justify-center rounded-full border border-line bg-surface text-brand transition-transform duration-500 group-hover:rotate-90">
-              <Plus className="h-5 w-5" />
-            </span>
-            <p className="font-body text-sm font-semibold text-ink">¿Tienes una vacante?</p>
-            <p className="font-body text-xs text-muted">Publícala y encuentra estudiantes elegibles.</p>
-            <Link
-              to="/vacantes/nueva"
-              className="btn-sheen rounded-lg bg-brand px-4 py-2 font-body text-xs font-semibold text-on-brand transition-transform duration-200 hover:scale-105 active:scale-95"
-            >
-              Publicar vacante
-            </Link>
-          </div>
-        </Reveal>
+      <div className="mt-4">
+        <AreaFilter options={options} value={area} onChange={setArea} />
       </div>
+
+      <p aria-live="polite" className="mt-4 font-body text-xs text-muted">
+        {matching.length === 0
+          ? `Sin vacantes en ${areaLabel}`
+          : `${matching.length} ${matching.length === 1 ? 'vacante' : 'vacantes'}${area === 'todas' ? '' : ` en ${areaLabel}`}`}
+      </p>
+
+      {/* key: al cambiar de área las tarjetas se vuelven a montar y entran en cascada, sin recargar la página */}
+      {matching.length === 0 ? (
+        <div
+          key={area}
+          className="animate-fade-in-up mt-3 flex flex-col items-center gap-3 rounded-2xl border border-dashed border-line px-6 py-10 text-center"
+        >
+          <span className="flex h-11 w-11 items-center justify-center rounded-full bg-brand-soft text-brand">
+            <SearchX className="h-5 w-5" />
+          </span>
+          <p className="font-heading text-lg text-ink">Aún no hay vacantes en {areaLabel}</p>
+          <p className="max-w-sm font-body text-xs leading-relaxed text-muted">
+            Pronto habrá nuevas oportunidades en esta área. Mientras tanto, puedes explorar las de otras áreas.
+          </p>
+          <button
+            type="button"
+            onClick={() => setArea('todas')}
+            className="rounded-lg border border-line bg-surface px-4 py-2 font-body text-xs font-semibold text-ink transition-[border-color,transform] duration-200 hover:border-brand/50 active:scale-95"
+          >
+            Ver todas las vacantes
+          </button>
+        </div>
+      ) : (
+        <div key={area} className="mt-3 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {visible.map((v, i) => {
+            const id = v.id ?? v.titulo
+            return (
+              <div key={id} className="animate-fade-in-up" style={{ animationDelay: `${i * 70}ms` }}>
+                <FeaturedCard vacancy={v} saved={saved.has(id)} onToggle={() => toggleSaved(id)} />
+              </div>
+            )
+          })}
+
+          <div className="animate-fade-in-up" style={{ animationDelay: `${visible.length * 70}ms` }}>
+            <div className="group flex h-full flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-line p-6 text-center transition-colors duration-300 hover:border-brand hover:bg-brand-soft/40">
+              <span className="flex h-11 w-11 items-center justify-center rounded-full border border-line bg-surface text-brand transition-transform duration-500 group-hover:rotate-90">
+                <Plus className="h-5 w-5" />
+              </span>
+              <p className="font-body text-sm font-semibold text-ink">¿Tienes una vacante?</p>
+              <p className="font-body text-xs text-muted">Publícala y encuentra estudiantes elegibles.</p>
+              <Link
+                to="/vacantes/nueva"
+                className="btn-sheen rounded-lg bg-brand px-4 py-2 font-body text-xs font-semibold text-on-brand transition-transform duration-200 hover:scale-105 active:scale-95"
+              >
+                Publicar vacante
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   )
 }

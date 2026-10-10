@@ -31,18 +31,21 @@ export const suggestedCompanies = [
 export const featuredVacancies = [
   {
     titulo: 'App educativa',
+    area: 'tecnologia',
     empresa: 'GPP Soluciones',
     descripcion: 'Buscamos practicantes de desarrollo para una app de apoyo estudiantil.',
     tags: ['Desarrollo', 'Remoto', 'Estudiantes'],
   },
   {
     titulo: 'Plataforma ambiental',
+    area: 'diseno',
     empresa: 'Nestlé',
     descripcion: 'Proyecto para crear conciencia sobre el cuidado del medio ambiente.',
     tags: ['Diseño', 'Colaborativo', 'Social'],
   },
   {
     titulo: 'Red de talentos',
+    area: 'administracion',
     empresa: 'Stellantis',
     descripcion: 'Conecta profesionales creativos con oportunidades reales.',
     tags: ['Desarrollo', 'Presencial', 'Empresa'],
