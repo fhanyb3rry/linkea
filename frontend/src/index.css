@@ -3,13 +3,13 @@
 
 /* Tema por variables: claro por defecto, oscuro con <html data-theme="dark"> */
 :root {
-  --canvas: #fff2d9;
-  --surface: #fffaf0;
+  --canvas: #fff9f0;
+  --surface: #fffefb;
   --ink: #4a3028;
   --muted: #6b4f43;
-  --line: #e6d3bf;
+  --line: #eddfd0;
   --brand: #6d1e2e;
-  --brand-soft: #f2dfd2;
+  --brand-soft: #f6e8de;
   --on-brand: #ffffff;
   --night: #2b1a15;
   --teal: #76a8a5;
