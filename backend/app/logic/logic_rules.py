@@ -52,6 +52,7 @@ class Proposiciones(BaseModel):
 class EligibilityResult(BaseModel):
     elegible: bool
     proposiciones: Proposiciones
+    razones_descarte: list[str] = []
 
 
 def _evaluar_carrera_match(student: Student, vacancy: Vacancy) -> bool:
@@ -89,9 +90,11 @@ def aplicar_formula(p: Proposiciones) -> bool:
 
 def evaluar_elegibilidad(student: Student, vacancy: Vacancy) -> EligibilityResult:
     proposiciones = evaluar_proposiciones(student, vacancy)
+    elegible = aplicar_formula(proposiciones)
     return EligibilityResult(
-        elegible=aplicar_formula(proposiciones),
+        elegible=elegible,
         proposiciones=proposiciones,
+        razones_descarte=[] if elegible else explicar(proposiciones),
     )
 
 
