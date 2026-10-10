@@ -3,28 +3,32 @@
 
 /* Tema por variables: claro por defecto, oscuro con <html data-theme="dark"> */
 :root {
-  --canvas: #faf8f7;
-  --surface: #ffffff;
-  --ink: #1a1517;
-  --muted: #6b6366;
-  --line: #ece6e4;
-  --brand: #b3191f;
-  --brand-soft: #fbe9e9;
+  --canvas: #fff2d9;
+  --surface: #fffaf0;
+  --ink: #4a3028;
+  --muted: #6b4f43;
+  --line: #e6d3bf;
+  --brand: #6d1e2e;
+  --brand-soft: #f2dfd2;
   --on-brand: #ffffff;
-  --night: #17110f;
+  --night: #2b1a15;
+  --teal: #76a8a5;
+  --accent: #e8a72e;
   color-scheme: light;
 }
 
 :root[data-theme='dark'] {
-  --canvas: #0d0d0f;
-  --surface: #17171a;
-  --ink: #f4f0ef;
-  --muted: #a39a9d;
-  --line: #2a2a2e;
-  --brand: #d02a30;
-  --brand-soft: #2d1416;
-  --on-brand: #ffffff;
-  --night: #09090b;
+  --canvas: #1c1411;
+  --surface: #271b17;
+  --ink: #f5e6d8;
+  --muted: #bba396;
+  --line: #3d2c25;
+  --brand: #d88a7c;
+  --brand-soft: #3a211d;
+  --on-brand: #2a1510;
+  --night: #140d0b;
+  --teal: #76a8a5;
+  --accent: #e8a72e;
   color-scheme: dark;
 }
 
@@ -38,6 +42,9 @@
   --color-brand-soft: var(--brand-soft);
   --color-on-brand: var(--on-brand);
   --color-night: var(--night);
+  --color-teal: var(--teal);
+  --color-accent: var(--accent);
+  --color-salmon: #d88a7c;
 
   --font-system: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --font-heading: "Fraunces", Georgia, "Times New Roman", serif;

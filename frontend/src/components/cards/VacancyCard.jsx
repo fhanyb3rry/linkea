@@ -8,13 +8,13 @@ export default function VacancyCard({ vacancy, matchPercentage }) {
   return (
     <article className="group flex flex-col overflow-hidden rounded-2xl border border-line bg-surface transition-colors hover:border-brand/40">
       <div className="relative h-24 bg-night">
-        <div className="absolute -right-6 -top-10 h-32 w-32 rounded-full bg-brand/70 blur-2xl" />
+        <div className="absolute -right-6 -top-10 h-32 w-32 rounded-full bg-salmon/50 blur-2xl" />
         <span className="absolute bottom-0 left-5 flex h-12 w-12 translate-y-1/2 items-center justify-center rounded-xl border-4 border-surface bg-brand font-body text-sm font-bold text-on-brand">
           {nombre_empresa.slice(0, 2).toUpperCase()}
         </span>
         <span
           title="Guardar (próximamente)"
-          className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-lg bg-white/15 text-on-brand backdrop-blur"
+          className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-lg bg-white/15 text-white backdrop-blur"
         >
           <Bookmark className="h-4 w-4" />
         </span>

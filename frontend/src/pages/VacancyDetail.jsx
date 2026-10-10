@@ -48,7 +48,7 @@ export default function VacancyDetail() {
       <div className="rounded-2xl bg-surface p-6 shadow-sm sm:p-8">
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-3">
-            <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-night font-heading text-sm font-bold text-on-brand">
+            <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-night font-heading text-sm font-bold text-white">
               {vacancy.nombre_empresa.slice(0, 3).toUpperCase()}
             </span>
             <div>

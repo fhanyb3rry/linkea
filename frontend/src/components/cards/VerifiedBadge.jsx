@@ -1,6 +1,6 @@
 export default function VerifiedBadge({ label = 'Verificado' }) {
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-night px-3 py-1 font-body text-xs font-semibold text-on-brand">
+    <span className="inline-flex items-center gap-1 rounded-full bg-night px-3 py-1 font-body text-xs font-semibold text-white">
       <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5">
         <path
           fillRule="evenodd"

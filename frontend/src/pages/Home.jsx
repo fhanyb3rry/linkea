@@ -49,17 +49,17 @@ function Chip({ children }) {
 function Hero() {
   return (
     <section className="relative overflow-hidden rounded-3xl border border-line bg-night px-6 py-10 sm:px-10 sm:py-14">
-      <div className="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-brand/60 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-32 right-1/3 h-72 w-72 rounded-full bg-brand/25 blur-3xl" />
+      <div className="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-salmon/40 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-32 right-1/3 h-72 w-72 rounded-full bg-salmon/15 blur-3xl" />
 
       <div className="relative max-w-xl">
         <p className="font-body text-xs font-medium uppercase tracking-[0.2em] text-white/70">
           Conecta · Postula · Crece
         </p>
-        <h1 className="mt-4 text-4xl font-medium leading-[1.05] text-on-brand sm:text-6xl">
+        <h1 className="mt-4 text-4xl font-medium leading-[1.05] text-white sm:text-6xl">
           Convierte tu talento
           <br />
-          en <em className="text-brand">oportunidades.</em>
+          en <em className="text-salmon">oportunidades.</em>
         </h1>
         <p className="mt-5 max-w-md font-body text-sm leading-relaxed text-white/75 sm:text-base">
           Linkea conecta estudiantes universitarios con empresas que ofrecen prácticas profesionales.
@@ -74,7 +74,7 @@ function Hero() {
           </Link>
           <Link
             to="/vacantes"
-            className="rounded-lg border border-white/25 px-5 py-3 font-body text-sm font-semibold text-on-brand transition-colors hover:bg-white/10"
+            className="rounded-lg border border-white/25 px-5 py-3 font-body text-sm font-semibold text-white transition-colors hover:bg-white/10"
           >
             Explorar vacantes
           </Link>
@@ -82,8 +82,8 @@ function Hero() {
       </div>
 
       <div className="relative mt-8 hidden max-w-xs rounded-2xl border border-white/15 bg-white/10 p-6 backdrop-blur-md lg:absolute lg:bottom-8 lg:right-8 lg:mt-0 lg:block">
-        <span className="block h-0.5 w-8 bg-brand" />
-        <p className="mt-4 font-heading text-xl leading-snug text-on-brand">
+        <span className="block h-0.5 w-8 bg-salmon" />
+        <p className="mt-4 font-heading text-xl leading-snug text-white">
           Las grandes carreras empiezan con buenas conexiones.
         </p>
       </div>
@@ -208,11 +208,11 @@ function Featured() {
         {featuredVacancies.map((v) => (
           <article key={v.titulo} className={`${cardClass} overflow-hidden`}>
             <div className="relative h-24 bg-night">
-              <div className="absolute -right-6 -top-8 h-28 w-28 rounded-full bg-brand/70 blur-2xl" />
+              <div className="absolute -right-6 -top-8 h-28 w-28 rounded-full bg-salmon/50 blur-2xl" />
               <button
                 type="button"
                 aria-label="Guardar vacante"
-                className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-lg bg-white/15 text-on-brand backdrop-blur"
+                className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-lg bg-white/15 text-white backdrop-blur"
               >
                 <Bookmark className="h-4 w-4" />
               </button>

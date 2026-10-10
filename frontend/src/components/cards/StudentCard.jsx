@@ -60,7 +60,7 @@ export default function StudentCard({ student, matchPercentage }) {
 
       <div className="mt-auto flex items-center justify-between border-t border-line pt-4">
         <span className="flex items-center gap-1.5 font-body text-xs text-muted">
-          <span className={`h-2 w-2 rounded-full ${estado === 'activo' ? 'bg-emerald-500' : 'bg-muted'}`} />
+          <span className={`h-2 w-2 rounded-full ${estado === 'activo' ? 'bg-teal' : 'bg-muted'}`} />
           {estados[estado] ?? estado}
         </span>
         <button

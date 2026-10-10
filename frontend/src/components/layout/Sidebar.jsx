@@ -74,16 +74,16 @@ export default function Sidebar({ onNavigate, onClose }) {
         ))}
       </nav>
 
-      <div className="relative mt-auto overflow-hidden rounded-2xl bg-night p-5 text-on-brand">
-        <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-brand/50 blur-3xl" />
-        <p className="relative font-heading text-xl leading-snug text-on-brand">
+      <div className="relative mt-auto overflow-hidden rounded-2xl bg-night p-5 text-white">
+        <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-salmon/35 blur-3xl" />
+        <p className="relative font-heading text-xl leading-snug text-white">
           Conecta con oportunidades que impulsan tu futuro.
         </p>
-        <span className="relative mt-3 block h-0.5 w-8 bg-brand" />
+        <span className="relative mt-3 block h-0.5 w-8 bg-salmon" />
         <Link
           to="/vacantes"
           onClick={onNavigate}
-          className="relative mt-5 flex items-center justify-between rounded-lg border border-white/20 px-3 py-2 font-body text-sm text-on-brand transition-colors hover:bg-white/10"
+          className="relative mt-5 flex items-center justify-between rounded-lg border border-white/20 px-3 py-2 font-body text-sm text-white transition-colors hover:bg-white/10"
         >
           Explorar vacantes
           <ArrowRight className="h-4 w-4" />
