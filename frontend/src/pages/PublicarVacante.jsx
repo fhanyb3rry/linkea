@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowRight, CheckCircle2 } from 'lucide-react'
-import { FormRow, TextArea, TextInput } from '../components/forms/FormField'
+import { FormRow, Select, TextArea, TextInput } from '../components/forms/FormField'
+import { AREA_OPTIONS } from '../lib/areas'
 import { createVacancy } from '../services/api'
 
 const initialForm = {
@@ -72,8 +73,17 @@ export default function PublicarVacante() {
               required
             />
           </FormRow>
-          <FormRow label="Sector">
-            <TextInput value={form.sector} onChange={handleChange('sector')} placeholder="Tecnología" required />
+          <FormRow label="Área profesional">
+            <Select value={form.sector} onChange={handleChange('sector')} required>
+              <option value="" disabled>
+                Selecciona un área
+              </option>
+              {AREA_OPTIONS.map((area) => (
+                <option key={area} value={area}>
+                  {area}
+                </option>
+              ))}
+            </Select>
           </FormRow>
           <FormRow label="Zona / ubicación">
             <TextInput value={form.zona} onChange={handleChange('zona')} placeholder="Toluca, Edo. Méx." required />

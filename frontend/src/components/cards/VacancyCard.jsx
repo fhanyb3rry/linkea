@@ -1,72 +1,99 @@
 import { Link } from 'react-router-dom'
-import { Bookmark, Clock, MapPin } from 'lucide-react'
+import { ArrowUpRight, Bookmark, Clock, MapPin } from 'lucide-react'
+import { areaInfo } from '../../lib/areas'
 import MatchBadge from './MatchBadge'
 
+const MAX_SKILLS = 4
+
+function Meta({ icon: Icon, children }) {
+  return (
+    <span className="flex items-center gap-1.5">
+      <Icon className="h-3.5 w-3.5 text-brand" />
+      {children}
+    </span>
+  )
+}
+
 export default function VacancyCard({ vacancy, matchPercentage, saved = false, onToggleSave }) {
-  const { id, nombre_empresa, sector, ubicacion, requisitos, estipendio, horarios } = vacancy
+  const { id, nombre_empresa, sector, ubicacion, requisitos, estipendio, horarios, ejemplo } = vacancy
+  const area = areaInfo(sector)
+  const AreaIcon = area.icon
+  const skills = requisitos?.skills_clave ?? []
+  const to = ejemplo ? '/vacantes' : `/vacantes/${id}`
 
   return (
-    <article className="group flex flex-col overflow-hidden rounded-2xl border border-line bg-surface transition-colors hover:border-brand/40">
-      <div className="relative h-24 bg-night">
-        <div className="absolute -right-6 -top-10 h-32 w-32 rounded-full bg-salmon/50 blur-2xl" />
-        <span className="absolute bottom-0 left-5 flex h-12 w-12 translate-y-1/2 items-center justify-center rounded-xl border-4 border-surface bg-brand font-body text-sm font-bold text-on-brand">
+    <article className="card group flex h-full flex-col gap-4 p-5">
+      <div className="flex items-start gap-3">
+        <span className="tile flex h-12 w-12 shrink-0 items-center justify-center rounded-xl font-heading text-base font-semibold">
           {nombre_empresa.slice(0, 2).toUpperCase()}
         </span>
+        <div className="min-w-0 flex-1">
+          <h3 className="truncate font-body text-base font-semibold text-ink">
+            {/* el enlace cubre toda la tarjeta; el botón de guardar queda por encima */}
+            <Link to={to} className="after:absolute after:inset-0 focus-visible:outline-none">
+              {nombre_empresa}
+            </Link>
+          </h3>
+          <span className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-brand-soft px-2.5 py-0.5 font-body text-[11px] font-medium text-brand">
+            <AreaIcon className="h-3 w-3" />
+            {area.label}
+          </span>
+        </div>
         <button
           type="button"
           aria-label={saved ? 'Quitar de guardados' : 'Guardar vacante'}
           aria-pressed={saved}
           onClick={onToggleSave}
-          className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-lg bg-white/15 text-white backdrop-blur transition-colors hover:bg-white/25"
+          className={`relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition-[background-color,border-color,color,transform] duration-200 hover:scale-105 active:scale-95 ${
+            saved
+              ? 'border-brand/40 bg-brand-soft text-brand'
+              : 'border-line bg-surface text-muted hover:border-brand/40 hover:text-brand'
+          }`}
         >
-          <Bookmark key={String(saved)} className={`h-4 w-4 ${saved ? 'animate-pop fill-current text-salmon' : ''}`} />
+          <Bookmark key={String(saved)} className={`h-4 w-4 ${saved ? 'animate-pop fill-current' : ''}`} />
         </button>
       </div>
 
-      <div className="flex flex-1 flex-col gap-3 p-5 pt-9">
-        <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0">
-            <h3 className="truncate font-body text-base font-semibold text-ink">{nombre_empresa}</h3>
-            <p className="font-body text-xs font-medium text-brand">{sector}</p>
-          </div>
+      {sector && sector !== area.label && (
+        <p className="-mt-2 font-body text-xs text-muted">{sector}</p>
+      )}
+
+      <div className="flex flex-wrap gap-x-4 gap-y-2 font-body text-xs text-muted">
+        <Meta icon={MapPin}>{ubicacion?.zona}</Meta>
+        <Meta icon={Clock}>{horarios?.horas_por_semana ?? '-'} hrs/semana</Meta>
+      </div>
+
+      {skills.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {skills.slice(0, MAX_SKILLS).map((skill) => (
+            <span
+              key={skill}
+              className="rounded-full border border-line bg-canvas px-2.5 py-1 font-body text-xs text-muted transition-colors group-hover:border-brand/25"
+            >
+              {skill}
+            </span>
+          ))}
+          {skills.length > MAX_SKILLS && (
+            <span className="rounded-full px-1.5 py-1 font-body text-xs text-muted">+{skills.length - MAX_SKILLS}</span>
+          )}
+        </div>
+      )}
+
+      <div className="mt-auto flex items-center justify-between border-t border-line pt-4">
+        <div className="flex items-center gap-2">
+          <span
+            className={`rounded-full px-2.5 py-1 font-body text-xs font-medium ${
+              estipendio?.apoyo_economico ? 'bg-teal/20 text-ink' : 'bg-canvas text-muted'
+            }`}
+          >
+            {estipendio?.apoyo_economico ? `$${estipendio.monto} ${estipendio.moneda}` : 'Sin apoyo'}
+          </span>
           <MatchBadge percentage={matchPercentage} />
         </div>
-
-        <div className="flex flex-wrap gap-x-4 gap-y-1 font-body text-xs text-muted">
-          <span className="flex items-center gap-1.5">
-            <MapPin className="h-3.5 w-3.5" />
-            {ubicacion?.zona}
-          </span>
-          <span className="flex items-center gap-1.5">
-            <Clock className="h-3.5 w-3.5" />
-            {horarios?.horas_por_semana ?? '-'} hrs/semana
-          </span>
-        </div>
-
-        {requisitos?.skills_clave?.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {requisitos.skills_clave.map((skill) => (
-              <span
-                key={skill}
-                className="rounded-md border border-line bg-canvas px-2.5 py-1 font-body text-xs text-muted"
-              >
-                {skill}
-              </span>
-            ))}
-          </div>
-        )}
-
-        <div className="mt-auto flex items-center justify-between border-t border-line pt-4">
-          <span className="font-body text-xs text-muted">
-            {estipendio?.apoyo_economico ? `$${estipendio.monto} ${estipendio.moneda}` : 'Sin apoyo económico'}
-          </span>
-          <Link
-            to={`/vacantes/${id}`}
-            className="rounded-lg bg-brand px-4 py-2 font-body text-xs font-semibold text-on-brand transition-opacity hover:opacity-90"
-          >
-            Ver detalle
-          </Link>
-        </div>
+        <span className="flex items-center gap-1 font-body text-xs font-semibold text-brand">
+          Ver detalle
+          <ArrowUpRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+        </span>
       </div>
     </article>
   )

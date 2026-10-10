@@ -2,11 +2,11 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   ArrowRight,
-  Bookmark,
   Briefcase,
   Building2,
   Check,
   GraduationCap,
+  LayoutGrid,
   MoreVertical,
   Plus,
   SearchX,
@@ -16,6 +16,7 @@ import {
 import CountUp from '../components/home/CountUp'
 import Reveal from '../components/home/Reveal'
 import useInView from '../hooks/useInView'
+import VacancyCard from '../components/cards/VacancyCard'
 import AreaFilter from '../components/home/AreaFilter'
 import useStoredSet from '../hooks/useStoredSet'
 import { AREAS, OTROS, areaOf, countByArea } from '../lib/areas'
@@ -36,9 +37,7 @@ const tabs = [
   { id: 'empresas', label: 'Empresas' },
 ]
 
-const cardClass = 'rounded-2xl border border-line bg-surface'
-const liftClass =
-  'transition-[transform,box-shadow,border-color] duration-300 hover:-translate-y-1 hover:border-brand/40 hover:shadow-lg hover:shadow-brand/10'
+const cardClass = 'card'
 
 function initials(name) {
   return name
@@ -151,7 +150,7 @@ function StatsRow() {
         const Icon = statIcons[icon]
         return (
           <Reveal key={label} delay={i * 90}>
-            <div className={`${cardClass} ${liftClass} group flex h-full items-center gap-4 p-5`}>
+            <div className={`${cardClass} group flex h-full items-center gap-4 p-5`}>
               <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand-soft text-brand transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6">
                 <Icon className="h-5 w-5" />
               </span>
@@ -168,7 +167,7 @@ function StatsRow() {
       <Reveal delay={stats.length * 90} className="col-span-2 lg:col-span-1">
         <Link
           to="/vacantes"
-          className={`${cardClass} ${liftClass} group flex h-full items-center gap-4 p-5`}
+          className={`${cardClass} group flex h-full items-center gap-4 p-5`}
         >
           <Sparkles className="h-5 w-5 shrink-0 text-brand transition-transform duration-500 group-hover:rotate-180" />
           <div className="min-w-0">
@@ -230,16 +229,7 @@ function useHomeData() {
       })),
     }
 
-    const destacadas = vacancies.map((v) => ({
-      id: v.id,
-      area: areaOf(v.sector),
-      titulo: v.nombre_empresa,
-      empresa: v.sector,
-      descripcion: `${v.ubicacion.zona} · ${v.horarios.horas_por_semana} hrs/semana · ${
-        v.estipendio.apoyo_economico ? `$${v.estipendio.monto} ${v.estipendio.moneda}` : 'Sin apoyo económico'
-      }`,
-      tags: v.requisitos.skills_clave.slice(0, 3),
-    }))
+    const destacadas = vacancies
 
     const fallback = {
       estudiantes: sugerencias.estudiantes.length === 0,
@@ -344,11 +334,11 @@ function Suggestions({ data, fallback }) {
             return (
               <article
                 key={id}
-                className={`${cardClass} ${liftClass} animate-fade-in-up flex flex-col gap-4 p-5`}
+                className={`${cardClass} animate-fade-in-up flex flex-col gap-4 p-5`}
                 style={{ animationDelay: `${i * 80}ms` }}
               >
                 <div className="flex items-start gap-3">
-                  <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-brand-soft font-body text-sm font-semibold text-brand">
+                  <span className="tile flex h-12 w-12 shrink-0 items-center justify-center rounded-full font-body text-sm font-semibold">
                     {initials(item.nombre)}
                   </span>
                   <div className="min-w-0 flex-1">
@@ -386,46 +376,6 @@ function Suggestions({ data, fallback }) {
   )
 }
 
-function FeaturedCard({ vacancy, saved, onToggle }) {
-  return (
-    <article className={`${cardClass} ${liftClass} group relative overflow-hidden`}>
-      <div className="relative h-24 overflow-hidden bg-night">
-        <div className="absolute -right-6 -top-8 h-28 w-28 rounded-full bg-salmon/50 blur-2xl transition-transform duration-700 group-hover:-translate-x-10 group-hover:translate-y-6 group-hover:scale-150" />
-      </div>
-      <button
-        type="button"
-        aria-label={saved ? 'Quitar de guardados' : 'Guardar vacante'}
-        aria-pressed={saved}
-        onClick={onToggle}
-        className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-lg bg-white/15 text-white backdrop-blur transition-colors hover:bg-white/25"
-      >
-        <Bookmark
-          key={String(saved)}
-          className={`h-4 w-4 ${saved ? 'animate-pop fill-current text-salmon' : ''}`}
-        />
-      </button>
-      <div className="flex flex-col gap-2 p-5">
-        <h3 className="font-body text-sm font-semibold text-ink">
-          {/* el enlace cubre toda la tarjeta; el botón de guardar queda por encima */}
-          <Link
-            to={vacancy.id ? `/vacantes/${vacancy.id}` : '/vacantes'}
-            className="after:absolute after:inset-0 focus-visible:outline-none"
-          >
-            {vacancy.titulo}
-          </Link>
-        </h3>
-        <p className="font-body text-xs font-medium text-brand">{vacancy.empresa}</p>
-        <p className="font-body text-xs leading-relaxed text-muted">{vacancy.descripcion}</p>
-        <div className="mt-2 flex flex-wrap gap-2">
-          {vacancy.tags.map((t) => (
-            <Chip key={t}>{t}</Chip>
-          ))}
-        </div>
-      </div>
-    </article>
-  )
-}
-
 const MAX_FEATURED = 7
 
 function Featured({ vacancies, fallback }) {
@@ -438,12 +388,12 @@ function Featured({ vacancies, fallback }) {
   const options = useMemo(() => {
     const areas = counts[OTROS.id] ? [...AREAS, OTROS] : AREAS
     return [
-      { id: 'todas', label: 'Todas', count: vacancies.length },
-      ...areas.map((a) => ({ id: a.id, label: a.label, count: counts[a.id] ?? 0 })),
+      { id: 'todas', label: 'Todas', count: vacancies.length, icon: LayoutGrid },
+      ...areas.map((a) => ({ id: a.id, label: a.label, count: counts[a.id] ?? 0, icon: a.icon })),
     ]
   }, [counts, vacancies.length])
 
-  const matching = area === 'todas' ? vacancies : vacancies.filter((v) => v.area === area)
+  const matching = area === 'todas' ? vacancies : vacancies.filter((v) => areaOf(v.sector) === area)
   const visible = matching.slice(0, MAX_FEATURED)
   const areaLabel = options.find((o) => o.id === area)?.label
 
@@ -497,14 +447,11 @@ function Featured({ vacancies, fallback }) {
         </div>
       ) : (
         <div key={area} className="mt-3 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {visible.map((v, i) => {
-            const id = v.id ?? v.titulo
-            return (
-              <div key={id} className="animate-fade-in-up" style={{ animationDelay: `${i * 70}ms` }}>
-                <FeaturedCard vacancy={v} saved={saved.has(id)} onToggle={() => toggleSaved(id)} />
-              </div>
-            )
-          })}
+          {visible.map((v, i) => (
+            <div key={v.id} className="animate-fade-in-up" style={{ animationDelay: `${i * 70}ms` }}>
+              <VacancyCard vacancy={v} saved={saved.has(v.id)} onToggleSave={() => toggleSaved(v.id)} />
+            </div>
+          ))}
 
           <div className="animate-fade-in-up" style={{ animationDelay: `${visible.length * 70}ms` }}>
             <div className="group flex h-full flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-line p-6 text-center transition-colors duration-300 hover:border-brand hover:bg-brand-soft/40">

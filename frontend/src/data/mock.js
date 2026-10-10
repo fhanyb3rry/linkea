@@ -28,26 +28,20 @@ export const suggestedCompanies = [
   { nombre: 'Tec de Monterrey', rol: 'Educación', skills: ['Lerma', 'Híbrido'], match: null },
 ]
 
+// Vacantes de ejemplo con la misma forma que las de la API (`ejemplo` evita enlazar a un detalle inexistente).
+const demo = (nombre_empresa, sector, zona, horas, apoyo, skills) => ({
+  id: `demo-${nombre_empresa}`,
+  ejemplo: true,
+  nombre_empresa,
+  sector,
+  ubicacion: { zona },
+  requisitos: { carreras_aceptadas: [], skills_clave: skills },
+  estipendio: { apoyo_economico: apoyo, monto: apoyo ? 4000 : null, moneda: 'MXN' },
+  horarios: { horas_por_semana: horas },
+})
+
 export const featuredVacancies = [
-  {
-    titulo: 'App educativa',
-    area: 'tecnologia',
-    empresa: 'GPP Soluciones',
-    descripcion: 'Buscamos practicantes de desarrollo para una app de apoyo estudiantil.',
-    tags: ['Desarrollo', 'Remoto', 'Estudiantes'],
-  },
-  {
-    titulo: 'Plataforma ambiental',
-    area: 'diseno',
-    empresa: 'Nestlé',
-    descripcion: 'Proyecto para crear conciencia sobre el cuidado del medio ambiente.',
-    tags: ['Diseño', 'Colaborativo', 'Social'],
-  },
-  {
-    titulo: 'Red de talentos',
-    area: 'administracion',
-    empresa: 'Stellantis',
-    descripcion: 'Conecta profesionales creativos con oportunidades reales.',
-    tags: ['Desarrollo', 'Presencial', 'Empresa'],
-  },
+  demo('GPP Soluciones', 'Tecnología', 'Toluca', 20, true, ['React', 'Python']),
+  demo('Nestlé', 'Diseño', 'Lerma', 15, false, ['Figma', 'Branding']),
+  demo('Stellantis', 'Ingeniería', 'Toluca', 30, true, ['AutoCAD', 'Calidad']),
 ]

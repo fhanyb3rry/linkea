@@ -14,6 +14,9 @@
   --night: #2b1a15;
   --teal: #76a8a5;
   --accent: #e8a72e;
+  --salmon: #d88a7c;
+  --tile: linear-gradient(135deg, #6d1e2e, #a4485b);
+  --on-tile: #ffffff;
   color-scheme: light;
 }
 
@@ -29,6 +32,9 @@
   --night: #140d0b;
   --teal: #76a8a5;
   --accent: #e8a72e;
+  --salmon: #d88a7c;
+  --tile: linear-gradient(135deg, #e3a093, #c4677a);
+  --on-tile: #2a1510;
   color-scheme: dark;
 }
 
@@ -224,5 +230,69 @@
   .reveal {
     opacity: 1;
     transform: none;
+  }
+}
+
+@layer components {
+  /* Tarjeta: relieve suave, brillo de marca en la esquina y barra superior que aparece al pasar el cursor */
+  .card,
+  .panel {
+    position: relative;
+    overflow: hidden;
+    border-radius: 1.1rem;
+    border: 1px solid var(--line);
+    background:
+      radial-gradient(120% 80% at 100% 0%, color-mix(in srgb, var(--brand) 7%, transparent), transparent 55%),
+      var(--surface);
+    box-shadow:
+      0 1px 2px color-mix(in srgb, var(--ink) 6%, transparent),
+      0 12px 28px -16px color-mix(in srgb, var(--ink) 24%, transparent);
+  }
+
+  .card {
+    transition:
+      translate 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 0.3s ease,
+      border-color 0.3s ease;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--brand), var(--salmon));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .card:hover {
+    translate: 0 -4px;
+    border-color: color-mix(in srgb, var(--brand) 38%, var(--line));
+    box-shadow:
+      0 2px 4px color-mix(in srgb, var(--ink) 8%, transparent),
+      0 24px 40px -20px color-mix(in srgb, var(--brand) 45%, transparent);
+  }
+
+  .card:hover::before {
+    transform: scaleX(1);
+  }
+
+  /* Monograma / avatar con degradado de marca */
+  .tile {
+    background: var(--tile);
+    color: var(--on-tile);
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.18), 0 6px 14px -6px color-mix(in srgb, var(--brand) 60%, transparent);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card,
+    .card::before {
+      transition: none;
+    }
+    .card:hover {
+      translate: none;
+    }
   }
 }

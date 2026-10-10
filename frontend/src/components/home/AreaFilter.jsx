@@ -1,14 +1,21 @@
-// Filtro por área profesional: chips con contador. Controlado desde fuera (value / onChange).
+import { Compass } from 'lucide-react'
+
+// Filtro por área profesional: chips con ícono y contador. Controlado desde fuera (value / onChange).
 export default function AreaFilter({ options, value, onChange }) {
   return (
-    <div className="rounded-2xl border border-line bg-surface p-4 shadow-sm shadow-ink/5 sm:p-5">
-      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-        <h3 className="text-lg font-medium">Explora por área profesional</h3>
-        <p className="font-body text-xs text-muted">Elige un área para ver solo sus vacantes.</p>
+    <div className="panel p-5">
+      <div className="flex items-center gap-3">
+        <span className="tile flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
+          <Compass className="h-5 w-5" />
+        </span>
+        <div>
+          <h3 className="text-lg font-medium leading-tight">Explora por área profesional</h3>
+          <p className="font-body text-xs text-muted">Elige un área y mira solo sus vacantes.</p>
+        </div>
       </div>
 
-      <div className="mt-4 flex flex-wrap gap-2" role="group" aria-label="Filtrar vacantes por área">
-        {options.map(({ id, label, count }) => {
+      <div className="mt-5 flex flex-wrap gap-2.5" role="group" aria-label="Filtrar vacantes por área">
+        {options.map(({ id, label, count, icon: Icon }) => {
           const active = id === value
           return (
             <button
@@ -16,16 +23,21 @@ export default function AreaFilter({ options, value, onChange }) {
               type="button"
               aria-pressed={active}
               onClick={() => onChange(id)}
-              className={`flex items-center gap-2 rounded-full border px-4 py-1.5 font-body text-xs font-medium transition-[background-color,color,border-color,box-shadow,transform] duration-200 motion-reduce:transition-none ${
+              className={`group flex items-center gap-2 rounded-xl border px-3.5 py-2 font-body text-xs font-medium transition-[background-color,color,border-color,box-shadow,translate] duration-300 motion-reduce:transition-none ${
                 active
-                  ? 'border-brand bg-brand text-on-brand shadow-sm shadow-brand/25'
-                  : 'border-line bg-canvas text-muted hover:-translate-y-px hover:border-brand/40 hover:text-ink'
+                  ? 'tile border-transparent shadow-lg shadow-brand/30'
+                  : 'border-line bg-canvas text-muted hover:-translate-y-0.5 hover:border-brand/40 hover:bg-surface hover:text-ink hover:shadow-md hover:shadow-brand/10'
               }`}
             >
+              <Icon
+                className={`h-4 w-4 transition-transform duration-300 ${
+                  active ? '' : 'text-brand group-hover:scale-110'
+                }`}
+              />
               {label}
               <span
-                className={`rounded-full px-1.5 text-[10px] leading-4 ${
-                  active ? 'bg-white/20 text-on-brand' : 'bg-brand-soft text-brand'
+                className={`rounded-md px-1.5 text-[10px] font-semibold leading-5 ${
+                  active ? 'bg-current/15' : 'bg-brand-soft text-brand'
                 } ${count === 0 && !active ? 'opacity-50' : ''}`}
               >
                 {count}

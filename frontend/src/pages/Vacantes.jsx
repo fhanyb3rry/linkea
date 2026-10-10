@@ -4,6 +4,7 @@ import VacancyCard from '../components/cards/VacancyCard'
 import ListState from '../components/layout/ListState'
 import PageHeader from '../components/layout/PageHeader'
 import useStoredSet from '../hooks/useStoredSet'
+import { areaInfo } from '../lib/areas'
 import { getVacancies } from '../services/api'
 
 export default function Vacantes() {
@@ -13,7 +14,7 @@ export default function Vacantes() {
   const [params] = useSearchParams()
   const [search, setSearch] = useState(params.get('q') ?? '')
   const [saved, toggleSaved] = useStoredSet('linkea-saved')
-  const [sector, setSector] = useState('Todos')
+  const [sector, setSector] = useState('Todas')
 
   useEffect(() => {
     getVacancies()
@@ -22,12 +23,13 @@ export default function Vacantes() {
       .finally(() => setLoading(false))
   }, [])
 
-  const sectors = useMemo(() => ['Todos', ...new Set(vacancies.map((v) => v.sector))], [vacancies])
+  // Filtro por área profesional (la misma clasificación del inicio), solo con las áreas que tienen vacantes
+  const sectors = useMemo(() => ['Todas', ...new Set(vacancies.map((v) => areaInfo(v.sector).label))], [vacancies])
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
     return vacancies.filter((v) => {
-      if (sector !== 'Todos' && v.sector !== sector) return false
+      if (sector !== 'Todas' && areaInfo(v.sector).label !== sector) return false
       if (!q) return true
       const text = [v.nombre_empresa, v.sector, v.ubicacion?.zona, ...(v.requisitos?.skills_clave ?? [])]
         .join(' ')
@@ -50,7 +52,7 @@ export default function Vacantes() {
       />
 
       {sectors.length > 2 && (
-        <div className="flex flex-wrap gap-2" role="tablist" aria-label="Filtrar por sector">
+        <div className="flex flex-wrap gap-2" role="tablist" aria-label="Filtrar por área">
           {sectors.map((s) => (
             <button
               key={s}
