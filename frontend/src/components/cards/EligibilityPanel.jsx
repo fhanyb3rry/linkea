@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Brain, Check, X } from 'lucide-react'
+import useActiveStudent from '../../hooks/useActiveStudent'
 import { checkEligibility, getStudents } from '../../services/api'
-
-const STORAGE_KEY = 'linkea-student'
 
 // Proposiciones atómicas de la fórmula, en el orden en que se muestran.
 const proposiciones = [
@@ -13,26 +12,10 @@ const proposiciones = [
   { key: 'ubicacion_compatible', label: 'Ubicación compatible' },
 ]
 
-function readStoredStudent() {
-  try {
-    return localStorage.getItem(STORAGE_KEY) ?? ''
-  } catch {
-    return ''
-  }
-}
-
-function storeStudent(id) {
-  try {
-    localStorage.setItem(STORAGE_KEY, id)
-  } catch {
-    // sin almacenamiento: la selección dura solo la sesión
-  }
-}
-
 export default function EligibilityPanel({ vacancyId }) {
   const [students, setStudents] = useState([])
   const [studentsError, setStudentsError] = useState(null)
-  const [studentId, setStudentId] = useState(readStoredStudent)
+  const [studentId, setStudentId] = useActiveStudent()
   // Resultado de la última consulta; `key` indica a qué par (estudiante, vacante) pertenece.
   const [outcome, setOutcome] = useState(null)
 
@@ -56,9 +39,7 @@ export default function EligibilityPanel({ vacancyId }) {
   }, [studentId, vacancyId, key])
 
   function onSelect(event) {
-    const id = event.target.value
-    setStudentId(id)
-    storeStudent(id)
+    setStudentId(event.target.value)
   }
 
   const current = outcome?.key === key ? outcome : null
@@ -130,6 +111,22 @@ export default function EligibilityPanel({ vacancyId }) {
               </p>
               <p className="font-body text-xs text-muted">Filtro 1 · lógica proposicional</p>
             </div>
+          </div>
+
+          <div>
+            <div className="mb-1.5 flex items-center justify-between font-body text-xs">
+              <span className="text-muted">Compatibilidad estimada</span>
+              <span className="font-semibold text-ink">{shown.compatibilidad}%</span>
+            </div>
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-line">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-cocoa to-caramel"
+                style={{ width: `${shown.compatibilidad}%` }}
+              />
+            </div>
+            <p className="mt-1.5 font-body text-[11px] leading-snug text-muted">
+              Calculada por reglas: carrera, skills, horas y zona. El análisis con IA llegará después.
+            </p>
           </div>
 
           <ul className="flex flex-col gap-2">

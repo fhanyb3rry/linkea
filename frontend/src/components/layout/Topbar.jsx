@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { Bell, Menu, Moon, Search, Sun, User } from 'lucide-react'
 import useTheme from '../../hooks/useTheme'
+import ProfileSelect from './ProfileSelect'
 
 export default function Topbar({ onOpenMenu }) {
   const { theme, toggle } = useTheme()
@@ -32,6 +33,7 @@ export default function Topbar({ onOpenMenu }) {
       </form>
 
       <div className="ml-auto flex items-center gap-2">
+        <ProfileSelect />
         <button
           type="button"
           onClick={toggle}

@@ -19,7 +19,7 @@ function initials(name) {
     .toUpperCase()
 }
 
-export default function StudentCard({ student, matchPercentage, connected = false, onToggleConnect }) {
+export default function StudentCard({ student, match, connected = false, onToggleConnect }) {
   const { nombre, carrera, semestre, ubicacion, skills = [], estado, disponibilidad } = student
   const horas = disponibilidad?.horas_por_semana ?? 0
   const status = estados[estado] ?? { label: estado, dot: 'bg-muted' }
@@ -42,7 +42,6 @@ export default function StudentCard({ student, matchPercentage, connected = fals
             {carrera} · {semestre}º semestre
           </p>
         </div>
-        <MatchBadge percentage={matchPercentage} />
       </div>
 
       <div>
@@ -52,23 +51,26 @@ export default function StudentCard({ student, matchPercentage, connected = fals
         </div>
         <div className="h-1.5 w-full overflow-hidden rounded-full bg-line">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-brand to-salmon"
+            className="h-full rounded-full bg-gradient-to-r from-cocoa to-caramel"
             style={{ width: `${Math.min(100, (horas / MAX_HORAS) * 100)}%` }}
           />
         </div>
       </div>
 
-      <p className="flex items-center gap-1.5 font-body text-xs text-muted">
-        <MapPin className="h-3.5 w-3.5 text-brand" />
-        {ubicacion?.zona}
-      </p>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="flex items-center gap-1.5 font-body text-xs text-muted">
+          <MapPin className="h-3.5 w-3.5 text-cocoa" />
+          {ubicacion?.zona}
+        </p>
+        <MatchBadge match={match} />
+      </div>
 
       {skills.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {skills.slice(0, MAX_SKILLS).map((skill) => (
             <span
               key={skill}
-              className="rounded-full border border-line bg-canvas px-2.5 py-1 font-body text-xs text-muted transition-colors group-hover:border-brand/25"
+              className="rounded-full border border-line bg-canvas px-2.5 py-1 font-body text-xs text-muted transition-colors group-hover:border-cocoa/25"
             >
               {skill}
             </span>
@@ -89,7 +91,7 @@ export default function StudentCard({ student, matchPercentage, connected = fals
           aria-pressed={connected}
           onClick={onToggleConnect}
           className={`flex items-center gap-1.5 rounded-lg px-4 py-2 font-body text-xs font-semibold transition-[background-color,color,border-color,transform,opacity] duration-200 hover:scale-105 active:scale-95 ${
-            connected ? 'border border-brand bg-brand-soft text-brand' : 'bg-brand text-on-brand hover:opacity-90'
+            connected ? 'border border-cocoa bg-cocoa-soft text-cocoa' : 'bg-cocoa text-on-cocoa hover:opacity-90'
           }`}
         >
           {connected && <Check className="animate-pop h-3.5 w-3.5" />}

@@ -3,6 +3,8 @@ import { useSearchParams } from 'react-router-dom'
 import VacancyCard from '../components/cards/VacancyCard'
 import ListState from '../components/layout/ListState'
 import PageHeader from '../components/layout/PageHeader'
+import useActiveStudent from '../hooks/useActiveStudent'
+import useMatches from '../hooks/useMatches'
 import useStoredSet from '../hooks/useStoredSet'
 import { areaInfo } from '../lib/areas'
 import { getVacancies } from '../services/api'
@@ -14,6 +16,8 @@ export default function Vacantes() {
   const [params] = useSearchParams()
   const [search, setSearch] = useState(params.get('q') ?? '')
   const [saved, toggleSaved] = useStoredSet('linkea-saved')
+  const [activeStudent] = useActiveStudent()
+  const matches = useMatches(activeStudent)
   const [sector, setSector] = useState('Todas')
 
   useEffect(() => {
@@ -38,11 +42,22 @@ export default function Vacantes() {
     })
   }, [vacancies, search, sector])
 
+  // Con un perfil activo, las vacantes se ordenan de mayor a menor compatibilidad
+  const sorted = useMemo(() => {
+    if (matches.size === 0) return filtered
+    const score = (v) => matches.get(v.id)?.compatibilidad ?? -1
+    return [...filtered].sort((a, b) => score(b) - score(a))
+  }, [filtered, matches])
+
   return (
     <section className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-8 sm:px-6">
       <PageHeader
         title="Vacantes"
-        subtitle="Prácticas profesionales publicadas por empresas."
+        subtitle={
+          activeStudent
+            ? 'Ordenadas por tu compatibilidad estimada.'
+            : 'Prácticas profesionales publicadas por empresas. Elige un perfil en «Ver como…» para ver tu compatibilidad.'
+        }
         count={loading || error ? undefined : vacancies.length}
         actionTo="/vacantes/nueva"
         actionLabel="Publicar vacante"
@@ -62,7 +77,7 @@ export default function Vacantes() {
               onClick={() => setSector(s)}
               className={`rounded-full border px-4 py-1.5 font-body text-xs font-medium transition-colors ${
                 s === sector
-                  ? 'border-brand bg-brand text-on-brand'
+                  ? 'border-cocoa bg-cocoa text-on-cocoa'
                   : 'border-line bg-surface text-muted hover:text-ink'
               }`}
             >
@@ -87,10 +102,11 @@ export default function Vacantes() {
 
       {!loading && !error && filtered.length > 0 && (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {filtered.map((vacancy) => (
+          {sorted.map((vacancy) => (
             <VacancyCard
               key={vacancy.id}
               vacancy={vacancy}
+              match={matches.get(vacancy.id)}
               saved={saved.has(vacancy.id)}
               onToggleSave={() => toggleSaved(vacancy.id)}
             />

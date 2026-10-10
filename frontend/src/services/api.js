@@ -40,3 +40,13 @@ export function createStudent(payload) {
 export function checkEligibility(studentId, vacancyId) {
   return request(`/eligibility/check/${studentId}/${vacancyId}`)
 }
+
+// Recomendaciones del agente para un estudiante: vacantes con elegibilidad y compatibilidad (0-100).
+export function getRecommendations(studentId) {
+  return request(`/agent/recommend/${studentId}`)
+}
+
+// Candidatos de una vacante: estudiantes con elegibilidad y compatibilidad (0-100).
+export function getCandidates(vacancyId) {
+  return request(`/agent/candidates/${vacancyId}`)
+}

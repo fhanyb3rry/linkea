@@ -9,9 +9,10 @@ from pydantic import BaseModel
 
 from app.logic.logic_rules import (
     Proposiciones,
+    aplicar_formula,
+    calcular_compatibilidad,
     evaluar_proposiciones,
     explicar,
-    aplicar_formula,
 )
 from app.models.company import Vacancy
 from app.models.student import Student
@@ -27,6 +28,18 @@ class Decision(BaseModel):
     empresa: str
     elegible: bool
     afinidad: int
+    compatibilidad: int
+    proposiciones: Proposiciones
+    razones_descarte: list[str]
+
+
+class Candidato(BaseModel):
+    """Vista de una vacante hacia sus candidatos: el mismo cálculo, desde el lado de la empresa."""
+
+    estudiante_id: str
+    nombre: str
+    elegible: bool
+    compatibilidad: int
     proposiciones: Proposiciones
     razones_descarte: list[str]
 
@@ -53,6 +66,7 @@ class AgenteVinculacion:
                     elegible=elegible,
                     # Afinidad: cuántas proposiciones se cumplen (0-4), desempata entre elegibles
                     afinidad=sum(p.model_dump().values()),
+                    compatibilidad=calcular_compatibilidad(percepcion.estudiante, vacante),
                     proposiciones=p,
                     razones_descarte=[] if elegible else explicar(p),
                 )
@@ -60,7 +74,7 @@ class AgenteVinculacion:
         return decisiones
 
     def actuar(self, estudiante: Student, decisiones: list[Decision]) -> Accion:
-        ordenadas = sorted(decisiones, key=lambda d: d.afinidad, reverse=True)
+        ordenadas = sorted(decisiones, key=lambda d: (d.compatibilidad, d.afinidad), reverse=True)
         return Accion(
             estudiante_id=str(estudiante.id),
             recomendadas=[d for d in ordenadas if d.elegible],
@@ -70,3 +84,21 @@ class AgenteVinculacion:
     def recomendar(self, estudiante: Student, vacantes: list[Vacancy]) -> Accion:
         percepcion = self.percibir(estudiante, vacantes)
         return self.actuar(estudiante, self.decidir(percepcion))
+
+    def candidatos(self, vacante: Vacancy, estudiantes: list[Student]) -> list[Candidato]:
+        """Evalúa a cada estudiante contra una vacante: elegibles primero, luego por compatibilidad."""
+        resultado = []
+        for estudiante in estudiantes:
+            p = evaluar_proposiciones(estudiante, vacante)
+            elegible = aplicar_formula(p)
+            resultado.append(
+                Candidato(
+                    estudiante_id=str(estudiante.id),
+                    nombre=estudiante.nombre,
+                    elegible=elegible,
+                    compatibilidad=calcular_compatibilidad(estudiante, vacante),
+                    proposiciones=p,
+                    razones_descarte=[] if elegible else explicar(p),
+                )
+            )
+        return sorted(resultado, key=lambda c: (c.elegible, c.compatibilidad), reverse=True)

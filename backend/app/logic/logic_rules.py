@@ -53,6 +53,7 @@ class EligibilityResult(BaseModel):
     elegible: bool
     proposiciones: Proposiciones
     razones_descarte: list[str] = []
+    compatibilidad: int = 0
 
 
 def _evaluar_carrera_match(student: Student, vacancy: Vacancy) -> bool:
@@ -88,6 +89,40 @@ def aplicar_formula(p: Proposiciones) -> bool:
     return ELEGIBLE.evaluar(p.model_dump())
 
 
+PESO_CARRERA = 30
+PESO_SKILLS = 30
+PESO_DISPONIBILIDAD = 20
+PESO_UBICACION = 20
+
+
+def calcular_compatibilidad(student: Student, vacancy: Vacancy) -> int:
+    """Puntaje 0-100 de qué tan bien encaja el alumno con la vacante.
+
+    Es determinista (NO es el filtro de IA): reparte 100 puntos entre carrera (30),
+    cobertura de las skills clave de la vacante (30), horas disponibles frente a las
+    requeridas (20) y misma zona (20). Sirve para ordenar y mostrar un porcentaje;
+    la decisión de elegibilidad sigue siendo la fórmula proposicional.
+    """
+    p = evaluar_proposiciones(student, vacancy)
+
+    skills_vacante = {s.strip().lower() for s in vacancy.requisitos.skills_clave}
+    skills_alumno = {s.strip().lower() for s in student.skills}
+    cobertura = len(skills_alumno & skills_vacante) / len(skills_vacante) if skills_vacante else 1.0
+
+    horas_requeridas = vacancy.horarios.horas_por_semana
+    disponibilidad = (
+        1.0 if horas_requeridas <= 0 else min(1.0, student.disponibilidad.horas_por_semana / horas_requeridas)
+    )
+
+    puntos = (
+        PESO_CARRERA * p.carrera_match
+        + PESO_SKILLS * cobertura
+        + PESO_DISPONIBILIDAD * disponibilidad
+        + PESO_UBICACION * p.ubicacion_compatible
+    )
+    return round(puntos)
+
+
 def evaluar_elegibilidad(student: Student, vacancy: Vacancy) -> EligibilityResult:
     proposiciones = evaluar_proposiciones(student, vacancy)
     elegible = aplicar_formula(proposiciones)
@@ -95,6 +130,7 @@ def evaluar_elegibilidad(student: Student, vacancy: Vacancy) -> EligibilityResul
         elegible=elegible,
         proposiciones=proposiciones,
         razones_descarte=[] if elegible else explicar(proposiciones),
+        compatibilidad=calcular_compatibilidad(student, vacancy),
     )
 
 

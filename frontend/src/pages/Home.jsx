@@ -18,6 +18,8 @@ import Reveal from '../components/home/Reveal'
 import useInView from '../hooks/useInView'
 import VacancyCard from '../components/cards/VacancyCard'
 import AreaFilter from '../components/home/AreaFilter'
+import useActiveStudent from '../hooks/useActiveStudent'
+import useMatches from '../hooks/useMatches'
 import useStoredSet from '../hooks/useStoredSet'
 import { AREAS, OTROS, areaOf, countByArea } from '../lib/areas'
 import { getStudents, getVacancies } from '../services/api'
@@ -151,7 +153,7 @@ function StatsRow() {
         return (
           <Reveal key={label} delay={i * 90}>
             <div className={`${cardClass} group flex h-full items-center gap-4 p-5`}>
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand-soft text-brand transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-cocoa-soft text-cocoa transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6">
                 <Icon className="h-5 w-5" />
               </span>
               <div>
@@ -169,7 +171,7 @@ function StatsRow() {
           to="/vacantes"
           className={`${cardClass} group flex h-full items-center gap-4 p-5`}
         >
-          <Sparkles className="h-5 w-5 shrink-0 text-brand transition-transform duration-500 group-hover:rotate-180" />
+          <Sparkles className="h-5 w-5 shrink-0 text-cocoa transition-transform duration-500 group-hover:rotate-180" />
           <div className="min-w-0">
             <p className="font-body text-sm font-semibold text-ink">Sigue explorando</p>
             <p className="font-body text-xs text-muted">Encuentra vacantes acordes a tu perfil.</p>
@@ -187,7 +189,7 @@ function MatchBar({ value }) {
   return (
     <div ref={ref} className="h-1.5 w-full overflow-hidden rounded-full bg-line">
       <div
-        className="h-full rounded-full bg-brand transition-[width] duration-1000 ease-out"
+        className="h-full rounded-full bg-cocoa transition-[width] duration-1000 ease-out"
         style={{ width: visible ? `${value}%` : '0%' }}
       />
     </div>
@@ -261,7 +263,7 @@ function CardAction({ tab, item, connected, onConnect }) {
         aria-pressed={connected}
         onClick={onConnect}
         className={`${actionClass} ${
-          connected ? 'border border-brand bg-brand-soft text-brand' : 'bg-brand text-on-brand hover:opacity-90'
+          connected ? 'border border-cocoa bg-cocoa-soft text-cocoa' : 'bg-cocoa text-on-cocoa hover:opacity-90'
         }`}
       >
         {connected && <Check className="animate-pop h-3.5 w-3.5" />}
@@ -278,13 +280,13 @@ function CardAction({ tab, item, connected, onConnect }) {
       : `/vacantes?q=${encodeURIComponent(item.nombre)}`
 
   return (
-    <Link to={to} className={`${actionClass} bg-brand text-on-brand hover:opacity-90`}>
+    <Link to={to} className={`${actionClass} bg-cocoa text-on-cocoa hover:opacity-90`}>
       {tab === 'vacantes' ? 'Postular' : 'Ver vacantes'}
     </Link>
   )
 }
 
-function Suggestions({ data, fallback }) {
+function Suggestions({ data, fallback, matches, hasStudent }) {
   const [active, setActive] = useState('estudiantes')
   const [connections, toggleConnection] = useStoredSet('linkea-connections')
   const items = data[active]
@@ -327,10 +329,18 @@ function Suggestions({ data, fallback }) {
           ))}
         </div>
 
+        {active === 'vacantes' && !hasStudent && !fallback.vacantes && (
+          <p className="mt-4 font-body text-xs text-muted">
+            Elige un perfil en «Ver como…» (arriba) para ver tu compatibilidad con cada vacante.
+          </p>
+        )}
+
         {/* key: al cambiar de pestaña se vuelve a montar y las tarjetas entran en cascada */}
         <div key={active} className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {items.map((item, i) => {
             const id = item.id ?? item.nombre
+            const real = active === 'vacantes' ? matches.get(item.id) : undefined
+            const matchValue = real ? real.compatibilidad : item.match
             return (
               <article
                 key={id}
@@ -352,13 +362,13 @@ function Suggestions({ data, fallback }) {
                     <Chip key={s}>{s}</Chip>
                   ))}
                 </div>
-                {item.match && (
+                {matchValue > 0 && (
                   <div>
                     <div className="mb-1.5 flex items-center justify-between font-body text-xs">
-                      <span className="text-muted">Compatibilidad</span>
-                      <span className="font-semibold text-brand">{item.match}%</span>
+                      <span className="text-muted">{real && !real.elegible ? 'No elegible' : 'Compatibilidad'}</span>
+                      <span className="font-semibold text-cocoa">{matchValue}%</span>
                     </div>
-                    <MatchBar value={item.match} />
+                    <MatchBar value={matchValue} />
                   </div>
                 )}
                 <CardAction
@@ -378,7 +388,7 @@ function Suggestions({ data, fallback }) {
 
 const MAX_FEATURED = 7
 
-function Featured({ vacancies, fallback }) {
+function Featured({ vacancies, fallback, matches }) {
   const [saved, toggleSaved] = useStoredSet('linkea-saved')
   const [area, setArea] = useState('todas')
 
@@ -449,7 +459,12 @@ function Featured({ vacancies, fallback }) {
         <div key={area} className="mt-3 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {visible.map((v, i) => (
             <div key={v.id} className="animate-fade-in-up" style={{ animationDelay: `${i * 70}ms` }}>
-              <VacancyCard vacancy={v} saved={saved.has(v.id)} onToggleSave={() => toggleSaved(v.id)} />
+              <VacancyCard
+                vacancy={v}
+                match={matches.get(v.id)}
+                saved={saved.has(v.id)}
+                onToggleSave={() => toggleSaved(v.id)}
+              />
             </div>
           ))}
 
@@ -476,13 +491,15 @@ function Featured({ vacancies, fallback }) {
 
 export default function Home() {
   const { sugerencias, destacadas, fallback } = useHomeData()
+  const [activeStudent] = useActiveStudent()
+  const matches = useMatches(activeStudent)
 
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-8 px-4 py-6 sm:px-6">
       <Hero />
       <StatsRow />
-      <Suggestions data={sugerencias} fallback={fallback} />
-      <Featured vacancies={destacadas} fallback={fallback.destacadas} />
+      <Suggestions data={sugerencias} fallback={fallback} matches={matches} hasStudent={Boolean(activeStudent)} />
+      <Featured vacancies={destacadas} fallback={fallback.destacadas} matches={matches} />
     </div>
   )
 }

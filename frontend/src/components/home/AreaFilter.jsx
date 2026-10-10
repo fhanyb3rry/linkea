@@ -25,19 +25,19 @@ export default function AreaFilter({ options, value, onChange }) {
               onClick={() => onChange(id)}
               className={`group flex items-center gap-2 rounded-xl border px-3.5 py-2 font-body text-xs font-medium transition-[background-color,color,border-color,box-shadow,translate] duration-300 motion-reduce:transition-none ${
                 active
-                  ? 'tile border-transparent shadow-lg shadow-brand/30'
-                  : 'border-line bg-canvas text-muted hover:-translate-y-0.5 hover:border-brand/40 hover:bg-surface hover:text-ink hover:shadow-md hover:shadow-brand/10'
+                  ? 'tile border-transparent shadow-lg shadow-cocoa/30'
+                  : 'border-line bg-canvas text-muted hover:-translate-y-0.5 hover:border-cocoa/40 hover:bg-surface hover:text-ink hover:shadow-md hover:shadow-cocoa/10'
               }`}
             >
               <Icon
                 className={`h-4 w-4 transition-transform duration-300 ${
-                  active ? '' : 'text-brand group-hover:scale-110'
+                  active ? '' : 'text-cocoa group-hover:scale-110'
                 }`}
               />
               {label}
               <span
                 className={`rounded-md px-1.5 text-[10px] font-semibold leading-5 ${
-                  active ? 'bg-current/15' : 'bg-brand-soft text-brand'
+                  active ? 'bg-current/15' : 'bg-cocoa-soft text-cocoa'
                 } ${count === 0 && !active ? 'opacity-50' : ''}`}
               >
                 {count}

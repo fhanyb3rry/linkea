@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import VacancyCard from '../components/cards/VacancyCard'
 import ListState from '../components/layout/ListState'
+import useActiveStudent from '../hooks/useActiveStudent'
+import useMatches from '../hooks/useMatches'
 import useStoredSet from '../hooks/useStoredSet'
 import { getVacancies } from '../services/api'
 
@@ -9,6 +11,8 @@ export default function Guardados() {
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(true)
   const [saved, toggleSaved] = useStoredSet('linkea-saved')
+  const [activeStudent] = useActiveStudent()
+  const matches = useMatches(activeStudent)
 
   useEffect(() => {
     getVacancies()
@@ -41,6 +45,7 @@ export default function Guardados() {
             <VacancyCard
               key={vacancy.id}
               vacancy={vacancy}
+              match={matches.get(vacancy.id)}
               saved
               onToggleSave={() => toggleSaved(vacancy.id)}
             />

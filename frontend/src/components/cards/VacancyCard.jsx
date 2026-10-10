@@ -8,13 +8,13 @@ const MAX_SKILLS = 4
 function Meta({ icon: Icon, children }) {
   return (
     <span className="flex items-center gap-1.5">
-      <Icon className="h-3.5 w-3.5 text-brand" />
+      <Icon className="h-3.5 w-3.5 text-cocoa" />
       {children}
     </span>
   )
 }
 
-export default function VacancyCard({ vacancy, matchPercentage, saved = false, onToggleSave }) {
+export default function VacancyCard({ vacancy, match, saved = false, onToggleSave }) {
   const { id, nombre_empresa, sector, ubicacion, requisitos, estipendio, horarios, ejemplo } = vacancy
   const area = areaInfo(sector)
   const AreaIcon = area.icon
@@ -34,7 +34,7 @@ export default function VacancyCard({ vacancy, matchPercentage, saved = false, o
               {nombre_empresa}
             </Link>
           </h3>
-          <span className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-brand-soft px-2.5 py-0.5 font-body text-[11px] font-medium text-brand">
+          <span className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-cocoa-soft px-2.5 py-0.5 font-body text-[11px] font-medium text-cocoa">
             <AreaIcon className="h-3 w-3" />
             {area.label}
           </span>
@@ -46,8 +46,8 @@ export default function VacancyCard({ vacancy, matchPercentage, saved = false, o
           onClick={onToggleSave}
           className={`relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition-[background-color,border-color,color,transform] duration-200 hover:scale-105 active:scale-95 ${
             saved
-              ? 'border-brand/40 bg-brand-soft text-brand'
-              : 'border-line bg-surface text-muted hover:border-brand/40 hover:text-brand'
+              ? 'border-cocoa/40 bg-cocoa-soft text-cocoa'
+              : 'border-line bg-surface text-muted hover:border-cocoa/40 hover:text-cocoa'
           }`}
         >
           <Bookmark key={String(saved)} className={`h-4 w-4 ${saved ? 'animate-pop fill-current' : ''}`} />
@@ -61,6 +61,11 @@ export default function VacancyCard({ vacancy, matchPercentage, saved = false, o
       <div className="flex flex-wrap gap-x-4 gap-y-2 font-body text-xs text-muted">
         <Meta icon={MapPin}>{ubicacion?.zona}</Meta>
         <Meta icon={Clock}>{horarios?.horas_por_semana ?? '-'} hrs/semana</Meta>
+        {match && (
+          <span className="ml-auto">
+            <MatchBadge match={match} />
+          </span>
+        )}
       </div>
 
       {skills.length > 0 && (
@@ -68,7 +73,7 @@ export default function VacancyCard({ vacancy, matchPercentage, saved = false, o
           {skills.slice(0, MAX_SKILLS).map((skill) => (
             <span
               key={skill}
-              className="rounded-full border border-line bg-canvas px-2.5 py-1 font-body text-xs text-muted transition-colors group-hover:border-brand/25"
+              className="rounded-full border border-line bg-canvas px-2.5 py-1 font-body text-xs text-muted transition-colors group-hover:border-cocoa/25"
             >
               {skill}
             </span>
@@ -88,9 +93,8 @@ export default function VacancyCard({ vacancy, matchPercentage, saved = false, o
           >
             {estipendio?.apoyo_economico ? `$${estipendio.monto} ${estipendio.moneda}` : 'Sin apoyo'}
           </span>
-          <MatchBadge percentage={matchPercentage} />
         </div>
-        <span className="flex items-center gap-1 font-body text-xs font-semibold text-brand">
+        <span className="flex items-center gap-1 font-body text-xs font-semibold text-cocoa">
           Ver detalle
           <ArrowUpRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
         </span>
