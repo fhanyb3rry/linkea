@@ -1,4 +1,4 @@
-import { Clock, MapPin } from 'lucide-react'
+import { Check, Clock, MapPin } from 'lucide-react'
 import MatchBadge from './MatchBadge'
 
 const estados = {
@@ -16,7 +16,7 @@ function initials(name) {
     .toUpperCase()
 }
 
-export default function StudentCard({ student, matchPercentage }) {
+export default function StudentCard({ student, matchPercentage, connected = false, onToggleConnect }) {
   const { nombre, carrera, semestre, ubicacion, skills, estado, disponibilidad } = student
 
   return (
@@ -65,10 +65,14 @@ export default function StudentCard({ student, matchPercentage }) {
         </span>
         <button
           type="button"
-          title="Próximamente"
-          className="rounded-lg bg-brand px-4 py-2 font-body text-xs font-semibold text-on-brand transition-opacity hover:opacity-90"
+          aria-pressed={connected}
+          onClick={onToggleConnect}
+          className={`flex items-center gap-1.5 rounded-lg px-4 py-2 font-body text-xs font-semibold transition-opacity ${
+            connected ? 'border border-brand bg-brand-soft text-brand' : 'bg-brand text-on-brand hover:opacity-90'
+          }`}
         >
-          Contactar
+          {connected && <Check className="h-3.5 w-3.5" />}
+          {connected ? 'Conectado' : 'Conectar'}
         </button>
       </div>
     </article>

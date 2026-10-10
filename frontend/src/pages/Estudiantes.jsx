@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import StudentCard from '../components/cards/StudentCard'
 import ListState from '../components/layout/ListState'
 import PageHeader from '../components/layout/PageHeader'
+import useStoredSet from '../hooks/useStoredSet'
 import { getStudents } from '../services/api'
 
 export default function Estudiantes() {
@@ -9,6 +10,7 @@ export default function Estudiantes() {
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
+  const [connections, toggleConnection] = useStoredSet('linkea-connections')
   const [carrera, setCarrera] = useState('Todas')
 
   useEffect(() => {
@@ -80,7 +82,12 @@ export default function Estudiantes() {
       {!loading && !error && filtered.length > 0 && (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {filtered.map((student) => (
-            <StudentCard key={student.id} student={student} />
+            <StudentCard
+              key={student.id}
+              student={student}
+              connected={connections.has(student.id)}
+              onToggleConnect={() => toggleConnection(student.id)}
+            />
           ))}
         </div>
       )}

@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { Bookmark, Clock, MapPin } from 'lucide-react'
 import MatchBadge from './MatchBadge'
 
-export default function VacancyCard({ vacancy, matchPercentage }) {
+export default function VacancyCard({ vacancy, matchPercentage, saved = false, onToggleSave }) {
   const { id, nombre_empresa, sector, ubicacion, requisitos, estipendio, horarios } = vacancy
 
   return (
@@ -12,12 +12,15 @@ export default function VacancyCard({ vacancy, matchPercentage }) {
         <span className="absolute bottom-0 left-5 flex h-12 w-12 translate-y-1/2 items-center justify-center rounded-xl border-4 border-surface bg-brand font-body text-sm font-bold text-on-brand">
           {nombre_empresa.slice(0, 2).toUpperCase()}
         </span>
-        <span
-          title="Guardar (próximamente)"
-          className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-lg bg-white/15 text-white backdrop-blur"
+        <button
+          type="button"
+          aria-label={saved ? 'Quitar de guardados' : 'Guardar vacante'}
+          aria-pressed={saved}
+          onClick={onToggleSave}
+          className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-lg bg-white/15 text-white backdrop-blur transition-colors hover:bg-white/25"
         >
-          <Bookmark className="h-4 w-4" />
-        </span>
+          <Bookmark key={String(saved)} className={`h-4 w-4 ${saved ? 'animate-pop fill-current text-salmon' : ''}`} />
+        </button>
       </div>
 
       <div className="flex flex-1 flex-col gap-3 p-5 pt-9">

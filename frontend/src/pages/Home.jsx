@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   ArrowRight,
@@ -15,6 +15,8 @@ import {
 import CountUp from '../components/home/CountUp'
 import Reveal from '../components/home/Reveal'
 import useInView from '../hooks/useInView'
+import useStoredSet from '../hooks/useStoredSet'
+import { getStudents, getVacancies } from '../services/api'
 import {
   featuredVacancies,
   stats,
@@ -26,9 +28,9 @@ import {
 const statIcons = { users: Users, briefcase: Briefcase, building: Building2, graduation: GraduationCap }
 
 const tabs = [
-  { id: 'estudiantes', label: 'Estudiantes', data: suggestedStudents, action: 'Contactar' },
-  { id: 'vacantes', label: 'Vacantes', data: suggestedVacancies, action: 'Postular' },
-  { id: 'empresas', label: 'Empresas', data: suggestedCompanies, action: 'Ver perfil' },
+  { id: 'estudiantes', label: 'Estudiantes' },
+  { id: 'vacantes', label: 'Vacantes' },
+  { id: 'empresas', label: 'Empresas' },
 ]
 
 const cardClass = 'rounded-2xl border border-line bg-surface'
@@ -190,15 +192,119 @@ function MatchBar({ value }) {
   )
 }
 
-function Suggestions() {
+
+// Datos del panel: reales desde la API; si no hay (backend apagado o vacío), se usan los de ejemplo.
+function useHomeData() {
+  const [data, setData] = useState({ students: [], vacancies: [], ready: false })
+
+  useEffect(() => {
+    Promise.allSettled([getStudents(), getVacancies()]).then(([s, v]) =>
+      setData({ students: s.value ?? [], vacancies: v.value ?? [], ready: true }),
+    )
+  }, [])
+
+  return useMemo(() => {
+    const { students, vacancies } = data
+    const empresas = [...new Map(vacancies.map((v) => [v.nombre_empresa, v])).values()]
+
+    const sugerencias = {
+      estudiantes: students.slice(0, 4).map((s) => ({
+        id: s.id,
+        nombre: s.nombre,
+        rol: `${s.carrera} · ${s.semestre}º semestre`,
+        skills: s.skills.slice(0, 3),
+      })),
+      vacantes: vacancies.slice(0, 4).map((v) => ({
+        id: v.id,
+        nombre: v.nombre_empresa,
+        rol: v.sector,
+        skills: v.requisitos.skills_clave.slice(0, 3),
+      })),
+      empresas: empresas.slice(0, 4).map((v) => ({
+        nombre: v.nombre_empresa,
+        rol: v.sector,
+        skills: [v.ubicacion.zona],
+      })),
+    }
+
+    const destacadas = vacancies.slice(0, 3).map((v) => ({
+      id: v.id,
+      titulo: v.nombre_empresa,
+      empresa: v.sector,
+      descripcion: `${v.ubicacion.zona} · ${v.horarios.horas_por_semana} hrs/semana · ${
+        v.estipendio.apoyo_economico ? `$${v.estipendio.monto} ${v.estipendio.moneda}` : 'Sin apoyo económico'
+      }`,
+      tags: v.requisitos.skills_clave.slice(0, 3),
+    }))
+
+    const fallback = {
+      estudiantes: sugerencias.estudiantes.length === 0,
+      vacantes: sugerencias.vacantes.length === 0,
+      empresas: sugerencias.empresas.length === 0,
+      destacadas: destacadas.length === 0,
+    }
+
+    return {
+      sugerencias: {
+        estudiantes: fallback.estudiantes ? suggestedStudents : sugerencias.estudiantes,
+        vacantes: fallback.vacantes ? suggestedVacancies : sugerencias.vacantes,
+        empresas: fallback.empresas ? suggestedCompanies : sugerencias.empresas,
+      },
+      destacadas: fallback.destacadas ? featuredVacancies : destacadas,
+      fallback,
+    }
+  }, [data])
+}
+
+const actionClass =
+  'mt-auto flex items-center gap-1.5 self-start rounded-lg px-4 py-2 font-body text-xs font-semibold transition-[transform,opacity,background-color] duration-200 hover:scale-105 active:scale-95'
+
+function CardAction({ tab, item, connected, onConnect }) {
+  if (tab === 'estudiantes') {
+    return (
+      <button
+        type="button"
+        aria-pressed={connected}
+        onClick={onConnect}
+        className={`${actionClass} ${
+          connected ? 'border border-brand bg-brand-soft text-brand' : 'bg-brand text-on-brand hover:opacity-90'
+        }`}
+      >
+        {connected && <Check className="animate-pop h-3.5 w-3.5" />}
+        {connected ? 'Conectado' : 'Conectar'}
+      </button>
+    )
+  }
+
+  const to =
+    tab === 'vacantes'
+      ? item.id
+        ? `/vacantes/${item.id}`
+        : '/vacantes'
+      : `/vacantes?q=${encodeURIComponent(item.nombre)}`
+
+  return (
+    <Link to={to} className={`${actionClass} bg-brand text-on-brand hover:opacity-90`}>
+      {tab === 'vacantes' ? 'Postular' : 'Ver vacantes'}
+    </Link>
+  )
+}
+
+function Suggestions({ data, fallback }) {
   const [active, setActive] = useState('estudiantes')
-  const tab = tabs.find((t) => t.id === active)
+  const [connections, toggleConnection] = useStoredSet('linkea-connections')
+  const items = data[active]
 
   return (
     <Reveal>
       <section>
         <div className="flex items-end justify-between">
-          <h2 className="text-2xl">Sugerencias para ti</h2>
+          <h2 className="text-2xl">
+            Sugerencias para ti
+            {fallback[active] && (
+              <span className="ml-3 align-middle font-body text-xs font-normal text-muted">Datos de ejemplo</span>
+            )}
+          </h2>
           <Link
             to={active === 'estudiantes' ? '/estudiantes' : '/vacantes'}
             className="group flex items-center gap-1 font-body text-sm text-ink hover:text-brand"
@@ -229,44 +335,47 @@ function Suggestions() {
 
         {/* key: al cambiar de pestaña se vuelve a montar y las tarjetas entran en cascada */}
         <div key={active} className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {tab.data.map((item, i) => (
-            <article
-              key={item.nombre}
-              className={`${cardClass} ${liftClass} animate-fade-in-up flex flex-col gap-4 p-5`}
-              style={{ animationDelay: `${i * 80}ms` }}
-            >
-              <div className="flex items-start gap-3">
-                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-brand-soft font-body text-sm font-semibold text-brand">
-                  {initials(item.nombre)}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate font-body text-sm font-semibold text-ink">{item.nombre}</p>
-                  <p className="truncate font-body text-xs text-muted">{item.rol}</p>
-                </div>
-                <MoreVertical className="h-4 w-4 shrink-0 text-muted" aria-hidden />
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {item.skills.map((s) => (
-                  <Chip key={s}>{s}</Chip>
-                ))}
-              </div>
-              {item.match && (
-                <div>
-                  <div className="mb-1.5 flex items-center justify-between font-body text-xs">
-                    <span className="text-muted">Compatibilidad</span>
-                    <span className="font-semibold text-brand">{item.match}%</span>
-                  </div>
-                  <MatchBar value={item.match} />
-                </div>
-              )}
-              <button
-                type="button"
-                className="mt-auto self-start rounded-lg bg-brand px-4 py-2 font-body text-xs font-semibold text-on-brand transition-[transform,opacity] duration-200 hover:scale-105 hover:opacity-90 active:scale-95"
+          {items.map((item, i) => {
+            const id = item.id ?? item.nombre
+            return (
+              <article
+                key={id}
+                className={`${cardClass} ${liftClass} animate-fade-in-up flex flex-col gap-4 p-5`}
+                style={{ animationDelay: `${i * 80}ms` }}
               >
-                {tab.action}
-              </button>
-            </article>
-          ))}
+                <div className="flex items-start gap-3">
+                  <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-brand-soft font-body text-sm font-semibold text-brand">
+                    {initials(item.nombre)}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-body text-sm font-semibold text-ink">{item.nombre}</p>
+                    <p className="truncate font-body text-xs text-muted">{item.rol}</p>
+                  </div>
+                  <MoreVertical className="h-4 w-4 shrink-0 text-muted" aria-hidden />
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {item.skills.map((s) => (
+                    <Chip key={s}>{s}</Chip>
+                  ))}
+                </div>
+                {item.match && (
+                  <div>
+                    <div className="mb-1.5 flex items-center justify-between font-body text-xs">
+                      <span className="text-muted">Compatibilidad</span>
+                      <span className="font-semibold text-brand">{item.match}%</span>
+                    </div>
+                    <MatchBar value={item.match} />
+                  </div>
+                )}
+                <CardAction
+                  tab={active}
+                  item={item}
+                  connected={connections.has(id)}
+                  onConnect={() => toggleConnection(id)}
+                />
+              </article>
+            )
+          })}
         </div>
       </section>
     </Reveal>
@@ -275,24 +384,32 @@ function Suggestions() {
 
 function FeaturedCard({ vacancy, saved, onToggle }) {
   return (
-    <article className={`${cardClass} ${liftClass} group overflow-hidden`}>
+    <article className={`${cardClass} ${liftClass} group relative overflow-hidden`}>
       <div className="relative h-24 overflow-hidden bg-night">
         <div className="absolute -right-6 -top-8 h-28 w-28 rounded-full bg-salmon/50 blur-2xl transition-transform duration-700 group-hover:-translate-x-10 group-hover:translate-y-6 group-hover:scale-150" />
-        <button
-          type="button"
-          aria-label={saved ? 'Quitar de guardados' : 'Guardar vacante'}
-          aria-pressed={saved}
-          onClick={onToggle}
-          className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-lg bg-white/15 text-white backdrop-blur transition-colors hover:bg-white/25"
-        >
-          <Bookmark
-            key={String(saved)}
-            className={`h-4 w-4 ${saved ? 'animate-pop fill-current text-salmon' : ''}`}
-          />
-        </button>
       </div>
+      <button
+        type="button"
+        aria-label={saved ? 'Quitar de guardados' : 'Guardar vacante'}
+        aria-pressed={saved}
+        onClick={onToggle}
+        className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-lg bg-white/15 text-white backdrop-blur transition-colors hover:bg-white/25"
+      >
+        <Bookmark
+          key={String(saved)}
+          className={`h-4 w-4 ${saved ? 'animate-pop fill-current text-salmon' : ''}`}
+        />
+      </button>
       <div className="flex flex-col gap-2 p-5">
-        <h3 className="font-body text-sm font-semibold text-ink">{vacancy.titulo}</h3>
+        <h3 className="font-body text-sm font-semibold text-ink">
+          {/* el enlace cubre toda la tarjeta; el botón de guardar queda por encima */}
+          <Link
+            to={vacancy.id ? `/vacantes/${vacancy.id}` : '/vacantes'}
+            className="after:absolute after:inset-0 focus-visible:outline-none"
+          >
+            {vacancy.titulo}
+          </Link>
+        </h3>
         <p className="font-body text-xs font-medium text-brand">{vacancy.empresa}</p>
         <p className="font-body text-xs leading-relaxed text-muted">{vacancy.descripcion}</p>
         <div className="mt-2 flex flex-wrap gap-2">
@@ -305,23 +422,19 @@ function FeaturedCard({ vacancy, saved, onToggle }) {
   )
 }
 
-function Featured() {
-  const [saved, setSaved] = useState(() => new Set())
-
-  function toggle(titulo) {
-    setSaved((prev) => {
-      const next = new Set(prev)
-      if (next.has(titulo)) next.delete(titulo)
-      else next.add(titulo)
-      return next
-    })
-  }
+function Featured({ vacancies, fallback }) {
+  const [saved, toggleSaved] = useStoredSet('linkea-saved')
 
   return (
     <section>
       <Reveal>
         <div className="flex items-end justify-between">
-          <h2 className="text-2xl">Vacantes destacadas</h2>
+          <h2 className="text-2xl">
+            Vacantes destacadas
+            {fallback && (
+              <span className="ml-3 align-middle font-body text-xs font-normal text-muted">Datos de ejemplo</span>
+            )}
+          </h2>
           <Link to="/vacantes" className="group flex items-center gap-1 font-body text-sm text-ink hover:text-brand">
             Ver más
             <ArrowRight className="h-4 w-4 text-brand transition-transform duration-300 group-hover:translate-x-1" />
@@ -330,13 +443,16 @@ function Featured() {
       </Reveal>
 
       <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {featuredVacancies.map((v, i) => (
-          <Reveal key={v.titulo} delay={i * 100}>
-            <FeaturedCard vacancy={v} saved={saved.has(v.titulo)} onToggle={() => toggle(v.titulo)} />
-          </Reveal>
-        ))}
+        {vacancies.map((v, i) => {
+          const id = v.id ?? v.titulo
+          return (
+            <Reveal key={id} delay={i * 100}>
+              <FeaturedCard vacancy={v} saved={saved.has(id)} onToggle={() => toggleSaved(id)} />
+            </Reveal>
+          )
+        })}
 
-        <Reveal delay={featuredVacancies.length * 100}>
+        <Reveal delay={vacancies.length * 100}>
           <div className="group flex h-full flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-line p-6 text-center transition-colors duration-300 hover:border-brand hover:bg-brand-soft/40">
             <span className="flex h-11 w-11 items-center justify-center rounded-full border border-line bg-surface text-brand transition-transform duration-500 group-hover:rotate-90">
               <Plus className="h-5 w-5" />
@@ -357,12 +473,14 @@ function Featured() {
 }
 
 export default function Home() {
+  const { sugerencias, destacadas, fallback } = useHomeData()
+
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-8 px-4 py-6 sm:px-6">
       <Hero />
       <StatsRow />
-      <Suggestions />
-      <Featured />
+      <Suggestions data={sugerencias} fallback={fallback} />
+      <Featured vacancies={destacadas} fallback={fallback.destacadas} />
     </div>
   )
 }

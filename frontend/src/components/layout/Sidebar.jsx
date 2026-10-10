@@ -19,7 +19,7 @@ const items = [
   { label: 'Postulaciones', icon: Send },
   { label: 'Mensajes', icon: MessageCircle },
   { label: 'Notificaciones', icon: Bell },
-  { label: 'Guardados', icon: Bookmark },
+  { to: '/guardados', label: 'Guardados', icon: Bookmark },
 ]
 
 const base = 'flex items-center gap-3 rounded-xl px-4 py-2.5 font-body text-sm font-medium transition-colors'

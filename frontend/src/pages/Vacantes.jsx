@@ -1,14 +1,18 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import VacancyCard from '../components/cards/VacancyCard'
 import ListState from '../components/layout/ListState'
 import PageHeader from '../components/layout/PageHeader'
+import useStoredSet from '../hooks/useStoredSet'
 import { getVacancies } from '../services/api'
 
 export default function Vacantes() {
   const [vacancies, setVacancies] = useState([])
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [search, setSearch] = useState('')
+  const [params] = useSearchParams()
+  const [search, setSearch] = useState(params.get('q') ?? '')
+  const [saved, toggleSaved] = useStoredSet('linkea-saved')
   const [sector, setSector] = useState('Todos')
 
   useEffect(() => {
@@ -82,7 +86,12 @@ export default function Vacantes() {
       {!loading && !error && filtered.length > 0 && (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {filtered.map((vacancy) => (
-            <VacancyCard key={vacancy.id} vacancy={vacancy} />
+            <VacancyCard
+              key={vacancy.id}
+              vacancy={vacancy}
+              saved={saved.has(vacancy.id)}
+              onToggleSave={() => toggleSaved(vacancy.id)}
+            />
           ))}
         </div>
       )}

@@ -10,6 +10,7 @@ import Register from './pages/Register'
 import CrearPerfilEstudiante from './pages/CrearPerfilEstudiante'
 import PublicarVacante from './pages/PublicarVacante'
 import VacancyDetail from './pages/VacancyDetail'
+import Guardados from './pages/Guardados'
 
 export default function App() {
   return (
@@ -25,6 +26,7 @@ export default function App() {
         <Route path="vacantes/nueva" element={<PublicarVacante />} />
         <Route path="vacantes/:id" element={<VacancyDetail />} />
         <Route path="estudiantes" element={<Estudiantes />} />
+        <Route path="guardados" element={<Guardados />} />
         <Route path="perfil/crear" element={<CrearPerfilEstudiante />} />
       </Route>
     </Routes>
