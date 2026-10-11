@@ -1,7 +1,15 @@
+from enum import Enum
+
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.models.common import PyObjectId
 from app.models.student import Ubicacion
+
+
+class Modalidad(str, Enum):
+    PRESENCIAL = "presencial"
+    REMOTO = "remoto"
+    HIBRIDO = "hibrido"
 
 
 class Estipendio(BaseModel):
@@ -27,6 +35,8 @@ class VacancyBase(BaseModel):
     requisitos: Requisitos
     estipendio: Estipendio
     horarios: Horario
+    descripcion: str = ""
+    modalidad: Modalidad = Modalidad.PRESENCIAL
 
 
 class VacancyCreate(VacancyBase):
@@ -40,6 +50,8 @@ class VacancyUpdate(BaseModel):
     requisitos: Requisitos | None = None
     estipendio: Estipendio | None = None
     horarios: Horario | None = None
+    descripcion: str | None = None
+    modalidad: Modalidad | None = None
 
 
 class Vacancy(VacancyBase):

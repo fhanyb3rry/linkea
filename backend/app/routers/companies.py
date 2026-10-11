@@ -66,3 +66,4 @@ async def delete_vacancy(
     result = await db.vacancies.delete_one({"_id": _oid(vacancy_id)})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Vacante no encontrada")
+    await db.applications.delete_many({"vacancy_id": vacancy_id})
