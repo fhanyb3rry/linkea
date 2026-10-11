@@ -45,6 +45,10 @@ export function createStudent(payload) {
   return postJSON('/students', payload)
 }
 
+export function getCompatibilidadIA(studentId, vacancyId, refrescar = false) {
+  return request(`/ai/compatibility/${studentId}/${vacancyId}${refrescar ? '?refrescar=true' : ''}`)
+}
+
 export function checkEligibility(studentId, vacancyId) {
   return request(`/eligibility/check/${studentId}/${vacancyId}`)
 }

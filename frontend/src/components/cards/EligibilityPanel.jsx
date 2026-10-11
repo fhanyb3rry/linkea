@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Brain, Check, X } from 'lucide-react'
+import { Brain, Check, RefreshCcw, ThumbsDown, ThumbsUp, X } from 'lucide-react'
 import useActiveStudent from '../../hooks/useActiveStudent'
-import { checkEligibility, getStudents } from '../../services/api'
+import { checkEligibility, getCompatibilidadIA, getStudents } from '../../services/api'
 
 // Proposiciones atómicas de la fórmula, en el orden en que se muestran.
 const proposiciones = [
@@ -11,6 +11,102 @@ const proposiciones = [
   { key: 'disponibilidad_horaria', label: 'Horas disponibles suficientes' },
   { key: 'ubicacion_compatible', label: 'Ubicación compatible' },
 ]
+
+// Filtro 2: la IA solo evalúa a quien pasó el filtro 1. Si la IA no está disponible, el backend
+// responde con el porcentaje por reglas y un aviso (fuente: 'reglas').
+function FiltroIA({ studentId, vacancyId, elegible }) {
+  const [estado, setEstado] = useState({ key: '', data: null, error: null })
+  const key = `${studentId}:${vacancyId}`
+  const [tick, setTick] = useState(0)
+
+  useEffect(() => {
+    if (!elegible) return undefined
+    let cancelled = false
+    getCompatibilidadIA(studentId, vacancyId, tick > 0)
+      .then((data) => !cancelled && setEstado({ key, data, error: null }))
+      .catch((err) => !cancelled && setEstado({ key, data: null, error: err.message }))
+    return () => {
+      cancelled = true
+    }
+  }, [studentId, vacancyId, elegible, key, tick])
+
+  const actual = estado.key === key ? estado : null
+  const data = actual?.data
+  const cargando = elegible && !actual
+
+  return (
+    <div className="flex flex-col gap-3 rounded-xl border border-line p-3">
+      <div className="flex items-center justify-between gap-2">
+        <p className="flex items-center gap-2 font-body text-xs font-semibold text-ink">
+          <Brain className="h-4 w-4 text-cocoa" />
+          Filtro 2 · compatibilidad con IA
+        </p>
+        {data?.fuente === 'ia' && (
+          <button
+            type="button"
+            title="Volver a evaluar"
+            onClick={() => {
+              setEstado({ key: '', data: null, error: null })
+              setTick((t) => t + 1)
+            }}
+            className="text-muted transition-colors hover:text-brand"
+          >
+            <RefreshCcw className="h-3.5 w-3.5" />
+          </button>
+        )}
+      </div>
+
+      {!elegible && (
+        <p className="font-body text-xs text-muted">
+          Se evalúa solo cuando pasas el filtro 1 (elegibilidad).
+        </p>
+      )}
+      {cargando && <div className="h-24 animate-pulse rounded-lg bg-canvas" aria-busy="true" />}
+      {actual?.error && <p className="font-body text-xs text-muted">No se pudo consultar: {actual.error}</p>}
+
+      {data && (
+        <>
+          <div>
+            <div className="mb-1.5 flex items-center justify-between font-body text-xs">
+              <span className="text-muted">{data.fuente === 'ia' ? 'Compatibilidad con IA' : 'Compatibilidad estimada'}</span>
+              <span className="font-semibold text-ink">{data.puntaje}%</span>
+            </div>
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-line">
+              <div className="h-full rounded-full bg-brand" style={{ width: `${data.puntaje}%` }} />
+            </div>
+          </div>
+          {data.aviso && <p className="font-body text-[11px] leading-snug text-muted">{data.aviso}</p>}
+          {data.resumen && <p className="font-body text-xs leading-relaxed text-ink">{data.resumen}</p>}
+          {data.razones_a_favor.length > 0 && (
+            <ul className="flex flex-col gap-1.5">
+              {data.razones_a_favor.map((r) => (
+                <li key={r} className="flex gap-2 font-body text-xs leading-snug text-ink">
+                  <ThumbsUp className="mt-0.5 h-3.5 w-3.5 shrink-0 text-teal" />
+                  {r}
+                </li>
+              ))}
+            </ul>
+          )}
+          {data.razones_en_contra.length > 0 && data.fuente === 'ia' && (
+            <ul className="flex flex-col gap-1.5">
+              {data.razones_en_contra.map((r) => (
+                <li key={r} className="flex gap-2 font-body text-xs leading-snug text-muted">
+                  <ThumbsDown className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                  {r}
+                </li>
+              ))}
+            </ul>
+          )}
+          {data.fuente === 'ia' && (
+            <p className="font-body text-[10px] text-muted">
+              Evaluado por IA ({data.modelo}){data.desde_cache ? ' · resultado guardado' : ''}. Es una orientación, no una decisión.
+            </p>
+          )}
+        </>
+      )}
+    </div>
+  )
+}
 
 export default function EligibilityPanel({ vacancyId }) {
   const [students, setStudents] = useState([])
@@ -125,7 +221,7 @@ export default function EligibilityPanel({ vacancyId }) {
               />
             </div>
             <p className="mt-1.5 font-body text-[11px] leading-snug text-muted">
-              Calculada por reglas: carrera, skills, horas y zona. El análisis con IA llegará después.
+              Calculada por reglas: carrera, skills, horas y zona. El análisis con IA va en el filtro 2.
             </p>
           </div>
 
@@ -160,13 +256,7 @@ export default function EligibilityPanel({ vacancyId }) {
         </>
       )}
 
-      <div className="flex items-start gap-3 rounded-xl border border-dashed border-line p-3">
-        <Brain className="mt-0.5 h-4 w-4 shrink-0 text-muted" />
-        <div>
-          <p className="font-body text-xs font-semibold text-ink">Filtro 2 · compatibilidad con IA</p>
-          <p className="font-body text-xs text-muted">Próximamente.</p>
-        </div>
-      </div>
+      {shown && !loading && <FiltroIA studentId={studentId} vacancyId={vacancyId} elegible={shown.elegible} />}
     </aside>
   )
 }
