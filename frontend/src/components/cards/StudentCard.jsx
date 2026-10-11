@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { Check, MapPin } from 'lucide-react'
 import MatchBadge from './MatchBadge'
 
@@ -37,7 +38,12 @@ export default function StudentCard({ student, match, connected = false, onToggl
           />
         </span>
         <div className="min-w-0 flex-1">
-          <h3 className="truncate font-body text-base font-semibold text-ink">{nombre}</h3>
+          <h3 className="truncate font-body text-base font-semibold text-ink">
+            {/* el enlace cubre toda la tarjeta; el botón Conectar queda por encima */}
+            <Link to={`/estudiantes/${student.id}`} className="after:absolute after:inset-0 focus-visible:outline-none">
+              {nombre}
+            </Link>
+          </h3>
           <p className="truncate font-body text-xs text-muted">
             {carrera} · {semestre}º semestre
           </p>
@@ -90,7 +96,7 @@ export default function StudentCard({ student, match, connected = false, onToggl
           type="button"
           aria-pressed={connected}
           onClick={onToggleConnect}
-          className={`flex items-center gap-1.5 rounded-lg px-4 py-2 font-body text-xs font-semibold transition-[background-color,color,border-color,transform,opacity] duration-200 hover:scale-105 active:scale-95 ${
+          className={`relative z-10 flex items-center gap-1.5 rounded-lg px-4 py-2 font-body text-xs font-semibold transition-[background-color,color,border-color,transform,opacity] duration-200 hover:scale-105 active:scale-95 ${
             connected ? 'border border-cocoa bg-cocoa-soft text-cocoa' : 'bg-cocoa text-on-cocoa hover:opacity-90'
           }`}
         >

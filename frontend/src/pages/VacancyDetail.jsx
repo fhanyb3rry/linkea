@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { ArrowLeft, Bookmark, Clock, GraduationCap, MapPin, Wallet } from 'lucide-react'
+import { ArrowLeft, Bookmark, CalendarDays, Clock, GraduationCap, Laptop, MapPin, Wallet } from 'lucide-react'
+import ApplyButton from '../components/cards/ApplyButton'
 import EligibilityPanel from '../components/cards/EligibilityPanel'
 import ListState from '../components/layout/ListState'
 import useStoredSet from '../hooks/useStoredSet'
@@ -35,13 +36,31 @@ export default function VacancyDetail() {
 
   return (
     <section className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6">
-      <Link
-        to="/vacantes"
-        className="mb-6 flex w-fit items-center gap-1.5 font-body text-sm text-muted transition-colors hover:text-brand"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Volver a vacantes
-      </Link>
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <Link
+          to="/vacantes"
+          className="flex w-fit items-center gap-1.5 font-body text-sm text-muted transition-colors hover:text-brand"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Volver a vacantes
+        </Link>
+        {vacancy && (
+          <div className="flex gap-2">
+            <Link
+              to={`/vacantes/${id}/candidatos`}
+              className="rounded-lg border border-line bg-surface px-3.5 py-2 font-body text-xs font-semibold text-ink hover:border-cocoa/50"
+            >
+              Ver candidatos
+            </Link>
+            <Link
+              to={`/vacantes/${id}/editar`}
+              className="rounded-lg border border-line bg-surface px-3.5 py-2 font-body text-xs font-semibold text-ink hover:border-cocoa/50"
+            >
+              Editar
+            </Link>
+          </div>
+        )}
+      </div>
 
       {(error || !vacancy) && <ListState loading={!error} error={error} />}
 
@@ -82,6 +101,28 @@ export default function VacancyDetail() {
                 />
               </div>
 
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                <Stat
+                  icon={Laptop}
+                  label="Modalidad"
+                  value={{ presencial: 'Presencial', remoto: 'Remoto', hibrido: 'Híbrido' }[vacancy.modalidad] ?? 'Presencial'}
+                />
+                <Stat
+                  icon={CalendarDays}
+                  label="Días de trabajo"
+                  value={vacancy.horarios.dias?.length ? vacancy.horarios.dias.join(', ') : 'Por definir'}
+                />
+              </div>
+
+              {vacancy.descripcion && (
+                <div className="mt-8">
+                  <h2 className="text-xl">Sobre la práctica</h2>
+                  <p className="mt-3 whitespace-pre-line font-body text-sm leading-relaxed text-muted">
+                    {vacancy.descripcion}
+                  </p>
+                </div>
+              )}
+
               <div className="mt-8">
                 <h2 className="flex items-center gap-2 text-xl">
                   <GraduationCap className="h-5 w-5 text-brand" />
@@ -113,14 +154,7 @@ export default function VacancyDetail() {
                 </div>
               </div>
 
-              <button
-                type="button"
-                disabled
-                title="Próximamente"
-                className="mt-10 w-full cursor-not-allowed rounded-lg bg-brand px-5 py-3.5 font-body text-sm font-semibold text-on-brand opacity-50"
-              >
-                Postular · próximamente
-              </button>
+              <ApplyButton vacancyId={id} />
             </div>
           </article>
 

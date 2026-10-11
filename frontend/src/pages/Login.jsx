@@ -30,6 +30,9 @@ export default function Login() {
         <FormRow label="Contraseña">
           <TextInput type="password" placeholder="••••••••" required />
         </FormRow>
+        <Link to="/recuperar" className="-mt-2 w-fit font-body text-xs text-muted hover:text-brand">
+          ¿Olvidaste tu contraseña?
+        </Link>
 
         <button
           type="submit"

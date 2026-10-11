@@ -1,11 +1,13 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { Bell, Menu, Moon, Search, Sun, User } from 'lucide-react'
+import useActiveStudent from '../../hooks/useActiveStudent'
 import useTheme from '../../hooks/useTheme'
 import ProfileSelect from './ProfileSelect'
 
 export default function Topbar({ onOpenMenu }) {
   const { theme, toggle } = useTheme()
   const navigate = useNavigate()
+  const [studentId] = useActiveStudent()
 
   function onSearch(event) {
     event.preventDefault()
@@ -42,21 +44,22 @@ export default function Topbar({ onOpenMenu }) {
         >
           {theme === 'dark' ? <Sun className="h-[18px] w-[18px]" /> : <Moon className="h-[18px] w-[18px]" />}
         </button>
-        <span
-          title="Próximamente"
-          className="relative hidden h-10 w-10 cursor-not-allowed items-center justify-center rounded-full text-ink sm:flex"
+        <Link
+          to="/notificaciones"
+          aria-label="Notificaciones"
+          className="relative hidden h-10 w-10 items-center justify-center rounded-full text-ink transition-colors hover:bg-surface sm:flex"
         >
           <Bell className="h-[18px] w-[18px]" />
           <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-brand" />
-        </span>
+        </Link>
         <Link
-          to="/login"
+          to={studentId ? '/perfil' : '/login'}
           className="flex items-center gap-2 rounded-full border border-line bg-surface py-1.5 pl-1.5 pr-4 font-body text-sm font-medium text-ink transition-colors hover:border-brand/40"
         >
           <span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand text-on-brand">
             <User className="h-4 w-4" />
           </span>
-          <span className="hidden sm:inline">Iniciar sesión</span>
+          <span className="hidden sm:inline">{studentId ? 'Mi perfil' : 'Iniciar sesión'}</span>
         </Link>
       </div>
     </header>
