@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
+import { Link, NavLink, useLocation } from 'react-router-dom'
+import PageTransition from './PageTransition'
 import { Menu, Moon, Sun, X } from 'lucide-react'
 import useTheme from '../../hooks/useTheme'
 
@@ -95,7 +96,7 @@ export default function PublicLayout() {
       </header>
 
       <div className={pathname === '/' ? '' : 'min-h-[70vh] pt-24'}>
-        <Outlet />
+        <PageTransition />
       </div>
 
       <footer id="contacto" className="border-t border-line bg-surface">

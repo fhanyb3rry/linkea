@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Outlet } from 'react-router-dom'
+import PageTransition from './PageTransition'
 import Sidebar from './Sidebar'
 import Topbar from './Topbar'
 
@@ -29,7 +29,7 @@ export default function Layout() {
       <div className="lg:pl-64">
         <Topbar onOpenMenu={() => setMenuOpen(true)} />
         <main>
-          <Outlet />
+          <PageTransition />
         </main>
       </div>
     </div>
