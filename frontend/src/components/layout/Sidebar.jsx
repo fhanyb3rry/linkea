@@ -7,6 +7,7 @@ import {
   Building2,
   GraduationCap,
   Home,
+  Network,
   MessageCircle,
   Send,
   Settings,
@@ -22,6 +23,7 @@ const groups = [
       { to: '/vacantes', label: 'Vacantes', icon: Briefcase },
       { to: '/estudiantes', label: 'Estudiantes', icon: GraduationCap },
       { to: '/guardados', label: 'Guardados', icon: Bookmark },
+      { to: '/rutas', label: 'Rutas de aprendizaje', icon: Network },
     ],
   },
   {

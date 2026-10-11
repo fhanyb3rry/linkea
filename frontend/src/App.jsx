@@ -21,6 +21,7 @@ import Postulaciones from './pages/Postulaciones'
 import PublicarVacante from './pages/PublicarVacante'
 import Recuperar from './pages/Recuperar'
 import Register from './pages/Register'
+import RutasAprendizaje from './pages/RutasAprendizaje'
 import VacancyDetail from './pages/VacancyDetail'
 import Vacantes from './pages/Vacantes'
 
@@ -44,6 +45,7 @@ export default function App() {
         <Route path="vacantes/:id/editar" element={<EditarVacante />} />
         <Route path="vacantes/:id/candidatos" element={<Candidatos />} />
         <Route path="guardados" element={<Guardados />} />
+        <Route path="rutas" element={<RutasAprendizaje />} />
 
         <Route path="estudiantes" element={<Estudiantes />} />
         <Route path="estudiantes/:id" element={<PerfilEstudiante />} />

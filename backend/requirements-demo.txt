@@ -1,0 +1,3 @@
+# Solo para demo_busqueda.py (el servidor no lo necesita)
+matplotlib
+numpy

@@ -128,3 +128,17 @@ export function updateApplication(id, estado) {
 export function deleteApplication(id) {
   return request(`/applications/${id}`, { method: 'DELETE' })
 }
+
+// Búsqueda DFS/BFS sobre el grafo de habilidades
+export function getGrafoSkills() {
+  return request('/search/grafo')
+}
+
+export function buscarRutas({ desde, hasta, algoritmo, limite }) {
+  const params = new URLSearchParams({ desde, hasta, algoritmo, limite })
+  return request(`/search/rutas?${params}`)
+}
+
+export function getPlanAprendizaje(studentId, vacancyId, limite) {
+  return request(`/search/aprendizaje/${studentId}/${vacancyId}?limite=${limite}`)
+}
