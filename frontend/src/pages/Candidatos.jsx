@@ -1,11 +1,13 @@
 import { useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { Check, Download, Eye, X } from 'lucide-react'
+import { BadgeCheck, Check, Download, Eye, X } from 'lucide-react'
 import EstadoBadge from '../components/cards/EstadoBadge'
+import HistorialPostulacion from '../components/cards/HistorialPostulacion'
 import MatchBadge from '../components/cards/MatchBadge'
 import ListState from '../components/layout/ListState'
 import PageTitle from '../components/layout/PageTitle'
 import useFetch from '../hooks/useFetch'
+import { TRANSICIONES } from '../lib/estados'
 import { formatDate, initials } from '../lib/perfil'
 import {
   descargarCV,
@@ -15,6 +17,14 @@ import {
   getVacancy,
   updateApplication,
 } from '../services/api'
+
+// Botón para llevar una postulación a cada estado.
+const ACCIONES = {
+  en_revision: { label: 'Marcar en revisión', className: 'border border-line bg-surface text-ink hover:border-cocoa/50' },
+  aceptada: { label: 'Aceptar', icon: Check, className: 'bg-cocoa text-on-cocoa hover:opacity-90' },
+  asignada: { label: 'Asignar estadía', icon: BadgeCheck, className: 'bg-teal text-white hover:opacity-90' },
+  rechazada: { label: 'Rechazar', icon: X, className: 'text-muted hover:text-brand' },
+}
 
 function Avatar({ name }) {
   return (
@@ -122,39 +132,23 @@ export default function Candidatos() {
                             CV
                           </button>
                         )}
-                        {a.estado !== 'en_revision' && (
-                          <button
-                            type="button"
-                            disabled={busy}
-                            onClick={() => cambiarEstado(a.id, 'en_revision')}
-                            className="rounded-lg border border-line bg-surface px-3 py-2 font-body text-xs font-semibold text-ink hover:border-cocoa/50 disabled:opacity-60"
-                          >
-                            Marcar en revisión
-                          </button>
-                        )}
-                        {a.estado !== 'aceptada' && (
-                          <button
-                            type="button"
-                            disabled={busy}
-                            onClick={() => cambiarEstado(a.id, 'aceptada')}
-                            className="flex items-center gap-1.5 rounded-lg bg-cocoa px-3 py-2 font-body text-xs font-semibold text-on-cocoa hover:opacity-90 disabled:opacity-60"
-                          >
-                            <Check className="h-3.5 w-3.5" />
-                            Aceptar
-                          </button>
-                        )}
-                        {a.estado !== 'rechazada' && (
-                          <button
-                            type="button"
-                            disabled={busy}
-                            onClick={() => cambiarEstado(a.id, 'rechazada')}
-                            className="flex items-center gap-1.5 rounded-lg px-3 py-2 font-body text-xs font-semibold text-muted hover:text-brand disabled:opacity-60"
-                          >
-                            <X className="h-3.5 w-3.5" />
-                            Rechazar
-                          </button>
-                        )}
+                        {TRANSICIONES[a.estado].map((destino) => {
+                          const accion = ACCIONES[destino]
+                          return (
+                            <button
+                              key={destino}
+                              type="button"
+                              disabled={busy}
+                              onClick={() => cambiarEstado(a.id, destino)}
+                              className={`flex items-center gap-1.5 rounded-lg px-3 py-2 font-body text-xs font-semibold disabled:opacity-60 ${accion.className}`}
+                            >
+                              {accion.icon && <accion.icon className="h-3.5 w-3.5" />}
+                              {accion.label}
+                            </button>
+                          )
+                        })}
                       </div>
+                      <HistorialPostulacion historial={a.historial} />
                     </li>
                   )
                 })}

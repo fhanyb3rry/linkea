@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Clock, MapPin } from 'lucide-react'
 import EstadoBadge from '../components/cards/EstadoBadge'
+import HistorialPostulacion from '../components/cards/HistorialPostulacion'
 import MatchBadge from '../components/cards/MatchBadge'
 import ListState from '../components/layout/ListState'
 import NeedsProfile from '../components/layout/NeedsProfile'
@@ -10,7 +11,7 @@ import useActiveStudent from '../hooks/useActiveStudent'
 import useFetch from '../hooks/useFetch'
 import useMatches from '../hooks/useMatches'
 import { areaInfo } from '../lib/areas'
-import { ESTADOS } from '../lib/estados'
+import { ESTADOS, RETIRABLES } from '../lib/estados'
 import { formatDate } from '../lib/perfil'
 import { deleteApplication, getApplications, getVacancies } from '../services/api'
 
@@ -109,7 +110,7 @@ export default function Postulaciones() {
           {actionError && <p className="font-body text-sm text-red-600">{actionError}</p>}
 
           <ul className="flex flex-col gap-4">
-            {visible.map(({ id, vacancy, estado, creada_en, mensaje }) => {
+            {visible.map(({ id, vacancy, estado, creada_en, mensaje, historial }) => {
               const area = areaInfo(vacancy.sector)
               const AreaIcon = area.icon
               return (
@@ -140,6 +141,9 @@ export default function Postulaciones() {
                       <span>Enviada el {formatDate(creada_en)}</span>
                     </div>
                     {mensaje && <p className="mt-2 line-clamp-2 font-body text-xs italic text-muted">“{mensaje}”</p>}
+                    <div className="mt-2">
+                      <HistorialPostulacion historial={historial} />
+                    </div>
                   </div>
 
                   <div className="flex flex-wrap items-center gap-3 sm:justify-end">
@@ -171,13 +175,15 @@ export default function Postulaciones() {
                         >
                           Ver vacante
                         </Link>
-                        <button
-                          type="button"
-                          onClick={() => setConfirmId(id)}
-                          className="rounded-lg px-3 py-2 font-body text-xs font-semibold text-muted hover:text-brand"
-                        >
-                          Retirar
-                        </button>
+                        {RETIRABLES.includes(estado) && (
+                          <button
+                            type="button"
+                            onClick={() => setConfirmId(id)}
+                            className="rounded-lg px-3 py-2 font-body text-xs font-semibold text-muted hover:text-brand"
+                          >
+                            Retirar
+                          </button>
+                        )}
                       </>
                     )}
                   </div>

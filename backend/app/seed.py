@@ -214,10 +214,17 @@ async def main(reset: bool) -> None:
                        "organizacion_id": str(org_id), "user_id": user_id}
             ids_vac.append((await db.vacancies.insert_one(vacante)).inserted_id)
 
+        # El historial repite el camino normal hasta llegar al estado de ejemplo.
+        camino = {"enviada": ["enviada"], "en_revision": ["enviada", "en_revision"],
+                  "aceptada": ["enviada", "en_revision", "aceptada"]}
         await db.applications.insert_many([
-            {"student_id": str(ids_est[e]), "vacancy_id": str(ids_vac[v]), "mensaje": "", "estado": estado, "creada_en": ahora}
+            {"student_id": str(ids_est[e]), "vacancy_id": str(ids_vac[v]), "mensaje": "", "estado": estado, "creada_en": ahora,
+             "historial": [{"estado": paso, "fecha": ahora, "por": "Datos de ejemplo", "nota": ""} for paso in camino[estado]]}
             for e, v, estado in POSTULACIONES
         ])
+        for e, _, estado in POSTULACIONES:
+            if estado == "aceptada":
+                await db.students.update_one({"_id": ids_est[e]}, {"$set": {"estado": "en_proceso"}})
 
         print(f"Listo: {len(ids_est)} estudiantes, {len(ids_vac)} organizaciones con una vacante cada una y {len(POSTULACIONES)} postulaciones.")
         print(f"\nCuentas (contraseña de todas: {PASSWORD_DEMO}):")

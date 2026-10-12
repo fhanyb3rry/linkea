@@ -5,7 +5,9 @@ import { useAuth } from '../../context/auth'
 import useActiveStudent from '../../hooks/useActiveStudent'
 import useFetch from '../../hooks/useFetch'
 import { createApplication, deleteApplication, getApplications } from '../../services/api'
+import { RETIRABLES } from '../../lib/estados'
 import { formatDate } from '../../lib/perfil'
+import HistorialPostulacion from './HistorialPostulacion'
 import EstadoBadge from './EstadoBadge'
 
 // Postulación del estudiante con sesión a una vacante: enviar (con mensaje opcional), ver estado o retirar.
@@ -74,14 +76,19 @@ export default function ApplyButton({ vacancyId }) {
           >
             Ver mis postulaciones
           </Link>
-          <button
-            type="button"
-            disabled={busy}
-            onClick={() => run(() => deleteApplication(application.id))}
-            className="rounded-lg border border-line bg-surface px-4 py-2 font-body text-xs font-semibold text-ink hover:border-cocoa/50 disabled:opacity-60"
-          >
-            Retirar postulación
-          </button>
+          {RETIRABLES.includes(application.estado) && (
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => run(() => deleteApplication(application.id))}
+              className="rounded-lg border border-line bg-surface px-4 py-2 font-body text-xs font-semibold text-ink hover:border-cocoa/50 disabled:opacity-60"
+            >
+              Retirar postulación
+            </button>
+          )}
+        </div>
+        <div className="mt-4">
+          <HistorialPostulacion historial={application.historial} />
         </div>
         {error && <p className="mt-3 font-body text-xs text-red-600">{error}</p>}
       </div>
