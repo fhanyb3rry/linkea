@@ -4,16 +4,14 @@ from pathlib import Path
 from bson import ObjectId
 from bson.errors import InvalidId
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
-from fastapi.responses import FileResponse
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
-from app.core.config import BACKEND_ROOT
+from app.core import archivos
 from app.core.database import get_database
 from app.models.student import Student, StudentCreate, StudentUpdate
 
 router = APIRouter(prefix="/students", tags=["students"])
 
-CV_DIR = BACKEND_ROOT / "uploads" / "cv"
 CV_MAX_BYTES = 5 * 1024 * 1024
 CV_TIPOS = {
     ".pdf": "application/pdf",
@@ -29,10 +27,10 @@ def _oid(student_id: str) -> ObjectId:
         raise HTTPException(status_code=400, detail="ID de estudiante inválido")
 
 
-def _borrar_archivos_cv(student_id: str) -> None:
-    """Elimina cualquier CV guardado del estudiante (el nombre en disco es su id + extensión)."""
-    for ext in CV_TIPOS:
-        (CV_DIR / f"{student_id}{ext}").unlink(missing_ok=True)
+async def _borrar_cv(db: AsyncIOMotorDatabase, oid: ObjectId) -> None:
+    """Elimina de GridFS el CV guardado del estudiante, si tiene."""
+    doc = await db.students.find_one({"_id": oid}, {"cv": 1})
+    await archivos.borrar(db, ((doc or {}).get("cv") or {}).get("archivo_id"))
 
 
 @router.post("", response_model=Student, status_code=201)
@@ -82,10 +80,11 @@ async def update_student(
 async def delete_student(
     student_id: str, db: AsyncIOMotorDatabase = Depends(get_database)
 ):
-    result = await db.students.delete_one({"_id": _oid(student_id)})
+    oid = _oid(student_id)
+    await _borrar_cv(db, oid)
+    result = await db.students.delete_one({"_id": oid})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Estudiante no encontrado")
-    _borrar_archivos_cv(student_id)
     await db.applications.delete_many({"student_id": student_id})
 
 
@@ -112,11 +111,13 @@ async def upload_cv(
     if ext == ".pdf" and not contenido.startswith(b"%PDF"):
         raise HTTPException(status_code=400, detail="El archivo no es un PDF válido")
 
-    CV_DIR.mkdir(parents=True, exist_ok=True)
-    _borrar_archivos_cv(student_id)
-    (CV_DIR / f"{student_id}{ext}").write_bytes(contenido)
+    await _borrar_cv(db, oid)
+    archivo_id = await archivos.guardar(
+        db, contenido, nombre[:120], CV_TIPOS[ext], student_id=student_id, clase="cv"
+    )
 
     cv = {
+        "archivo_id": archivo_id,
         "nombre_archivo": nombre[:120],
         "tipo": CV_TIPOS[ext],
         "tamano": len(contenido),
@@ -132,20 +133,17 @@ async def download_cv(
 ):
     doc = await db.students.find_one({"_id": _oid(student_id)}, {"cv": 1})
     cv = (doc or {}).get("cv")
-    if not cv:
+    if not cv or not cv.get("archivo_id"):
         raise HTTPException(status_code=404, detail="Este estudiante no ha subido su currículum")
-    ext = Path(cv["nombre_archivo"]).suffix.lower()
-    ruta = CV_DIR / f"{student_id}{ext}"
-    if not ruta.exists():
-        raise HTTPException(status_code=404, detail="No se encontró el archivo del currículum")
-    return FileResponse(ruta, media_type=cv["tipo"], filename=cv["nombre_archivo"])
+    return await archivos.descargar(db, cv["archivo_id"], cv["nombre_archivo"], cv["tipo"])
 
 
 @router.delete("/{student_id}/cv", status_code=204)
 async def delete_cv(
     student_id: str, db: AsyncIOMotorDatabase = Depends(get_database)
 ):
-    result = await db.students.update_one({"_id": _oid(student_id)}, {"$unset": {"cv": ""}})
+    oid = _oid(student_id)
+    await _borrar_cv(db, oid)
+    result = await db.students.update_one({"_id": oid}, {"$unset": {"cv": ""}})
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Estudiante no encontrado")
-    _borrar_archivos_cv(student_id)

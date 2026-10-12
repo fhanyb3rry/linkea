@@ -29,8 +29,9 @@ class Enlaces(BaseModel):
 
 
 class Curriculum(BaseModel):
-    """Metadatos del CV subido; el archivo vive en backend/uploads/cv/."""
+    """Metadatos del CV subido; el archivo vive en MongoDB (GridFS, ver app/core/archivos.py)."""
 
+    archivo_id: str | None = None
     nombre_archivo: str
     tipo: str
     tamano: int
