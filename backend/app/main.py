@@ -9,10 +9,12 @@ from app.routers import (
     ai,
     applications,
     auth,
+    catalogo,
     companies,
     eligibility,
     organizations,
     search,
+    seguimientos,
     students,
 )
 
@@ -42,6 +44,8 @@ app.include_router(agent.router)
 app.include_router(applications.router)
 app.include_router(search.router)
 app.include_router(ai.router)
+app.include_router(seguimientos.router)
+app.include_router(catalogo.router)
 
 
 @app.get("/health")

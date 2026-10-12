@@ -6,6 +6,7 @@ import {
   Bookmark,
   Briefcase,
   Building2,
+  CalendarCheck,
   Factory,
   GraduationCap,
   Home,
@@ -33,6 +34,8 @@ const groups = [
     title: 'Mi actividad',
     items: [
       { to: '/postulaciones', label: 'Postulaciones', icon: Send, roles: ['estudiante'] },
+      { to: '/estadia', label: 'Mi estadía', icon: CalendarCheck, roles: ['estudiante'] },
+      { to: '/seguimientos', label: 'Seguimiento', icon: CalendarCheck, roles: ['empresa', 'asesor_academico', 'coordinador'] },
       { to: '/mensajes', label: 'Mensajes', icon: MessageCircle },
       { to: '/notificaciones', label: 'Notificaciones', icon: Bell },
     ],

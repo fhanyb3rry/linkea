@@ -126,16 +126,20 @@ export function deleteCV(studentId) {
   return request(`/students/${studentId}/cv`, { method: 'DELETE' })
 }
 
-// Descarga el CV con la sesión (un <a href> normal no manda el token).
-export async function descargarCV(studentId, nombre = 'curriculum') {
-  const response = await send(`/students/${studentId}/cv`)
-  if (!response.ok) throw new Error('No se pudo descargar el currículum')
+// Descarga un archivo con la sesión (un <a href> normal no manda el token).
+async function descargar(path, nombre) {
+  const response = await send(path)
+  if (!response.ok) throw new Error('No se pudo descargar el archivo')
   const url = URL.createObjectURL(await response.blob())
   const link = document.createElement('a')
   link.href = url
   link.download = nombre
   link.click()
   setTimeout(() => URL.revokeObjectURL(url), 1000)
+}
+
+export function descargarCV(studentId, nombre = 'curriculum') {
+  return descargar(`/students/${studentId}/cv`, nombre)
 }
 
 // ---- Vacantes ----------------------------------------------------------------------------
@@ -201,4 +205,98 @@ export function buscarRutas({ desde, hasta, algoritmo, limite }) {
 
 export function getPlanAprendizaje(studentId, vacancyId, limite) {
   return request(`/search/aprendizaje/${studentId}/${vacancyId}?limite=${limite}`)
+}
+
+// ---- Seguimiento de la estadía -----------------------------------------------------------
+// Cada acción devuelve el seguimiento completo ya actualizado (con sus totales).
+
+export function getSeguimientos(estado) {
+  return request(`/seguimientos${estado ? `?estado=${estado}` : ''}`)
+}
+
+export function getSeguimiento(id) {
+  return request(`/seguimientos/${id}`)
+}
+
+export function updateSeguimiento(id, cambios) {
+  return sendJSON('PATCH', `/seguimientos/${id}`, cambios)
+}
+
+export function asignarAsesor(id, asesorId) {
+  return sendJSON('PUT', `/seguimientos/${id}/asesor`, { asesor_id: asesorId })
+}
+
+export function crearBitacora(id, bitacora) {
+  return postJSON(`/seguimientos/${id}/bitacoras`, bitacora)
+}
+
+// estado: 'validada' | 'rechazada'
+export function revisarBitacora(id, bitacoraId, estado, observacion = '') {
+  return sendJSON('PATCH', `/seguimientos/${id}/bitacoras/${bitacoraId}`, { estado, observacion })
+}
+
+export function borrarBitacora(id, bitacoraId) {
+  return request(`/seguimientos/${id}/bitacoras/${bitacoraId}`, { method: 'DELETE' })
+}
+
+export function crearReporte(id, { titulo, periodo, contenido, archivo }) {
+  const body = new FormData()
+  body.append('titulo', titulo)
+  body.append('periodo', periodo)
+  body.append('contenido', contenido)
+  if (archivo) body.append('file', archivo)
+  return request(`/seguimientos/${id}/reportes`, { method: 'POST', body })
+}
+
+export function descargarReporte(id, reporte) {
+  return descargar(`/seguimientos/${id}/reportes/${reporte.id}/archivo`, reporte.archivo.nombre)
+}
+
+export function crearIncidencia(id, incidencia) {
+  return postJSON(`/seguimientos/${id}/incidencias`, incidencia)
+}
+
+export function resolverIncidencia(id, incidenciaId, resolucion) {
+  return sendJSON('PATCH', `/seguimientos/${id}/incidencias/${incidenciaId}`, { resolucion })
+}
+
+export function subirDocumento(id, documentoId, archivo) {
+  const body = new FormData()
+  body.append('file', archivo)
+  return request(`/seguimientos/${id}/documentos/${documentoId}/archivo`, { method: 'POST', body })
+}
+
+export function descargarDocumento(id, documento) {
+  const ultima = documento.versiones[documento.versiones.length - 1]
+  return descargar(`/seguimientos/${id}/documentos/${documento.id}/archivo`, ultima.nombre)
+}
+
+export function firmarDocumento(id, documentoId) {
+  return request(`/seguimientos/${id}/documentos/${documentoId}/firmar`, { method: 'POST' })
+}
+
+export function rechazarDocumento(id, documentoId, observacion) {
+  return postJSON(`/seguimientos/${id}/documentos/${documentoId}/rechazar`, { observacion })
+}
+
+// ---- Coordinación ------------------------------------------------------------------------
+
+export function getUsuarios(rol) {
+  return request(`/auth/usuarios${rol ? `?rol=${rol}` : ''}`)
+}
+
+export function getCatalogoDocumentos() {
+  return request('/catalogo-documentos')
+}
+
+export function createDocumentoCatalogo(payload) {
+  return postJSON('/catalogo-documentos', payload)
+}
+
+export function updateDocumentoCatalogo(id, payload) {
+  return sendJSON('PUT', `/catalogo-documentos/${id}`, payload)
+}
+
+export function deleteDocumentoCatalogo(id) {
+  return request(`/catalogo-documentos/${id}`, { method: 'DELETE' })
 }

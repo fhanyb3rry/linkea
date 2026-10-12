@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from app.core.database import get_database
+from app.core.estadias import crear_seguimiento
 from app.core.seguridad import es_rol, requiere_rol, usuario_actual
 from app.models.application import (
     Application,
@@ -129,6 +130,9 @@ async def update_application(
     }.get(data.estado)
     if nuevo_estado_alumno:
         await db.students.update_one({"_id": student_oid(doc["student_id"])}, {"$set": {"estado": nuevo_estado_alumno}})
+    # Al asignar la estadía empieza su seguimiento (bitácoras, reportes, documentos…).
+    if data.estado == EstadoPostulacion.ASIGNADA:
+        await crear_seguimiento(db, doc)
 
     return await db.applications.find_one({"_id": doc["_id"]})
 

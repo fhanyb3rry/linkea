@@ -22,13 +22,14 @@ from motor.motor_asyncio import AsyncIOMotorClient
 
 from app.core.config import settings
 from app.core.database import crear_indices
+from app.core.estadias import crear_seguimiento, nuevo_id
 from app.core.seguridad import cifrar_password
 from app.models.company import VacancyCreate
 from app.models.organization import OrganizationCreate
 from app.models.student import StudentCreate
 
 # Todo lo que --reset borra (incluye los archivos de GridFS).
-COLECCIONES = ["users", "organizations", "students", "vacancies", "applications", "ai_compatibilidad", "archivos.files", "archivos.chunks"]
+COLECCIONES = ["users", "organizations", "students", "seguimientos", "catalogo_documentos", "vacancies", "applications", "ai_compatibilidad", "archivos.files", "archivos.chunks"]
 
 ESTUDIANTES = [
     {
@@ -157,8 +158,17 @@ PERSONAL = [
     ("Mtra. Laura Sánchez", "asesor@linkea.test", "asesor_academico"),
 ]
 
+# Documentos de ejemplo de la estadía (la lista real de la UTVT la ajusta coordinación en la app).
+CATALOGO = [
+    ("Carta de presentación", "La emite la universidad para presentar al estudiante.", ["academico"]),
+    ("Carta de aceptación", "La organización confirma que recibe al estudiante.", ["empresarial"]),
+    ("Plan de trabajo", "Actividades y entregables acordados para la estadía.", ["academico", "empresarial"]),
+    ("Evaluación final", "Calificación del desempeño del estudiante.", ["academico", "empresarial"]),
+    ("Carta de liberación", "La organización confirma que el estudiante concluyó sus horas.", ["empresarial"]),
+]
+
 # (índice de estudiante, índice de vacante, estado)
-POSTULACIONES = [(0, 0, "en_revision"), (1, 1, "enviada"), (3, 2, "aceptada"), (2, 3, "enviada")]
+POSTULACIONES = [(0, 0, "en_revision"), (1, 1, "enviada"), (3, 2, "aceptada"), (2, 3, "enviada"), (5, 5, "asignada")]
 
 
 async def main(reset: bool) -> None:
@@ -216,15 +226,39 @@ async def main(reset: bool) -> None:
 
         # El historial repite el camino normal hasta llegar al estado de ejemplo.
         camino = {"enviada": ["enviada"], "en_revision": ["enviada", "en_revision"],
-                  "aceptada": ["enviada", "en_revision", "aceptada"]}
+                  "aceptada": ["enviada", "en_revision", "aceptada"],
+                  "asignada": ["enviada", "en_revision", "aceptada", "asignada"]}
         await db.applications.insert_many([
             {"student_id": str(ids_est[e]), "vacancy_id": str(ids_vac[v]), "mensaje": "", "estado": estado, "creada_en": ahora,
              "historial": [{"estado": paso, "fecha": ahora, "por": "Datos de ejemplo", "nota": ""} for paso in camino[estado]]}
             for e, v, estado in POSTULACIONES
         ])
         for e, _, estado in POSTULACIONES:
-            if estado == "aceptada":
-                await db.students.update_one({"_id": ids_est[e]}, {"$set": {"estado": "en_proceso"}})
+            if estado in ("aceptada", "asignada"):
+                await db.students.update_one({"_id": ids_est[e]}, {"$set": {"estado": "en_proceso" if estado == "aceptada" else "colocado"}})
+
+        await db.catalogo_documentos.insert_many([
+            {"nombre": n, "descripcion": d, "requiere": r, "orden": i, "activo": True} for i, (n, d, r) in enumerate(CATALOGO)
+        ])
+
+        # Estadía en curso de ejemplo: con asesor académico y unas bitácoras.
+        asesor = await db.users.find_one({"rol": "asesor_academico"})
+        for postulacion in await db.applications.find({"estado": "asignada"}).to_list(length=None):
+            sid = await crear_seguimiento(db, postulacion)
+            bitacoras = [
+                {"id": nuevo_id(), "fecha": f"2026-09-{d:02d}", "horas": 8, "actividades": act, "estado": est,
+                 "revisada_por": "Grupo Administrativo Lerma" if est != "pendiente" else "", "revisada_en": ahora if est != "pendiente" else "",
+                 "observacion": "", "creada_en": ahora}
+                for d, act, est in [
+                    (21, "Inducción y recorrido por las áreas administrativas.", "validada"),
+                    (22, "Captura y conciliación de facturas de proveedores.", "validada"),
+                    (23, "Apoyo en el control de inventario de papelería.", "pendiente"),
+                ]
+            ]
+            await db.seguimientos.update_one({"_id": sid}, {"$set": {
+                "asesor_academico_id": str(asesor["_id"]), "asesor_academico_nombre": asesor["nombre"],
+                "fecha_inicio": "2026-09-21", "bitacoras": bitacoras,
+            }})
 
         print(f"Listo: {len(ids_est)} estudiantes, {len(ids_vac)} organizaciones con una vacante cada una y {len(POSTULACIONES)} postulaciones.")
         print(f"\nCuentas (contraseña de todas: {PASSWORD_DEMO}):")

@@ -5,8 +5,8 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 from pymongo.errors import DuplicateKeyError
 
 from app.core.database import get_database
-from app.core.seguridad import cifrar_password, crear_token, usuario_actual, verificar_password
-from app.models.user import LoginIn, RegistroIn, TokenOut, Usuario
+from app.core.seguridad import cifrar_password, crear_token, requiere_rol, usuario_actual, verificar_password
+from app.models.user import LoginIn, RegistroIn, Rol, TokenOut, Usuario
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -47,3 +47,14 @@ async def login(data: LoginIn, db: AsyncIOMotorDatabase = Depends(get_database))
 @router.get("/me", response_model=Usuario)
 async def me(usuario: dict = Depends(usuario_actual)):
     return usuario
+
+
+@router.get("/usuarios", response_model=list[Usuario])
+async def list_usuarios(
+    rol: Rol | None = None,
+    db: AsyncIOMotorDatabase = Depends(get_database),
+    _: dict = Depends(requiere_rol(Rol.COORDINADOR)),
+):
+    """Cuentas registradas (solo coordinación), p. ej. ?rol=asesor_academico para asignar asesores."""
+    filtro = {"rol": rol.value} if rol else {}
+    return await db.users.find(filtro).sort("nombre", 1).to_list(length=None)

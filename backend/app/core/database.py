@@ -31,6 +31,12 @@ INDICES = [
     # Una organización por cuenta de empresa; las vacantes se consultan por organización.
     ("organizations", [("user_id", 1)], {"unique": True}),
     ("vacancies", [("organizacion_id", 1)], {}),
+    # Un seguimiento por postulación asignada; se consulta por estudiante, empresa y asesor.
+    ("seguimientos", [("postulacion_id", 1)], {"unique": True}),
+    ("seguimientos", [("student_id", 1)], {}),
+    ("seguimientos", [("empresa_user_id", 1)], {}),
+    ("seguimientos", [("asesor_academico_id", 1)], {}),
+    ("seguimientos", [("estado", 1)], {}),
 ]
 
 

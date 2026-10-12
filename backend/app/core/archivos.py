@@ -9,7 +9,7 @@ from urllib.parse import quote
 
 from bson import ObjectId
 from bson.errors import InvalidId
-from fastapi import HTTPException
+from fastapi import HTTPException, UploadFile
 from fastapi.responses import Response
 from gridfs.errors import NoFile
 from motor.motor_asyncio import AsyncIOMotorDatabase, AsyncIOMotorGridFSBucket
@@ -50,3 +50,17 @@ async def descargar(db: AsyncIOMotorDatabase, archivo_id: str, nombre: str, tipo
         media_type=tipo,
         headers={"Content-Disposition": f"attachment; filename*=utf-8''{quote(nombre)}"},
     )
+
+
+async def leer_pdf(file: UploadFile, max_mb: int = 10) -> tuple[bytes, str]:
+    """Lee un PDF subido y lo valida (extensión, tamaño y que de verdad sea PDF)."""
+    nombre = (file.filename or "documento.pdf").rsplit("/", 1)[-1][:120]
+    if not nombre.lower().endswith(".pdf"):
+        raise HTTPException(status_code=400, detail="Solo se aceptan archivos PDF")
+    maximo = max_mb * 1024 * 1024
+    contenido = await file.read(maximo + 1)
+    if len(contenido) > maximo:
+        raise HTTPException(status_code=413, detail=f"El archivo supera los {max_mb} MB")
+    if not contenido.startswith(b"%PDF"):
+        raise HTTPException(status_code=400, detail="El archivo no es un PDF válido")
+    return contenido, nombre

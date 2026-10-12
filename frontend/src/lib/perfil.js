@@ -56,7 +56,8 @@ export function formatSize(bytes) {
 
 export function formatDate(iso) {
   if (!iso) return ''
-  const date = new Date(iso)
+  // Una fecha sola ("2026-09-21") se lee como día local; si no, JS la toma en UTC y en México sale el día anterior.
+  const date = /^\d{4}-\d{2}-\d{2}$/.test(iso) ? new Date(`${iso}T00:00:00`) : new Date(iso)
   return Number.isNaN(date.getTime())
     ? ''
     : date.toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })

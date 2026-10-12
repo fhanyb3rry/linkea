@@ -14,6 +14,7 @@ import Home from './pages/Home'
 import Landing from './pages/Landing'
 import Login from './pages/Login'
 import Mensajes from './pages/Mensajes'
+import MiEstadia from './pages/MiEstadia'
 import MiPerfil from './pages/MiPerfil'
 import NotFound from './pages/NotFound'
 import OrganizacionDetalle from './pages/OrganizacionDetalle'
@@ -26,6 +27,8 @@ import PublicarVacante from './pages/PublicarVacante'
 import Recuperar from './pages/Recuperar'
 import Register from './pages/Register'
 import RutasAprendizaje from './pages/RutasAprendizaje'
+import SeguimientoDetalle from './pages/SeguimientoDetalle'
+import Seguimientos from './pages/Seguimientos'
 import VacancyDetail from './pages/VacancyDetail'
 import Vacantes from './pages/Vacantes'
 
@@ -64,6 +67,7 @@ export default function App() {
           <Route path="perfil/crear" element={<CrearPerfilEstudiante />} />
           <Route path="perfil/editar" element={<EditarPerfil />} />
           <Route path="postulaciones" element={<Postulaciones />} />
+          <Route path="estadia" element={<MiEstadia />} />
         </Route>
 
         <Route element={<RequireAuth roles={['empresa']} />}>
@@ -76,6 +80,8 @@ export default function App() {
         </Route>
         <Route element={<RequireAuth roles={['empresa', 'coordinador', 'asesor_academico']} />}>
           <Route path="vacantes/:id/candidatos" element={<Candidatos />} />
+          <Route path="seguimientos" element={<Seguimientos />} />
+          <Route path="seguimientos/:id" element={<SeguimientoDetalle />} />
         </Route>
 
         <Route path="mensajes" element={<Mensajes />} />
