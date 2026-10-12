@@ -1,13 +1,22 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { Bell, Menu, Moon, Search, Sun, User } from 'lucide-react'
-import useActiveStudent from '../../hooks/useActiveStudent'
+import { Bell, LogOut, Menu, Moon, Search, Sun } from 'lucide-react'
+import { useAuth } from '../../context/auth'
 import useTheme from '../../hooks/useTheme'
-import ProfileSelect from './ProfileSelect'
+import { initials } from '../../lib/perfil'
+import { ROLES } from '../../lib/roles'
+
+// A dónde lleva el botón de la cuenta según el rol.
+const CUENTA = { estudiante: '/perfil', empresa: '/empresa' }
 
 export default function Topbar({ onOpenMenu }) {
   const { theme, toggle } = useTheme()
   const navigate = useNavigate()
-  const [studentId] = useActiveStudent()
+  const { usuario, logout } = useAuth()
+
+  function salir() {
+    logout()
+    navigate('/login')
+  }
 
   function onSearch(event) {
     event.preventDefault()
@@ -35,7 +44,6 @@ export default function Topbar({ onOpenMenu }) {
       </form>
 
       <div className="ml-auto flex items-center gap-2">
-        <ProfileSelect />
         <button
           type="button"
           onClick={toggle}
@@ -53,14 +61,27 @@ export default function Topbar({ onOpenMenu }) {
           <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-brand" />
         </Link>
         <Link
-          to={studentId ? '/perfil' : '/login'}
+          to={CUENTA[usuario?.rol] ?? '/configuracion'}
+          title={usuario?.email}
           className="flex items-center gap-2 rounded-full border border-line bg-surface py-1.5 pl-1.5 pr-4 font-body text-sm font-medium text-ink transition-colors hover:border-brand/40"
         >
-          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand text-on-brand">
-            <User className="h-4 w-4" />
+          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand text-[11px] font-semibold text-on-brand">
+            {initials(usuario?.nombre)}
           </span>
-          <span className="hidden sm:inline">{studentId ? 'Mi perfil' : 'Iniciar sesión'}</span>
+          <span className="hidden min-w-0 flex-col leading-tight sm:flex">
+            <span className="max-w-36 truncate">{usuario?.nombre}</span>
+            <span className="text-[10px] font-normal text-muted">{ROLES[usuario?.rol]}</span>
+          </span>
         </Link>
+        <button
+          type="button"
+          onClick={salir}
+          aria-label="Cerrar sesión"
+          title="Cerrar sesión"
+          className="flex h-10 w-10 items-center justify-center rounded-full text-ink transition-colors hover:bg-surface"
+        >
+          <LogOut className="h-[18px] w-[18px]" />
+        </button>
       </div>
     </header>
   )

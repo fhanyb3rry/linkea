@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router-dom'
 import Layout from './components/layout/Layout'
 import PublicLayout from './components/layout/PublicLayout'
+import RequireAuth from './components/layout/RequireAuth'
 import Candidatos from './pages/Candidatos'
 import Configuracion from './pages/Configuracion'
 import CrearPerfilEstudiante from './pages/CrearPerfilEstudiante'
@@ -36,26 +37,41 @@ export default function App() {
         <Route path="*" element={<NotFound />} />
       </Route>
 
-      <Route element={<Layout />}>
+      {/* Todo lo de adentro pide sesión; algunos grupos, además, un rol. */}
+      <Route
+        element={
+          <RequireAuth>
+            <Layout />
+          </RequireAuth>
+        }
+      >
         <Route path="inicio" element={<Home />} />
 
         <Route path="vacantes" element={<Vacantes />} />
-        <Route path="vacantes/nueva" element={<PublicarVacante />} />
         <Route path="vacantes/:id" element={<VacancyDetail />} />
-        <Route path="vacantes/:id/editar" element={<EditarVacante />} />
-        <Route path="vacantes/:id/candidatos" element={<Candidatos />} />
         <Route path="guardados" element={<Guardados />} />
-        <Route path="rutas" element={<RutasAprendizaje />} />
-
         <Route path="estudiantes" element={<Estudiantes />} />
         <Route path="estudiantes/:id" element={<PerfilEstudiante />} />
 
-        <Route path="perfil" element={<MiPerfil />} />
-        <Route path="perfil/crear" element={<CrearPerfilEstudiante />} />
-        <Route path="perfil/editar" element={<EditarPerfil />} />
+        <Route element={<RequireAuth roles={['estudiante']} />}>
+          <Route path="rutas" element={<RutasAprendizaje />} />
+          <Route path="perfil" element={<MiPerfil />} />
+          <Route path="perfil/crear" element={<CrearPerfilEstudiante />} />
+          <Route path="perfil/editar" element={<EditarPerfil />} />
+          <Route path="postulaciones" element={<Postulaciones />} />
+        </Route>
 
-        <Route path="postulaciones" element={<Postulaciones />} />
-        <Route path="empresa" element={<PanelEmpresa />} />
+        <Route element={<RequireAuth roles={['empresa']} />}>
+          <Route path="vacantes/nueva" element={<PublicarVacante />} />
+          <Route path="empresa" element={<PanelEmpresa />} />
+        </Route>
+        <Route element={<RequireAuth roles={['empresa', 'coordinador']} />}>
+          <Route path="vacantes/:id/editar" element={<EditarVacante />} />
+        </Route>
+        <Route element={<RequireAuth roles={['empresa', 'coordinador', 'asesor_academico']} />}>
+          <Route path="vacantes/:id/candidatos" element={<Candidatos />} />
+        </Route>
+
         <Route path="mensajes" element={<Mensajes />} />
         <Route path="notificaciones" element={<Notificaciones />} />
         <Route path="configuracion" element={<Configuracion />} />

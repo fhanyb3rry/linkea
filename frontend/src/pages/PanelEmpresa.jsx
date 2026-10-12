@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Briefcase, Clock, FileCheck2, MapPin, Pencil, Plus, Trash2, Users } from 'lucide-react'
 import ListState from '../components/layout/ListState'
+import { useAuth } from '../context/auth'
 import PageTitle from '../components/layout/PageTitle'
 import useFetch from '../hooks/useFetch'
 import { areaInfo } from '../lib/areas'
@@ -22,11 +23,14 @@ function Stat({ icon: Icon, label, value }) {
 }
 
 export default function PanelEmpresa() {
+  const { usuario } = useAuth()
   const { data, error, loading, reload } = useFetch(() => Promise.all([getVacancies(), getApplications()]), [])
   const [confirmId, setConfirmId] = useState(null)
   const [actionError, setActionError] = useState(null)
 
-  const [vacancies, applications] = data ?? [[], []]
+  const [todas, applications] = data ?? [[], []]
+  // Solo las vacantes que publicó esta cuenta (las postulaciones ya llegan filtradas del backend).
+  const vacancies = useMemo(() => todas.filter((v) => v.user_id === usuario?.id), [todas, usuario])
 
   const porVacante = useMemo(() => {
     const map = new Map()

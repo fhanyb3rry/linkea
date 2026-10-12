@@ -1,13 +1,27 @@
+import { getToken, setToken } from '../lib/session'
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000'
 
+// Toda petición lleva el token de la sesión. Si el backend responde 401 (sesión vencida o
+// inválida) se borra el token y la app regresa al login.
+async function send(path, options = {}) {
+  const token = getToken()
+  const headers = { ...options.headers, ...(token ? { Authorization: `Bearer ${token}` } : {}) }
+  const response = await fetch(`${API_BASE_URL}${path}`, { ...options, headers })
+  if (response.status === 401 && token) setToken('')
+  return response
+}
+
 async function request(path, options) {
-  const response = await fetch(`${API_BASE_URL}${path}`, options)
+  const response = await send(path, options)
   if (!response.ok) {
     // El backend manda mensajes claros en `detail` (p. ej. "Ya te postulaste a esta vacante")
     let detail = ''
     try {
       const body = await response.json()
       if (typeof body.detail === 'string') detail = body.detail
+      // Errores de validación (422): FastAPI manda una lista; mostramos el primero.
+      else if (Array.isArray(body.detail) && body.detail[0]?.msg) detail = body.detail[0].msg.replace(/^Value error, /, '')
     } catch {
       // la respuesta no era JSON
     }
@@ -23,6 +37,21 @@ function postJSON(path, body) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   })
+}
+
+// ---- Cuentas -----------------------------------------------------------------------------
+
+export function login(email, password) {
+  return postJSON('/auth/login', { email, password })
+}
+
+// rol: 'estudiante' | 'empresa'
+export function register({ nombre, email, password, rol }) {
+  return postJSON('/auth/register', { nombre, email, password, rol })
+}
+
+export function getMe() {
+  return request('/auth/me')
 }
 
 export function getVacancies() {
@@ -96,8 +125,16 @@ export function deleteCV(studentId) {
   return request(`/students/${studentId}/cv`, { method: 'DELETE' })
 }
 
-export function cvUrl(studentId) {
-  return `${API_BASE_URL}/students/${studentId}/cv`
+// Descarga el CV con la sesión (un <a href> normal no manda el token).
+export async function descargarCV(studentId, nombre = 'curriculum') {
+  const response = await send(`/students/${studentId}/cv`)
+  if (!response.ok) throw new Error('No se pudo descargar el currículum')
+  const url = URL.createObjectURL(await response.blob())
+  const link = document.createElement('a')
+  link.href = url
+  link.download = nombre
+  link.click()
+  setTimeout(() => URL.revokeObjectURL(url), 1000)
 }
 
 // ---- Vacantes ----------------------------------------------------------------------------

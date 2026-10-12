@@ -3,6 +3,7 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 from pydantic import BaseModel
 
 from app.core.database import get_database
+from app.core.seguridad import usuario_actual
 from app.models.company import Vacancy
 from app.models.student import Student
 from app.routers.companies import _oid as vacancy_oid
@@ -10,7 +11,7 @@ from app.routers.students import _oid as student_oid
 from app.search.busqueda import ALGORITMOS, ResultadoBusqueda, dfs_todas_las_rutas
 from app.search.grafo_skills import GRAFO_SKILLS, normalizar
 
-router = APIRouter(prefix="/search", tags=["search"])
+router = APIRouter(prefix="/search", tags=["search"], dependencies=[Depends(usuario_actual)])
 
 
 @router.get("/grafo")

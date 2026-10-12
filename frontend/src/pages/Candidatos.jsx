@@ -8,7 +8,7 @@ import PageTitle from '../components/layout/PageTitle'
 import useFetch from '../hooks/useFetch'
 import { formatDate, initials } from '../lib/perfil'
 import {
-  cvUrl,
+  descargarCV,
   getApplications,
   getCandidates,
   getStudents,
@@ -113,15 +113,14 @@ export default function Candidatos() {
                           Ver perfil
                         </Link>
                         {student.cv && (
-                          <a
-                            href={cvUrl(student.id)}
-                            target="_blank"
-                            rel="noreferrer"
+                          <button
+                            type="button"
+                            onClick={() => descargarCV(student.id, student.cv.nombre_archivo)}
                             className="flex items-center gap-1.5 rounded-lg border border-line bg-surface px-3 py-2 font-body text-xs font-semibold text-ink hover:border-cocoa/50"
                           >
                             <Download className="h-3.5 w-3.5" />
                             CV
-                          </a>
+                          </button>
                         )}
                         {a.estado !== 'en_revision' && (
                           <button

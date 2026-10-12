@@ -3,9 +3,11 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Moon, Sun } from 'lucide-react'
 import PageTitle from '../components/layout/PageTitle'
 import PreviewNotice from '../components/layout/PreviewNotice'
-import useActiveStudent, { setActiveStudent } from '../hooks/useActiveStudent'
+import { useAuth } from '../context/auth'
+import useActiveStudent from '../hooks/useActiveStudent'
 import useFetch from '../hooks/useFetch'
 import useTheme from '../hooks/useTheme'
+import { ROLES } from '../lib/roles'
 import { deleteStudent, getStudent } from '../services/api'
 
 const KEY = 'linkea-settings'
@@ -63,6 +65,7 @@ function Block({ title, description, children }) {
 export default function Configuracion() {
   const navigate = useNavigate()
   const { theme, toggle } = useTheme()
+  const { usuario, logout, refresh } = useAuth()
   const [studentId] = useActiveStudent()
   const [settings, setSettings] = useState(readSettings)
   const [confirmDelete, setConfirmDelete] = useState(false)
@@ -82,16 +85,16 @@ export default function Configuracion() {
   }
 
   function cerrarSesion() {
-    setActiveStudent('')
-    navigate('/')
+    logout()
+    navigate('/login')
   }
 
   async function eliminarPerfil() {
     setError(null)
     try {
       await deleteStudent(studentId)
-      setActiveStudent('')
-      navigate('/')
+      await refresh()
+      navigate('/inicio')
     } catch (err) {
       setError(err.message)
     }
@@ -118,30 +121,38 @@ export default function Configuracion() {
         </div>
       </Block>
 
-      <Block title="Cuenta" description="Aún no hay inicio de sesión: la app usa el perfil que elijas en «Ver como…».">
-        <div className="flex flex-wrap items-center justify-between gap-4 py-3">
-          <span>
-            <span className="block font-body text-sm font-medium text-ink">Perfil activo</span>
-            <span className="block font-body text-xs text-muted">
-              {studentId ? (student ? `${student.nombre} · ${student.carrera}` : 'Cargando…') : 'Ninguno seleccionado'}
-            </span>
+      <Block title="Cuenta">
+        <div className="py-3">
+          <span className="block font-body text-sm font-medium text-ink">{usuario.nombre}</span>
+          <span className="block font-body text-xs text-muted">
+            {usuario.email} · {ROLES[usuario.rol]}
           </span>
-          {studentId ? (
-            <Link
-              to="/perfil/editar"
-              className="rounded-lg border border-line bg-surface px-4 py-2 font-body text-xs font-semibold text-ink hover:border-cocoa/50"
-            >
-              Editar perfil
-            </Link>
-          ) : (
-            <Link
-              to="/perfil/crear"
-              className="rounded-lg bg-brand px-4 py-2 font-body text-xs font-semibold text-on-brand hover:opacity-90"
-            >
-              Crear perfil
-            </Link>
+        </div>
+        {usuario.rol === 'estudiante' && (
+          <div className="flex flex-wrap items-center justify-between gap-4 py-3">
+            <span>
+              <span className="block font-body text-sm font-medium text-ink">Mi perfil</span>
+              <span className="block font-body text-xs text-muted">
+                {studentId ? (student ? `${student.nombre} · ${student.carrera}` : 'Cargando…') : 'Aún no lo creas'}
+              </span>
+            </span>
+            {studentId ? (
+              <Link
+                to="/perfil/editar"
+                className="rounded-lg border border-line bg-surface px-4 py-2 font-body text-xs font-semibold text-ink hover:border-cocoa/50"
+              >
+                Editar perfil
+              </Link>
+            ) : (
+              <Link
+                to="/perfil/crear"
+                className="rounded-lg bg-brand px-4 py-2 font-body text-xs font-semibold text-on-brand hover:opacity-90"
+              >
+                Crear perfil
+              </Link>
           )}
         </div>
+        )}
       </Block>
 
       <Block title="Notificaciones" description="Elige qué avisos quieres recibir.">
@@ -187,7 +198,7 @@ export default function Configuracion() {
         <div className="flex flex-wrap items-center justify-between gap-4 py-3">
           <span>
             <span className="block font-body text-sm font-medium text-ink">Cerrar sesión</span>
-            <span className="block font-body text-xs text-muted">Deja de ver como el perfil actual.</span>
+            <span className="block font-body text-xs text-muted">Sal de tu cuenta en este navegador.</span>
           </span>
           <button
             type="button"

@@ -18,6 +18,7 @@ import Reveal from '../components/home/Reveal'
 import useInView from '../hooks/useInView'
 import VacancyCard from '../components/cards/VacancyCard'
 import AreaFilter from '../components/home/AreaFilter'
+import { useAuth } from '../context/auth'
 import useActiveStudent from '../hooks/useActiveStudent'
 import useMatches from '../hooks/useMatches'
 import useStoredSet from '../hooks/useStoredSet'
@@ -70,7 +71,14 @@ function FloatChip({ className = '', delay = 0, children }) {
   )
 }
 
+// Botón principal del inicio según el rol (el personal de la universidad no tiene uno).
+const ACCION_PRINCIPAL = {
+  empresa: { to: '/vacantes/nueva', label: 'Publicar vacante' },
+  estudiante: { to: '/perfil', label: 'Mi perfil' },
+}
+
 function Hero() {
+  const principal = ACCION_PRINCIPAL[useAuth().usuario?.rol]
   return (
     <section className="animate-fade-in-up relative overflow-hidden rounded-3xl border border-line bg-night px-6 py-10 sm:px-10 sm:py-14">
       <div className="bg-dots pointer-events-none absolute inset-0 opacity-60 [mask-image:linear-gradient(to_right,transparent,black_70%)]" />
@@ -95,13 +103,15 @@ function Hero() {
           La elegibilidad se decide con lógica proposicional y la compatibilidad con IA.
         </p>
         <div className="animate-fade-in-up mt-7 flex flex-wrap gap-3 [animation-delay:400ms]">
-          <Link
-            to="/vacantes/nueva"
-            className="btn-sheen group flex items-center gap-2 rounded-lg bg-brand px-5 py-3 font-body text-sm font-semibold text-on-brand transition-transform duration-200 hover:scale-[1.03] active:scale-95"
-          >
-            Publicar vacante
-            <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-          </Link>
+          {principal && (
+            <Link
+              to={principal.to}
+              className="btn-sheen group flex items-center gap-2 rounded-lg bg-brand px-5 py-3 font-body text-sm font-semibold text-on-brand transition-transform duration-200 hover:scale-[1.03] active:scale-95"
+            >
+              {principal.label}
+              <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+            </Link>
+          )}
           <Link
             to="/vacantes"
             className="rounded-lg border border-white/25 px-5 py-3 font-body text-sm font-semibold text-white transition-[background-color,transform] duration-200 hover:scale-[1.03] hover:bg-white/10 active:scale-95"
@@ -331,7 +341,7 @@ function Suggestions({ data, fallback, matches, hasStudent }) {
 
         {active === 'vacantes' && !hasStudent && !fallback.vacantes && (
           <p className="mt-4 font-body text-xs text-muted">
-            Elige un perfil en «Ver como…» (arriba) para ver tu compatibilidad con cada vacante.
+            Con tu perfil de estudiante verás tu compatibilidad con cada vacante.
           </p>
         )}
 
@@ -389,6 +399,7 @@ function Suggestions({ data, fallback, matches, hasStudent }) {
 const MAX_FEATURED = 7
 
 function Featured({ vacancies, fallback, matches }) {
+  const esEmpresa = useAuth().usuario?.rol === 'empresa'
   const [saved, toggleSaved] = useStoredSet('linkea-saved')
   const [area, setArea] = useState('todas')
 
@@ -468,21 +479,23 @@ function Featured({ vacancies, fallback, matches }) {
             </div>
           ))}
 
-          <div className="animate-fade-in-up" style={{ animationDelay: `${visible.length * 70}ms` }}>
-            <div className="group flex h-full flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-line p-6 text-center transition-colors duration-300 hover:border-brand hover:bg-brand-soft/40">
-              <span className="flex h-11 w-11 items-center justify-center rounded-full border border-line bg-surface text-brand transition-transform duration-500 group-hover:rotate-90">
-                <Plus className="h-5 w-5" />
-              </span>
-              <p className="font-body text-sm font-semibold text-ink">¿Tienes una vacante?</p>
-              <p className="font-body text-xs text-muted">Publícala y encuentra estudiantes elegibles.</p>
-              <Link
-                to="/vacantes/nueva"
-                className="btn-sheen rounded-lg bg-brand px-4 py-2 font-body text-xs font-semibold text-on-brand transition-transform duration-200 hover:scale-105 active:scale-95"
-              >
-                Publicar vacante
-              </Link>
+          {esEmpresa && (
+            <div className="animate-fade-in-up" style={{ animationDelay: `${visible.length * 70}ms` }}>
+              <div className="group flex h-full flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-line p-6 text-center transition-colors duration-300 hover:border-brand hover:bg-brand-soft/40">
+                <span className="flex h-11 w-11 items-center justify-center rounded-full border border-line bg-surface text-brand transition-transform duration-500 group-hover:rotate-90">
+                  <Plus className="h-5 w-5" />
+                </span>
+                <p className="font-body text-sm font-semibold text-ink">¿Tienes una vacante?</p>
+                <p className="font-body text-xs text-muted">Publícala y encuentra estudiantes elegibles.</p>
+                <Link
+                  to="/vacantes/nueva"
+                  className="btn-sheen rounded-lg bg-brand px-4 py-2 font-body text-xs font-semibold text-on-brand transition-transform duration-200 hover:scale-105 active:scale-95"
+                >
+                  Publicar vacante
+                </Link>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       )}
     </section>

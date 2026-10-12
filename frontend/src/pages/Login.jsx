@@ -1,14 +1,32 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { useState } from 'react'
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { ArrowRight, Sparkles } from 'lucide-react'
 import { FormRow, TextInput } from '../components/forms/FormField'
+import { inicioDe, useAuth } from '../context/auth'
 
 export default function Login() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const { usuario, login } = useAuth()
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState(null)
+  const [busy, setBusy] = useState(false)
 
-  // Prototipo: aún no hay autenticación en el backend, solo se entra al panel.
-  function onSubmit(event) {
+  if (usuario) return <Navigate to={inicioDe(usuario)} replace />
+
+  async function onSubmit(event) {
     event.preventDefault()
-    navigate('/inicio')
+    setBusy(true)
+    setError(null)
+    try {
+      const u = await login(email, password)
+      // Regresa a la página que pidió antes de entrar (si la había).
+      navigate(location.state?.from ?? inicioDe(u), { replace: true })
+    } catch (err) {
+      setError(err.message)
+      setBusy(false)
+    }
   }
 
   return (
@@ -25,20 +43,37 @@ export default function Login() {
 
       <form onSubmit={onSubmit} className="mt-6 flex flex-col gap-4">
         <FormRow label="Correo electrónico">
-          <TextInput type="email" placeholder="tucorreo@ejemplo.com" required />
+          <TextInput
+            type="email"
+            placeholder="tucorreo@ejemplo.com"
+            autoComplete="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
         </FormRow>
         <FormRow label="Contraseña">
-          <TextInput type="password" placeholder="••••••••" required />
+          <TextInput
+            type="password"
+            placeholder="••••••••"
+            autoComplete="current-password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
         </FormRow>
         <Link to="/recuperar" className="-mt-2 w-fit font-body text-xs text-muted hover:text-brand">
           ¿Olvidaste tu contraseña?
         </Link>
 
+        {error && <p className="rounded-xl bg-brand-soft p-3 font-body text-xs text-ink">{error}</p>}
+
         <button
           type="submit"
-          className="group mt-2 flex items-center justify-center gap-2 rounded-full bg-brand px-5 py-3 font-body text-sm font-semibold text-on-brand transition-all duration-300 hover:scale-[1.02] hover:opacity-90 active:scale-95"
+          disabled={busy}
+          className="group mt-2 flex items-center justify-center gap-2 rounded-full bg-brand px-5 py-3 font-body text-sm font-semibold text-on-brand transition-all duration-300 hover:scale-[1.02] hover:opacity-90 active:scale-95 disabled:opacity-60"
         >
-          Iniciar sesión
+          {busy ? 'Entrando…' : 'Iniciar sesión'}
           <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
         </button>
       </form>

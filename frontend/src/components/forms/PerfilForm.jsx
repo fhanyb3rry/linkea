@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowRight, CheckCircle2 } from 'lucide-react'
-import { setActiveStudent } from '../../hooks/useActiveStudent'
+import { useAuth } from '../../context/auth'
 import { CARRERAS, IDIOMA_SUGGESTIONS, SKILL_SUGGESTIONS } from '../../lib/perfil'
-import { createStudent, cvUrl, deleteCV, updateStudent, uploadCV } from '../../services/api'
+import { createStudent, deleteCV, descargarCV, updateStudent, uploadCV } from '../../services/api'
 import ChipInput from './ChipInput'
 import DaysPicker from './DaysPicker'
 import FileDrop from './FileDrop'
@@ -35,6 +35,7 @@ function toForm(student) {
 // mode: 'crear' | 'editar'. En 'editar', `initial` es el estudiante guardado.
 export default function PerfilForm({ mode, initial }) {
   const navigate = useNavigate()
+  const { refresh } = useAuth()
   const [form, setForm] = useState(() => toForm(initial))
   const [cvFile, setCvFile] = useState(null)
   const [removeCV, setRemoveCV] = useState(false)
@@ -88,7 +89,7 @@ export default function PerfilForm({ mode, initial }) {
       return
     }
 
-    if (mode === 'crear') setActiveStudent(id)
+    if (mode === 'crear') await refresh()
     setStatus('success')
     setTimeout(() => navigate(`/estudiantes/${id}`), 900)
   }
@@ -225,7 +226,7 @@ export default function PerfilForm({ mode, initial }) {
           existing={initial?.cv}
           removed={removeCV}
           onRemoveExisting={() => setRemoveCV(true)}
-          downloadHref={initial?.id ? cvUrl(initial.id) : undefined}
+          onDownload={initial?.cv ? () => descargarCV(initial.id, initial.cv.nombre_archivo) : undefined}
         />
         {removeCV && initial?.cv && !cvFile && (
           <p className="font-body text-xs text-muted">

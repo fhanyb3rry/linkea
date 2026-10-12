@@ -70,7 +70,7 @@ export default function Postulaciones() {
         </Link>
       </PageTitle>
 
-      {!studentId && <NeedsProfile text="Elige un perfil en «Ver como…» (arriba) para ver sus postulaciones." />}
+      {!studentId && <NeedsProfile text="Crea tu perfil para postularte y ver aquí tus postulaciones." />}
 
       {studentId && (
         <>

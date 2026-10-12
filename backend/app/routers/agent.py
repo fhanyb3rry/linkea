@@ -4,12 +4,13 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 from app.agent.agent import Accion, AgenteVinculacion, Candidato
 from app.agent.peas import PEAS
 from app.core.database import get_database
+from app.core.seguridad import usuario_actual
 from app.models.company import Vacancy
 from app.models.student import Student
 from app.routers.companies import _oid as vacancy_oid
 from app.routers.students import _oid as student_oid
 
-router = APIRouter(prefix="/agent", tags=["agent"])
+router = APIRouter(prefix="/agent", tags=["agent"], dependencies=[Depends(usuario_actual)])
 
 
 @router.get("/peas")

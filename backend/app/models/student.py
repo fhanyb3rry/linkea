@@ -74,6 +74,7 @@ class StudentUpdate(BaseModel):
 
 class Student(StudentBase):
     id: PyObjectId = Field(validation_alias="_id", serialization_alias="id")
+    user_id: str | None = None  # cuenta dueña del perfil
     cv: Curriculum | None = None
 
     model_config = ConfigDict(populate_by_name=True, arbitrary_types_allowed=True)

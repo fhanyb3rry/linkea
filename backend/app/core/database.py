@@ -21,6 +21,10 @@ INDICES = [
     # Un estudiante solo puede postularse una vez a cada vacante.
     ("applications", [("student_id", 1), ("vacancy_id", 1)], {"unique": True}),
     ("applications", [("vacancy_id", 1)], {}),
+    # Cuentas: un correo por cuenta; un perfil de estudiante por cuenta.
+    ("users", [("email", 1)], {"unique": True}),
+    ("students", [("user_id", 1)], {"unique": True, "partialFilterExpression": {"user_id": {"$type": "string"}}}),
+    ("vacancies", [("user_id", 1)], {}),
 ]
 
 

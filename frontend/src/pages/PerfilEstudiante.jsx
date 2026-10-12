@@ -11,7 +11,6 @@ import {
   MapPin,
   Pencil,
   Phone,
-  UserCheck,
 } from 'lucide-react'
 import ListState from '../components/layout/ListState'
 import PageTitle from '../components/layout/PageTitle'
@@ -19,7 +18,7 @@ import useActiveStudent from '../hooks/useActiveStudent'
 import useFetch from '../hooks/useFetch'
 import useStoredSet from '../hooks/useStoredSet'
 import { formatDate, formatSize, initials, perfilCompleto } from '../lib/perfil'
-import { cvUrl, getStudent } from '../services/api'
+import { descargarCV, getStudent } from '../services/api'
 
 const estados = {
   activo: { label: 'Disponible', dot: 'bg-teal' },
@@ -60,7 +59,7 @@ function Dato({ icon: Icon, children }) {
 
 export default function PerfilEstudiante() {
   const { id } = useParams()
-  const [activeId, setActiveId] = useActiveStudent()
+  const [activeId] = useActiveStudent()
   const [connections, toggleConnection] = useStoredSet('linkea-connections')
   const { data: student, error, loading } = useFetch(() => getStudent(id), [id])
 
@@ -132,14 +131,6 @@ export default function PerfilEstudiante() {
                   >
                     {connected && <Check className="h-4 w-4" />}
                     {connected ? 'Conectado' : 'Conectar'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setActiveId(id)}
-                    className="flex items-center justify-center gap-2 rounded-lg border border-line bg-surface px-5 py-2.5 font-body text-sm font-semibold text-ink hover:border-cocoa/50"
-                  >
-                    <UserCheck className="h-4 w-4" />
-                    Ver como este perfil
                   </button>
                 </>
               )}
@@ -213,15 +204,14 @@ export default function PerfilEstudiante() {
                         </p>
                       </div>
                     </div>
-                    <a
-                      href={cvUrl(student.id)}
-                      target="_blank"
-                      rel="noreferrer"
+                    <button
+                      type="button"
+                      onClick={() => descargarCV(student.id, student.cv.nombre_archivo)}
                       className="flex items-center justify-center gap-2 rounded-lg bg-cocoa px-4 py-2.5 font-body text-sm font-semibold text-on-cocoa transition-opacity hover:opacity-90"
                     >
                       <Download className="h-4 w-4" />
-                      Ver / descargar
-                    </a>
+                      Descargar
+                    </button>
                   </div>
                 ) : (
                   <div className="flex flex-col items-start gap-3">

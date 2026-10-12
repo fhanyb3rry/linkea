@@ -5,23 +5,28 @@ Se corre desde la carpeta backend, con el venv activo:
     python -m app.seed            # solo si la base está vacía
     python -m app.seed --reset    # BORRA todo lo de Linkea y vuelve a cargar los ejemplos
 
+Crea también una cuenta por estudiante y por empresa, más un coordinador y un asesor académico;
+todas con la contraseña de PASSWORD_DEMO (los correos se imprimen al terminar).
+
 Usa la MONGODB_URI y MONGODB_DB_NAME del .env. Los datos pasan por los mismos modelos que la API,
 así que tienen exactamente la forma que espera la app.
 """
 
 import asyncio
 import sys
+import unicodedata
 from datetime import datetime, timezone
 
 from motor.motor_asyncio import AsyncIOMotorClient
 
 from app.core.config import settings
 from app.core.database import crear_indices
+from app.core.seguridad import cifrar_password
 from app.models.company import VacancyCreate
 from app.models.student import StudentCreate
 
 # Todo lo que --reset borra (incluye los archivos de GridFS).
-COLECCIONES = ["students", "vacancies", "applications", "ai_compatibilidad", "archivos.files", "archivos.chunks"]
+COLECCIONES = ["users", "students", "vacancies", "applications", "ai_compatibilidad", "archivos.files", "archivos.chunks"]
 
 ESTUDIANTES = [
     {
@@ -123,6 +128,14 @@ VACANTES = [
              "Apoyo en procesos administrativos y control de proveedores."),
 ]
 
+PASSWORD_DEMO = "linkea123"
+
+# Personal de la universidad (no se puede registrar desde la app).
+PERSONAL = [
+    ("Coordinación de Estadías", "coordinador@linkea.test", "coordinador"),
+    ("Mtra. Laura Sánchez", "asesor@linkea.test", "asesor_academico"),
+]
+
 # (índice de estudiante, índice de vacante, estado)
 POSTULACIONES = [(0, 0, "en_revision"), (1, 1, "enviada"), (3, 2, "aceptada"), (2, 3, "enviada")]
 
@@ -141,18 +154,42 @@ async def main(reset: bool) -> None:
 
         await crear_indices(db)
 
-        estudiantes = [StudentCreate(**e).model_dump(mode="json") for e in ESTUDIANTES]
-        ids_est = (await db.students.insert_many(estudiantes)).inserted_ids
-        vacantes = [VacancyCreate(**v).model_dump(mode="json") for v in VACANTES]
-        ids_vac = (await db.vacancies.insert_many(vacantes)).inserted_ids
-
         ahora = datetime.now(timezone.utc).isoformat()
+        password_hash = cifrar_password(PASSWORD_DEMO)
+
+        def cuenta(nombre, email, rol):
+            return {"nombre": nombre, "email": email, "password_hash": password_hash, "rol": rol,
+                    "perfil_id": None, "activo": True, "creado_en": ahora}
+
+        await db.users.insert_many([cuenta(*p) for p in PERSONAL])
+
+        # Cada estudiante con su cuenta (el correo de la cuenta es el de su perfil).
+        ids_est = []
+        for e in ESTUDIANTES:
+            user_id = (await db.users.insert_one(cuenta(e["nombre"], e["correo"], "estudiante"))).inserted_id
+            perfil = {**StudentCreate(**e).model_dump(mode="json"), "user_id": str(user_id)}
+            sid = (await db.students.insert_one(perfil)).inserted_id
+            await db.users.update_one({"_id": user_id}, {"$set": {"perfil_id": str(sid)}})
+            ids_est.append(sid)
+
+        # Cada empresa con su cuenta, dueña de su vacante.
+        ids_vac = []
+        for v in VACANTES:
+            sin_acentos = unicodedata.normalize("NFKD", v["nombre_empresa"].lower()).encode("ascii", "ignore").decode()
+            email = "rh@" + "".join(c for c in sin_acentos if c.isalnum()) + ".test"
+            user_id = (await db.users.insert_one(cuenta(v["nombre_empresa"], email, "empresa"))).inserted_id
+            vacante = {**VacancyCreate(**v).model_dump(mode="json"), "user_id": str(user_id)}
+            ids_vac.append((await db.vacancies.insert_one(vacante)).inserted_id)
+
         await db.applications.insert_many([
             {"student_id": str(ids_est[e]), "vacancy_id": str(ids_vac[v]), "mensaje": "", "estado": estado, "creada_en": ahora}
             for e, v, estado in POSTULACIONES
         ])
 
         print(f"Listo: {len(ids_est)} estudiantes, {len(ids_vac)} vacantes y {len(POSTULACIONES)} postulaciones.")
+        print(f"\nCuentas (contraseña de todas: {PASSWORD_DEMO}):")
+        async for u in db.users.find({}, {"email": 1, "rol": 1}).sort("rol"):
+            print(f"  {u['rol']:<17} {u['email']}")
     finally:
         cliente.close()
 

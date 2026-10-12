@@ -103,7 +103,7 @@ function PlanPerfil({ limite }) {
       </div>
       {!studentId ? (
         <p className="font-body text-sm text-muted">
-          Elige un perfil con «Ver como…» en la barra superior para ver tu ruta personalizada.
+          Crea tu perfil de estudiante para ver tu ruta personalizada.
         </p>
       ) : (
         <>

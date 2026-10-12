@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from app.core.database import get_database
+from app.core.seguridad import usuario_actual
 from app.logic.logic_rules import (
     EligibilityResult,
     evaluar_elegibilidad,
@@ -13,7 +14,7 @@ from app.models.student import Student
 from app.routers.companies import _oid as vacancy_oid
 from app.routers.students import _oid as student_oid
 
-router = APIRouter(prefix="/eligibility", tags=["eligibility"])
+router = APIRouter(prefix="/eligibility", tags=["eligibility"], dependencies=[Depends(usuario_actual)])
 
 
 @router.get("/truth-table")

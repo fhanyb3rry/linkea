@@ -1,10 +1,34 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { ArrowRight, Briefcase, GraduationCap, Sparkles } from 'lucide-react'
 import { FormRow, TextInput } from '../components/forms/FormField'
+import { inicioDe, useAuth } from '../context/auth'
 
 export default function Register() {
+  const navigate = useNavigate()
+  const { usuario, register } = useAuth()
   const [role, setRole] = useState('estudiante')
+  const [form, setForm] = useState({ nombre: '', email: '', password: '' })
+  const [error, setError] = useState(null)
+  const [busy, setBusy] = useState(false)
+
+  if (usuario) return <Navigate to={inicioDe(usuario)} replace />
+
+  const set = (key) => (e) => setForm((prev) => ({ ...prev, [key]: e.target.value }))
+
+  async function onSubmit(event) {
+    event.preventDefault()
+    setBusy(true)
+    setError(null)
+    try {
+      const u = await register({ ...form, rol: role })
+      // El estudiante sigue con su perfil; la empresa, a su panel.
+      navigate(u.rol === 'empresa' ? '/empresa' : inicioDe(u), { replace: true })
+    } catch (err) {
+      setError(err.message)
+      setBusy(false)
+    }
+  }
 
   return (
     <section className="mx-auto flex min-h-[70vh] max-w-md flex-col justify-center px-4 py-16 sm:px-6">
@@ -43,24 +67,52 @@ export default function Register() {
         </button>
       </div>
 
-      <form className="mt-6 flex flex-col gap-4">
-        <FormRow label="Nombre completo">
-          <TextInput type="text" placeholder="Tu nombre" required />
+      <form onSubmit={onSubmit} className="mt-6 flex flex-col gap-4">
+        <FormRow label={role === 'empresa' ? 'Nombre de la empresa' : 'Nombre completo'}>
+          <TextInput
+            type="text"
+            placeholder={role === 'empresa' ? 'Nombre de la empresa' : 'Tu nombre'}
+            autoComplete={role === 'empresa' ? 'organization' : 'name'}
+            required
+            minLength={2}
+            maxLength={120}
+            value={form.nombre}
+            onChange={set('nombre')}
+          />
         </FormRow>
         <FormRow label="Correo electrónico">
-          <TextInput type="email" placeholder="tucorreo@ejemplo.com" required />
+          <TextInput
+            type="email"
+            placeholder="tucorreo@ejemplo.com"
+            autoComplete="email"
+            required
+            value={form.email}
+            onChange={set('email')}
+          />
         </FormRow>
-        <FormRow label="Contraseña">
-          <TextInput type="password" placeholder="••••••••" required />
+        <FormRow label="Contraseña (mínimo 8 caracteres)">
+          <TextInput
+            type="password"
+            placeholder="••••••••"
+            autoComplete="new-password"
+            required
+            minLength={8}
+            maxLength={72}
+            value={form.password}
+            onChange={set('password')}
+          />
         </FormRow>
 
-        <Link
-          to={role === 'estudiante' ? '/perfil/crear' : '/vacantes/nueva'}
-          className="group mt-2 flex items-center justify-center gap-2 rounded-full bg-brand px-5 py-3 font-body text-sm font-semibold text-on-brand transition-all duration-300 hover:scale-[1.02] hover:opacity-90 active:scale-95"
+        {error && <p className="rounded-xl bg-brand-soft p-3 font-body text-xs text-ink">{error}</p>}
+
+        <button
+          type="submit"
+          disabled={busy}
+          className="group mt-2 flex items-center justify-center gap-2 rounded-full bg-brand px-5 py-3 font-body text-sm font-semibold text-on-brand transition-all duration-300 hover:scale-[1.02] hover:opacity-90 active:scale-95 disabled:opacity-60"
         >
-          Crear cuenta
+          {busy ? 'Creando cuenta…' : 'Crear cuenta'}
           <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-        </Link>
+        </button>
       </form>
 
       <p className="mt-6 text-center font-body text-sm text-muted">

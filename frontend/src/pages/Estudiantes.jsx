@@ -2,10 +2,14 @@ import { useEffect, useMemo, useState } from 'react'
 import StudentCard from '../components/cards/StudentCard'
 import ListState from '../components/layout/ListState'
 import PageHeader from '../components/layout/PageHeader'
+import { useAuth } from '../context/auth'
 import useStoredSet from '../hooks/useStoredSet'
 import { getCandidates, getStudents, getVacancies } from '../services/api'
 
 export default function Estudiantes() {
+  const { usuario } = useAuth()
+  // Solo un estudiante que aún no tiene perfil ve el botón para crearlo.
+  const crearPerfil = usuario?.rol === 'estudiante' && !usuario.perfil_id ? '/perfil/crear' : undefined
   const [students, setStudents] = useState([])
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -69,7 +73,7 @@ export default function Estudiantes() {
         title="Estudiantes"
         subtitle="Perfiles de estudiantes que buscan una práctica profesional."
         count={loading || error ? undefined : students.length}
-        actionTo="/perfil/crear"
+        actionTo={crearPerfil}
         actionLabel="Crear perfil"
         search={search}
         onSearch={setSearch}
@@ -124,7 +128,7 @@ export default function Estudiantes() {
             ? 'Aún no hay estudiantes registrados.'
             : 'Ningún estudiante coincide con tu búsqueda.'
         }
-        actionTo={students.length === 0 ? '/perfil/crear' : undefined}
+        actionTo={students.length === 0 ? crearPerfil : undefined}
         actionLabel="Crear el primer perfil"
       />
 

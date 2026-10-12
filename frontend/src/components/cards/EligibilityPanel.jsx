@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Brain, Check, RefreshCcw, ThumbsDown, ThumbsUp, X } from 'lucide-react'
+import { useAuth } from '../../context/auth'
 import useActiveStudent from '../../hooks/useActiveStudent'
 import { checkEligibility, getCompatibilidadIA, getStudents } from '../../services/api'
 
@@ -111,15 +112,21 @@ function FiltroIA({ studentId, vacancyId, elegible }) {
 export default function EligibilityPanel({ vacancyId }) {
   const [students, setStudents] = useState([])
   const [studentsError, setStudentsError] = useState(null)
-  const [studentId, setStudentId] = useActiveStudent()
+  const { usuario } = useAuth()
+  const esEstudiante = usuario?.rol === 'estudiante'
+  const [miPerfil] = useActiveStudent()
+  // El estudiante se evalúa a sí mismo; empresa y personal eligen a quién evaluar.
+  const [elegido, setElegido] = useState('')
+  const studentId = esEstudiante ? miPerfil : elegido
   // Resultado de la última consulta; `key` indica a qué par (estudiante, vacante) pertenece.
   const [outcome, setOutcome] = useState(null)
 
   useEffect(() => {
+    if (esEstudiante) return
     getStudents()
       .then(setStudents)
       .catch((err) => setStudentsError(err.message))
-  }, [])
+  }, [esEstudiante])
 
   const key = `${studentId}:${vacancyId}`
 
@@ -135,7 +142,7 @@ export default function EligibilityPanel({ vacancyId }) {
   }, [studentId, vacancyId, key])
 
   function onSelect(event) {
-    setStudentId(event.target.value)
+    setElegido(event.target.value)
   }
 
   const current = outcome?.key === key ? outcome : null
@@ -152,32 +159,38 @@ export default function EligibilityPanel({ vacancyId }) {
         </p>
       </div>
 
-      <div>
-        <label htmlFor="student" className="mb-1.5 block font-body text-xs font-medium text-ink">
-          Evaluar como
-        </label>
-        <select
-          id="student"
-          value={studentId}
-          onChange={onSelect}
-          className="w-full rounded-xl border border-line bg-canvas px-3 py-2.5 font-body text-sm text-ink focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
-        >
-          <option value="">Selecciona un estudiante...</option>
-          {students.map((s) => (
-            <option key={s.id} value={s.id}>
-              {s.nombre} · {s.carrera}
-            </option>
-          ))}
-        </select>
-        {students.length === 0 && !studentsError && (
-          <p className="mt-2 font-body text-xs text-muted">
-            Aún no hay estudiantes.{' '}
+      {esEstudiante ? (
+        !studentId && (
+          <p className="font-body text-xs text-muted">
             <Link to="/perfil/crear" className="font-semibold text-brand hover:underline">
-              Crea un perfil
-            </Link>
+              Crea tu perfil
+            </Link>{' '}
+            para ver tu compatibilidad con esta vacante.
           </p>
-        )}
-      </div>
+        )
+      ) : (
+        <div>
+          <label htmlFor="student" className="mb-1.5 block font-body text-xs font-medium text-ink">
+            Evaluar a
+          </label>
+          <select
+            id="student"
+            value={studentId}
+            onChange={onSelect}
+            className="w-full rounded-xl border border-line bg-canvas px-3 py-2.5 font-body text-sm text-ink focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
+          >
+            <option value="">Selecciona un estudiante...</option>
+            {students.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.nombre} · {s.carrera}
+              </option>
+            ))}
+          </select>
+          {students.length === 0 && !studentsError && (
+            <p className="mt-2 font-body text-xs text-muted">Aún no hay estudiantes registrados.</p>
+          )}
+        </div>
+      )}
 
       {error && (
         <p className="rounded-xl bg-brand-soft p-3 font-body text-xs text-ink">

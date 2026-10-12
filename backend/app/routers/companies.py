@@ -4,9 +4,22 @@ from fastapi import APIRouter, Depends, HTTPException
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from app.core.database import get_database
+from app.core.seguridad import es_rol, requiere_rol, usuario_actual
 from app.models.company import Vacancy, VacancyCreate, VacancyUpdate
+from app.models.user import Rol
 
-router = APIRouter(prefix="/vacancies", tags=["vacancies"])
+router = APIRouter(prefix="/vacancies", tags=["vacancies"], dependencies=[Depends(usuario_actual)])
+
+
+async def _propia(db: AsyncIOMotorDatabase, usuario: dict, vacancy_id: str) -> ObjectId:
+    """La empresa dueña de la vacante (o el coordinador) puede modificarla."""
+    oid = _oid(vacancy_id)
+    vacante = await db.vacancies.find_one({"_id": oid}, {"user_id": 1})
+    if vacante is None:
+        raise HTTPException(status_code=404, detail="Vacante no encontrada")
+    if not es_rol(usuario, Rol.COORDINADOR) and vacante.get("user_id") != str(usuario["_id"]):
+        raise HTTPException(status_code=403, detail="Solo la empresa que publicó la vacante puede modificarla")
+    return oid
 
 
 def _oid(vacancy_id: str) -> ObjectId:
@@ -18,9 +31,11 @@ def _oid(vacancy_id: str) -> ObjectId:
 
 @router.post("", response_model=Vacancy, status_code=201)
 async def create_vacancy(
-    vacancy: VacancyCreate, db: AsyncIOMotorDatabase = Depends(get_database)
+    vacancy: VacancyCreate,
+    db: AsyncIOMotorDatabase = Depends(get_database),
+    usuario: dict = Depends(requiere_rol(Rol.EMPRESA)),
 ):
-    result = await db.vacancies.insert_one(vacancy.model_dump())
+    result = await db.vacancies.insert_one({**vacancy.model_dump(), "user_id": str(usuario["_id"])})
     created = await db.vacancies.find_one({"_id": result.inserted_id})
     return created
 
@@ -45,12 +60,12 @@ async def update_vacancy(
     vacancy_id: str,
     vacancy: VacancyUpdate,
     db: AsyncIOMotorDatabase = Depends(get_database),
+    usuario: dict = Depends(usuario_actual),
 ):
+    oid = await _propia(db, usuario, vacancy_id)
     update_data = {k: v for k, v in vacancy.model_dump().items() if v is not None}
     if update_data:
-        result = await db.vacancies.update_one(
-            {"_id": _oid(vacancy_id)}, {"$set": update_data}
-        )
+        result = await db.vacancies.update_one({"_id": oid}, {"$set": update_data})
         if result.matched_count == 0:
             raise HTTPException(status_code=404, detail="Vacante no encontrada")
     updated = await db.vacancies.find_one({"_id": _oid(vacancy_id)})
@@ -61,9 +76,11 @@ async def update_vacancy(
 
 @router.delete("/{vacancy_id}", status_code=204)
 async def delete_vacancy(
-    vacancy_id: str, db: AsyncIOMotorDatabase = Depends(get_database)
+    vacancy_id: str,
+    db: AsyncIOMotorDatabase = Depends(get_database),
+    usuario: dict = Depends(usuario_actual),
 ):
-    result = await db.vacancies.delete_one({"_id": _oid(vacancy_id)})
+    result = await db.vacancies.delete_one({"_id": await _propia(db, usuario, vacancy_id)})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Vacante no encontrada")
     await db.applications.delete_many({"vacancy_id": vacancy_id})

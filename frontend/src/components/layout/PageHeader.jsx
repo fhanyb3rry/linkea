@@ -14,13 +14,15 @@ export default function PageHeader({ title, subtitle, count, actionTo, actionLab
           </h1>
           <p className="mt-2 font-body text-sm text-muted">{subtitle}</p>
         </div>
-        <Link
-          to={actionTo}
-          className="flex items-center gap-2 rounded-lg bg-brand px-5 py-3 font-body text-sm font-semibold text-on-brand transition-opacity hover:opacity-90"
-        >
-          <Plus className="h-4 w-4" />
-          {actionLabel}
-        </Link>
+        {actionTo && (
+          <Link
+            to={actionTo}
+            className="flex items-center gap-2 rounded-lg bg-brand px-5 py-3 font-body text-sm font-semibold text-on-brand transition-opacity hover:opacity-90"
+          >
+            <Plus className="h-4 w-4" />
+            {actionLabel}
+          </Link>
+        )}
       </div>
 
       <div className="relative max-w-md">

@@ -1,4 +1,5 @@
 import { Link, NavLink } from 'react-router-dom'
+import { useAuth } from '../../context/auth'
 import {
   ArrowRight,
   Bell,
@@ -23,13 +24,13 @@ const groups = [
       { to: '/vacantes', label: 'Vacantes', icon: Briefcase },
       { to: '/estudiantes', label: 'Estudiantes', icon: GraduationCap },
       { to: '/guardados', label: 'Guardados', icon: Bookmark },
-      { to: '/rutas', label: 'Rutas de aprendizaje', icon: Network },
+      { to: '/rutas', label: 'Rutas de aprendizaje', icon: Network, roles: ['estudiante'] },
     ],
   },
   {
     title: 'Mi actividad',
     items: [
-      { to: '/postulaciones', label: 'Postulaciones', icon: Send },
+      { to: '/postulaciones', label: 'Postulaciones', icon: Send, roles: ['estudiante'] },
       { to: '/mensajes', label: 'Mensajes', icon: MessageCircle },
       { to: '/notificaciones', label: 'Notificaciones', icon: Bell },
     ],
@@ -37,8 +38,8 @@ const groups = [
   {
     title: 'Cuenta',
     items: [
-      { to: '/perfil', label: 'Mi perfil', icon: UserRound },
-      { to: '/empresa', label: 'Mi empresa', icon: Building2 },
+      { to: '/perfil', label: 'Mi perfil', icon: UserRound, roles: ['estudiante'] },
+      { to: '/empresa', label: 'Mi empresa', icon: Building2, roles: ['empresa'] },
       { to: '/configuracion', label: 'Configuración', icon: Settings },
     ],
   },
@@ -60,6 +61,12 @@ function Item({ to, label, icon: Icon, onNavigate }) {
 }
 
 export default function Sidebar({ onNavigate, onClose }) {
+  const { usuario } = useAuth()
+  // Cada rol ve solo las opciones que le tocan (los items sin `roles` son para todos).
+  const visibles = groups
+    .map((g) => ({ ...g, items: g.items.filter((i) => !i.roles || i.roles.includes(usuario?.rol)) }))
+    .filter((g) => g.items.length > 0)
+
   return (
     <div className="flex h-full flex-col gap-5 px-4 py-6">
       <div className="flex items-center justify-between px-2">
@@ -74,7 +81,7 @@ export default function Sidebar({ onNavigate, onClose }) {
       </div>
 
       <nav className="-mx-1 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-1" aria-label="Principal">
-        {groups.map((group) => (
+        {visibles.map((group) => (
           <div key={group.title} className="flex flex-col gap-0.5">
             <p className="px-4 pb-1 font-body text-[10px] font-semibold uppercase tracking-[0.15em] text-muted/80">
               {group.title}

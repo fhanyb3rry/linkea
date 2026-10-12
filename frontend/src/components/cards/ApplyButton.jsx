@@ -1,14 +1,16 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Check, Send } from 'lucide-react'
+import { useAuth } from '../../context/auth'
 import useActiveStudent from '../../hooks/useActiveStudent'
 import useFetch from '../../hooks/useFetch'
 import { createApplication, deleteApplication, getApplications } from '../../services/api'
 import { formatDate } from '../../lib/perfil'
 import EstadoBadge from './EstadoBadge'
 
-// Postulación del perfil activo a una vacante: enviar (con mensaje opcional), ver estado o retirar.
+// Postulación del estudiante con sesión a una vacante: enviar (con mensaje opcional), ver estado o retirar.
 export default function ApplyButton({ vacancyId }) {
+  const { usuario } = useAuth()
   const [studentId] = useActiveStudent()
   const [mensaje, setMensaje] = useState('')
   const [busy, setBusy] = useState(false)
@@ -34,11 +36,14 @@ export default function ApplyButton({ vacancyId }) {
     }
   }
 
+  // Solo los estudiantes se postulan.
+  if (usuario?.rol !== 'estudiante') return null
+
   if (!studentId) {
     return (
       <div className="mt-10 rounded-xl border border-dashed border-line p-4 text-center">
         <p className="font-body text-sm text-muted">
-          Elige un perfil en «Ver como…» (arriba) para postular.{' '}
+          Crea tu perfil para postularte.{' '}
           <Link to="/perfil/crear" className="font-semibold text-brand hover:underline">
             Crear mi perfil
           </Link>

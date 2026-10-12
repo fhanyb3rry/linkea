@@ -3,7 +3,7 @@ import { Download, FileText, Trash2, UploadCloud } from 'lucide-react'
 import { CV_ACCEPT, formatDate, formatSize, validateCV } from '../../lib/perfil'
 
 // Carga del currículum. `file` = archivo nuevo elegido; `existing` = CV ya guardado (metadatos del backend).
-export default function FileDrop({ file, onFile, existing, removed, onRemoveExisting, downloadHref }) {
+export default function FileDrop({ file, onFile, existing, removed, onRemoveExisting, onDownload }) {
   const inputRef = useRef(null)
   const [dragging, setDragging] = useState(false)
   const [error, setError] = useState(null)
@@ -45,16 +45,15 @@ export default function FileDrop({ file, onFile, existing, removed, onRemoveExis
                 : `${formatSize(existing.tamano)} · subido el ${formatDate(existing.subido_en)}`}
             </p>
           </div>
-          {showExisting && downloadHref && (
-            <a
-              href={downloadHref}
-              target="_blank"
-              rel="noreferrer"
-              aria-label="Ver currículum"
+          {showExisting && onDownload && (
+            <button
+              type="button"
+              onClick={onDownload}
+              aria-label="Descargar currículum"
               className="flex h-9 w-9 items-center justify-center rounded-lg border border-line text-muted hover:text-ink"
             >
               <Download className="h-4 w-4" />
-            </a>
+            </button>
           )}
           <button
             type="button"

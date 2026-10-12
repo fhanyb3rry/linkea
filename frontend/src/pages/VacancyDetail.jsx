@@ -4,6 +4,7 @@ import { ArrowLeft, Bookmark, CalendarDays, Clock, GraduationCap, Laptop, MapPin
 import ApplyButton from '../components/cards/ApplyButton'
 import EligibilityPanel from '../components/cards/EligibilityPanel'
 import ListState from '../components/layout/ListState'
+import { useAuth } from '../context/auth'
 import useStoredSet from '../hooks/useStoredSet'
 import { getVacancy } from '../services/api'
 
@@ -27,6 +28,11 @@ export default function VacancyDetail() {
   const [error, setError] = useState(null)
   const [savedSet, toggleSaved] = useStoredSet('linkea-saved')
   const saved = savedSet.has(id)
+  const { usuario } = useAuth()
+  // Editar: la empresa que la publicó o coordinación. Candidatos: además, los asesores.
+  const esDuena = usuario?.rol === 'empresa' && vacancy?.user_id === usuario.id
+  const puedeEditar = esDuena || usuario?.rol === 'coordinador'
+  const verCandidatos = puedeEditar || usuario?.rol === 'asesor_academico'
 
   useEffect(() => {
     getVacancy(id)
@@ -44,7 +50,7 @@ export default function VacancyDetail() {
           <ArrowLeft className="h-4 w-4" />
           Volver a vacantes
         </Link>
-        {vacancy && (
+        {vacancy && verCandidatos && (
           <div className="flex gap-2">
             <Link
               to={`/vacantes/${id}/candidatos`}
@@ -52,12 +58,14 @@ export default function VacancyDetail() {
             >
               Ver candidatos
             </Link>
-            <Link
-              to={`/vacantes/${id}/editar`}
-              className="rounded-lg border border-line bg-surface px-3.5 py-2 font-body text-xs font-semibold text-ink hover:border-cocoa/50"
-            >
-              Editar
-            </Link>
+            {puedeEditar && (
+              <Link
+                to={`/vacantes/${id}/editar`}
+                className="rounded-lg border border-line bg-surface px-3.5 py-2 font-body text-xs font-semibold text-ink hover:border-cocoa/50"
+              >
+                Editar
+              </Link>
+            )}
           </div>
         )}
       </div>

@@ -8,13 +8,14 @@ from app.ai.client import ia_configurada, probar_conexion
 from app.ai.compatibilidad import ErrorIA, evaluar_con_ia, huella
 from app.core.config import settings
 from app.core.database import get_database
+from app.core.seguridad import usuario_actual
 from app.logic.logic_rules import evaluar_elegibilidad
 from app.models.company import Vacancy
 from app.models.student import Student
 from app.routers.companies import _oid as vacancy_oid
 from app.routers.students import _oid as student_oid
 
-router = APIRouter(prefix="/ai", tags=["ai"])
+router = APIRouter(prefix="/ai", tags=["ai"], dependencies=[Depends(usuario_actual)])
 
 
 @router.get("/status")

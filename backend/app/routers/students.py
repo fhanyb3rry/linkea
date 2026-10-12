@@ -8,9 +8,11 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from app.core import archivos
 from app.core.database import get_database
+from app.core.seguridad import requiere_rol, usuario_actual
 from app.models.student import Student, StudentCreate, StudentUpdate
+from app.models.user import Rol
 
-router = APIRouter(prefix="/students", tags=["students"])
+router = APIRouter(prefix="/students", tags=["students"], dependencies=[Depends(usuario_actual)])
 
 CV_MAX_BYTES = 5 * 1024 * 1024
 CV_TIPOS = {
@@ -27,6 +29,14 @@ def _oid(student_id: str) -> ObjectId:
         raise HTTPException(status_code=400, detail="ID de estudiante inválido")
 
 
+def _propio(usuario: dict, student_id: str) -> ObjectId:
+    """Solo el dueño del perfil puede modificarlo."""
+    oid = _oid(student_id)
+    if usuario.get("perfil_id") != student_id or usuario["rol"] != Rol.ESTUDIANTE.value:
+        raise HTTPException(status_code=403, detail="Solo puedes modificar tu propio perfil")
+    return oid
+
+
 async def _borrar_cv(db: AsyncIOMotorDatabase, oid: ObjectId) -> None:
     """Elimina de GridFS el CV guardado del estudiante, si tiene."""
     doc = await db.students.find_one({"_id": oid}, {"cv": 1})
@@ -35,11 +45,16 @@ async def _borrar_cv(db: AsyncIOMotorDatabase, oid: ObjectId) -> None:
 
 @router.post("", response_model=Student, status_code=201)
 async def create_student(
-    student: StudentCreate, db: AsyncIOMotorDatabase = Depends(get_database)
+    student: StudentCreate,
+    db: AsyncIOMotorDatabase = Depends(get_database),
+    usuario: dict = Depends(requiere_rol(Rol.ESTUDIANTE)),
 ):
-    result = await db.students.insert_one(student.model_dump())
-    created = await db.students.find_one({"_id": result.inserted_id})
-    return created
+    if usuario.get("perfil_id"):
+        raise HTTPException(status_code=409, detail="Ya tienes un perfil; edítalo en lugar de crear otro")
+    user_id = str(usuario["_id"])
+    result = await db.students.insert_one({**student.model_dump(), "user_id": user_id})
+    await db.users.update_one({"_id": usuario["_id"]}, {"$set": {"perfil_id": str(result.inserted_id)}})
+    return await db.students.find_one({"_id": result.inserted_id})
 
 
 @router.get("", response_model=list[Student])
@@ -62,12 +77,12 @@ async def update_student(
     student_id: str,
     student: StudentUpdate,
     db: AsyncIOMotorDatabase = Depends(get_database),
+    usuario: dict = Depends(usuario_actual),
 ):
+    oid = _propio(usuario, student_id)
     update_data = {k: v for k, v in student.model_dump().items() if v is not None}
     if update_data:
-        result = await db.students.update_one(
-            {"_id": _oid(student_id)}, {"$set": update_data}
-        )
+        result = await db.students.update_one({"_id": oid}, {"$set": update_data})
         if result.matched_count == 0:
             raise HTTPException(status_code=404, detail="Estudiante no encontrado")
     updated = await db.students.find_one({"_id": _oid(student_id)})
@@ -78,13 +93,16 @@ async def update_student(
 
 @router.delete("/{student_id}", status_code=204)
 async def delete_student(
-    student_id: str, db: AsyncIOMotorDatabase = Depends(get_database)
+    student_id: str,
+    db: AsyncIOMotorDatabase = Depends(get_database),
+    usuario: dict = Depends(usuario_actual),
 ):
-    oid = _oid(student_id)
+    oid = _propio(usuario, student_id)
     await _borrar_cv(db, oid)
     result = await db.students.delete_one({"_id": oid})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Estudiante no encontrado")
+    await db.users.update_one({"_id": usuario["_id"]}, {"$set": {"perfil_id": None}})
     await db.applications.delete_many({"student_id": student_id})
 
 
@@ -93,8 +111,9 @@ async def upload_cv(
     student_id: str,
     file: UploadFile = File(...),
     db: AsyncIOMotorDatabase = Depends(get_database),
+    usuario: dict = Depends(usuario_actual),
 ):
-    oid = _oid(student_id)
+    oid = _propio(usuario, student_id)
     if await db.students.find_one({"_id": oid}, {"_id": 1}) is None:
         raise HTTPException(status_code=404, detail="Estudiante no encontrado")
 
@@ -140,9 +159,11 @@ async def download_cv(
 
 @router.delete("/{student_id}/cv", status_code=204)
 async def delete_cv(
-    student_id: str, db: AsyncIOMotorDatabase = Depends(get_database)
+    student_id: str,
+    db: AsyncIOMotorDatabase = Depends(get_database),
+    usuario: dict = Depends(usuario_actual),
 ):
-    oid = _oid(student_id)
+    oid = _propio(usuario, student_id)
     await _borrar_cv(db, oid)
     result = await db.students.update_one({"_id": oid}, {"$unset": {"cv": ""}})
     if result.matched_count == 0:

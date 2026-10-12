@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import VacancyCard from '../components/cards/VacancyCard'
 import ListState from '../components/layout/ListState'
 import PageHeader from '../components/layout/PageHeader'
+import { useAuth } from '../context/auth'
 import useActiveStudent from '../hooks/useActiveStudent'
 import useMatches from '../hooks/useMatches'
 import useStoredSet from '../hooks/useStoredSet'
@@ -17,6 +18,7 @@ export default function Vacantes() {
   const [search, setSearch] = useState(params.get('q') ?? '')
   const [saved, toggleSaved] = useStoredSet('linkea-saved')
   const [activeStudent] = useActiveStudent()
+  const esEmpresa = useAuth().usuario?.rol === 'empresa'
   const matches = useMatches(activeStudent)
   const [sector, setSector] = useState('Todas')
 
@@ -56,10 +58,10 @@ export default function Vacantes() {
         subtitle={
           activeStudent
             ? 'Ordenadas por tu compatibilidad estimada.'
-            : 'Prácticas profesionales publicadas por empresas. Elige un perfil en «Ver como…» para ver tu compatibilidad.'
+            : 'Prácticas profesionales publicadas por empresas. Con tu perfil de estudiante verás tu compatibilidad.'
         }
         count={loading || error ? undefined : vacancies.length}
-        actionTo="/vacantes/nueva"
+        actionTo={esEmpresa ? '/vacantes/nueva' : undefined}
         actionLabel="Publicar vacante"
         search={search}
         onSearch={setSearch}
@@ -96,7 +98,7 @@ export default function Vacantes() {
             ? 'Aún no hay vacantes registradas.'
             : 'Ninguna vacante coincide con tu búsqueda.'
         }
-        actionTo={vacancies.length === 0 ? '/vacantes/nueva' : undefined}
+        actionTo={esEmpresa && vacancies.length === 0 ? '/vacantes/nueva' : undefined}
         actionLabel="Publicar la primera vacante"
       />
 

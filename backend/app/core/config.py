@@ -15,6 +15,11 @@ class Settings(BaseSettings):
     # (p. ej. claude-sonnet-5-5 o claude-haiku-5-5 para gastar menos).
     anthropic_model: str = "claude-opus-5-5"
 
+    # Sesiones (JWT). Si falta la clave se genera una al azar en cada arranque: sirve para probar,
+    # pero cierra la sesión de todos cada vez que el servidor se reinicia.
+    jwt_secret: str = ""
+    jwt_horas: int = 12
+
     model_config = SettingsConfigDict(
         env_file=BACKEND_ROOT / ".env", env_file_encoding="utf-8"
     )
