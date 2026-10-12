@@ -13,7 +13,7 @@ const DESC_MAX = 800
 
 function toForm(vacancy) {
   return {
-    nombreEmpresa: vacancy?.nombre_empresa ?? '',
+    titulo: vacancy?.titulo ?? '',
     sector: vacancy?.sector ?? '',
     zona: vacancy?.ubicacion?.zona ?? '',
     modalidad: vacancy?.modalidad ?? 'presencial',
@@ -45,7 +45,7 @@ export default function VacanteForm({ mode, initial }) {
     setError(null)
 
     const payload = {
-      nombre_empresa: form.nombreEmpresa.trim(),
+      titulo: form.titulo.trim(),
       sector: form.sector,
       ubicacion: { zona: form.zona.trim() },
       modalidad: form.modalidad,
@@ -74,8 +74,15 @@ export default function VacanteForm({ mode, initial }) {
     <form onSubmit={handleSubmit} className="flex flex-col gap-6">
       <FormSection title="La vacante" description="Lo básico para que los estudiantes la encuentren.">
         <div className="grid gap-5 sm:grid-cols-2">
-          <FormRow label="Nombre de la empresa *">
-            <TextInput value={form.nombreEmpresa} onChange={onText('nombreEmpresa')} placeholder="Acme Tech" required />
+          <FormRow label="Título de la vacante *">
+            <TextInput
+              value={form.titulo}
+              onChange={onText('titulo')}
+              placeholder="Desarrollo web con React"
+              required
+              minLength={3}
+              maxLength={120}
+            />
           </FormRow>
           <FormRow label="Área profesional *">
             <Select value={form.sector} onChange={onText('sector')} required>

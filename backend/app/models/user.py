@@ -60,7 +60,7 @@ class Usuario(BaseModel):
     nombre: str
     email: str
     rol: Rol
-    # Id del documento con su perfil: el estudiante en `students` (la empresa tendrá su organización).
+    # Id del documento con su perfil: el estudiante en `students`, la empresa en `organizations`.
     perfil_id: str | None = None
     activo: bool = True
     creado_en: str

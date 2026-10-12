@@ -29,7 +29,7 @@ class Horario(BaseModel):
 
 
 class VacancyBase(BaseModel):
-    nombre_empresa: str
+    titulo: str = ""
     sector: str
     ubicacion: Ubicacion
     requisitos: Requisitos
@@ -40,11 +40,11 @@ class VacancyBase(BaseModel):
 
 
 class VacancyCreate(VacancyBase):
-    pass
+    titulo: str = Field(min_length=3, max_length=120)
 
 
 class VacancyUpdate(BaseModel):
-    nombre_empresa: str | None = None
+    titulo: str | None = Field(default=None, min_length=3, max_length=120)
     sector: str | None = None
     ubicacion: Ubicacion | None = None
     requisitos: Requisitos | None = None
@@ -56,6 +56,10 @@ class VacancyUpdate(BaseModel):
 
 class Vacancy(VacancyBase):
     id: PyObjectId = Field(validation_alias="_id", serialization_alias="id")
+    # Copia del nombre de la organización: así los listados no tienen que consultarla
+    # (se actualiza sola si la organización cambia de nombre).
+    nombre_empresa: str
+    organizacion_id: str | None = None
     user_id: str | None = None  # cuenta de la empresa que la publicó
 
     model_config = ConfigDict(populate_by_name=True, arbitrary_types_allowed=True)

@@ -25,6 +25,9 @@ INDICES = [
     ("users", [("email", 1)], {"unique": True}),
     ("students", [("user_id", 1)], {"unique": True, "partialFilterExpression": {"user_id": {"$type": "string"}}}),
     ("vacancies", [("user_id", 1)], {}),
+    # Una organización por cuenta de empresa; las vacantes se consultan por organización.
+    ("organizations", [("user_id", 1)], {"unique": True}),
+    ("vacancies", [("organizacion_id", 1)], {}),
 ]
 
 

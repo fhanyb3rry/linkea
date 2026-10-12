@@ -56,7 +56,7 @@ export default function Candidatos() {
   return (
     <section className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-4 py-8 sm:px-6">
       <PageTitle
-        title={vacancy ? `Candidatos · ${vacancy.nombre_empresa}` : 'Candidatos'}
+        title={vacancy ? `Candidatos · ${vacancy.titulo || vacancy.nombre_empresa}` : 'Candidatos'}
         subtitle="Revisa las postulaciones recibidas y descubre estudiantes elegibles que aún no se han postulado."
         back={{ to: '/empresa', label: 'Mi empresa' }}
       />

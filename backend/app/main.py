@@ -4,7 +4,17 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.database import close_mongo_connection, connect_to_mongo
-from app.routers import agent, ai, applications, auth, companies, eligibility, search, students
+from app.routers import (
+    agent,
+    ai,
+    applications,
+    auth,
+    companies,
+    eligibility,
+    organizations,
+    search,
+    students,
+)
 
 
 @asynccontextmanager
@@ -25,6 +35,7 @@ app.add_middleware(
 
 app.include_router(auth.router)
 app.include_router(students.router)
+app.include_router(organizations.router)
 app.include_router(companies.router)
 app.include_router(eligibility.router)
 app.include_router(agent.router)

@@ -35,14 +35,26 @@ async def create_vacancy(
     db: AsyncIOMotorDatabase = Depends(get_database),
     usuario: dict = Depends(requiere_rol(Rol.EMPRESA)),
 ):
-    result = await db.vacancies.insert_one({**vacancy.model_dump(), "user_id": str(usuario["_id"])})
+    org = await db.organizations.find_one({"user_id": str(usuario["_id"])}, {"nombre": 1})
+    if org is None:
+        raise HTTPException(status_code=409, detail="Registra primero tu organización para publicar vacantes")
+    doc = {
+        **vacancy.model_dump(),
+        "nombre_empresa": org["nombre"],
+        "organizacion_id": str(org["_id"]),
+        "user_id": str(usuario["_id"]),
+    }
+    result = await db.vacancies.insert_one(doc)
     created = await db.vacancies.find_one({"_id": result.inserted_id})
     return created
 
 
 @router.get("", response_model=list[Vacancy])
-async def list_vacancies(db: AsyncIOMotorDatabase = Depends(get_database)):
-    return await db.vacancies.find().to_list(length=None)
+async def list_vacancies(
+    organizacion_id: str | None = None, db: AsyncIOMotorDatabase = Depends(get_database)
+):
+    filtro = {"organizacion_id": organizacion_id} if organizacion_id else {}
+    return await db.vacancies.find(filtro).to_list(length=None)
 
 
 @router.get("/{vacancy_id}", response_model=Vacancy)

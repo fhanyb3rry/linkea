@@ -17,16 +17,18 @@ import sys
 import unicodedata
 from datetime import datetime, timezone
 
+from bson import ObjectId
 from motor.motor_asyncio import AsyncIOMotorClient
 
 from app.core.config import settings
 from app.core.database import crear_indices
 from app.core.seguridad import cifrar_password
 from app.models.company import VacancyCreate
+from app.models.organization import OrganizationCreate
 from app.models.student import StudentCreate
 
 # Todo lo que --reset borra (incluye los archivos de GridFS).
-COLECCIONES = ["users", "students", "vacancies", "applications", "ai_compatibilidad", "archivos.files", "archivos.chunks"]
+COLECCIONES = ["users", "organizations", "students", "vacancies", "applications", "ai_compatibilidad", "archivos.files", "archivos.chunks"]
 
 ESTUDIANTES = [
     {
@@ -93,9 +95,10 @@ ESTUDIANTES = [
 ]
 
 
-def _vacante(empresa, sector, zona, carreras, skills, horas, dias, apoyo, monto, modalidad, descripcion):
+def _vacante(empresa, titulo, sector, zona, carreras, skills, horas, dias, apoyo, monto, modalidad, descripcion):
     return {
         "nombre_empresa": empresa,
+        "titulo": titulo,
         "sector": sector,
         "ubicacion": {"zona": zona},
         "requisitos": {"carreras_aceptadas": carreras, "skills_clave": skills},
@@ -108,22 +111,22 @@ def _vacante(empresa, sector, zona, carreras, skills, horas, dias, apoyo, monto,
 
 LV = ["Lun", "Mar", "Mié", "Jue", "Vie"]
 VACANTES = [
-    _vacante("Soluciones Nevado", "Tecnología", "Toluca", ["Ingeniería en Software", "Ingeniería en Sistemas"],
+    _vacante("Soluciones Nevado", "Desarrollo backend con Python", "Tecnología", "Toluca", ["Ingeniería en Software", "Ingeniería en Sistemas"],
              ["Python", "SQL"], 25, LV, True, 4500, "hibrido",
              "Apoyo en el desarrollo de una API interna y reportes de datos."),
-    _vacante("Valle Digital", "Tecnología", "Metepec", ["Ingeniería en Sistemas", "Ingeniería en Software"],
+    _vacante("Valle Digital", "Desarrollo front-end con React", "Tecnología", "Metepec", ["Ingeniería en Sistemas", "Ingeniería en Software"],
              ["React", "JavaScript"], 20, ["Lun", "Mié", "Vie"], True, 4000, "remoto",
              "Desarrollo de componentes front-end para la plataforma de clientes."),
-    _vacante("Manufacturas del Centro", "Ingeniería", "Lerma", ["Ingeniería Industrial"],
+    _vacante("Manufacturas del Centro", "Analista de indicadores de producción", "Ingeniería", "Lerma", ["Ingeniería Industrial"],
              ["Excel", "Power BI"], 30, LV, True, 5000, "presencial",
              "Análisis de indicadores de producción y mejora continua."),
-    _vacante("Agencia Xinantécatl", "Marketing", "Toluca", ["Mercadotecnia", "Diseño Gráfico"],
+    _vacante("Agencia Xinantécatl", "Community manager", "Marketing", "Toluca", ["Mercadotecnia", "Diseño Gráfico"],
              ["Redes sociales", "Copywriting"], 20, ["Mar", "Jue"], False, None, "hibrido",
              "Gestión de redes sociales y campañas para clientes locales."),
-    _vacante("Estudio Matlatzinca", "Diseño", "Toluca", ["Diseño Gráfico"],
+    _vacante("Estudio Matlatzinca", "Diseño de identidad y UI", "Diseño", "Toluca", ["Diseño Gráfico"],
              ["Figma", "Illustrator"], 15, ["Lun", "Mié"], True, 3000, "presencial",
              "Diseño de identidad visual y prototipos de interfaces."),
-    _vacante("Grupo Administrativo Lerma", "Administración", "Lerma", ["Administración", "Contaduría"],
+    _vacante("Grupo Administrativo Lerma", "Auxiliar administrativo", "Administración", "Lerma", ["Administración", "Contaduría"],
              ["Excel", "Comunicación"], 30, LV, True, 4000, "presencial",
              "Apoyo en procesos administrativos y control de proveedores."),
 ]
@@ -172,13 +175,25 @@ async def main(reset: bool) -> None:
             await db.users.update_one({"_id": user_id}, {"$set": {"perfil_id": str(sid)}})
             ids_est.append(sid)
 
-        # Cada empresa con su cuenta, dueña de su vacante.
+        # Cada empresa con su cuenta y su organización, dueña de su vacante.
         ids_vac = []
-        for v in VACANTES:
-            sin_acentos = unicodedata.normalize("NFKD", v["nombre_empresa"].lower()).encode("ascii", "ignore").decode()
-            email = "rh@" + "".join(c for c in sin_acentos if c.isalnum()) + ".test"
-            user_id = (await db.users.insert_one(cuenta(v["nombre_empresa"], email, "empresa"))).inserted_id
-            vacante = {**VacancyCreate(**v).model_dump(mode="json"), "user_id": str(user_id)}
+        for v in [dict(v) for v in VACANTES]:
+            empresa = v.pop("nombre_empresa")
+            sin_acentos = unicodedata.normalize("NFKD", empresa.lower()).encode("ascii", "ignore").decode()
+            dominio = "".join(c for c in sin_acentos if c.isalnum()) + ".test"
+            email = "rh@" + dominio
+            user_id = str((await db.users.insert_one(cuenta(empresa, email, "empresa"))).inserted_id)
+            org = OrganizationCreate(
+                nombre=empresa,
+                sector=v["sector"],
+                ubicacion=v["ubicacion"],
+                descripcion=f"{empresa} recibe practicantes de la UTVT en el área de {v['sector'].lower()}.",
+                contacto={"correo": email, "sitio": f"https://{dominio[:-5]}.mx", "responsable": "Lic. Andrea Ruiz", "cargo": "Recursos Humanos"},
+            )
+            org_id = (await db.organizations.insert_one({**org.model_dump(mode="json"), "user_id": user_id, "creada_en": ahora})).inserted_id
+            await db.users.update_one({"_id": ObjectId(user_id)}, {"$set": {"perfil_id": str(org_id)}})
+            vacante = {**VacancyCreate(**v).model_dump(mode="json"), "nombre_empresa": empresa,
+                       "organizacion_id": str(org_id), "user_id": user_id}
             ids_vac.append((await db.vacancies.insert_one(vacante)).inserted_id)
 
         await db.applications.insert_many([
@@ -186,7 +201,7 @@ async def main(reset: bool) -> None:
             for e, v, estado in POSTULACIONES
         ])
 
-        print(f"Listo: {len(ids_est)} estudiantes, {len(ids_vac)} vacantes y {len(POSTULACIONES)} postulaciones.")
+        print(f"Listo: {len(ids_est)} estudiantes, {len(ids_vac)} organizaciones con una vacante cada una y {len(POSTULACIONES)} postulaciones.")
         print(f"\nCuentas (contraseña de todas: {PASSWORD_DEMO}):")
         async for u in db.users.find({}, {"email": 1, "rol": 1}).sort("rol"):
             print(f"  {u['rol']:<17} {u['email']}")

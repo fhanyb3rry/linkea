@@ -112,7 +112,7 @@ export default function Estudiantes() {
             <option value="">Ninguna</option>
             {vacancies.map((v) => (
               <option key={v.id} value={v.id}>
-                {v.nombre_empresa} · {v.sector}
+                {v.titulo || v.sector} · {v.nombre_empresa}
               </option>
             ))}
           </select>

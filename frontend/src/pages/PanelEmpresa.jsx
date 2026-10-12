@@ -1,12 +1,13 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Briefcase, Clock, FileCheck2, MapPin, Pencil, Plus, Trash2, Users } from 'lucide-react'
+import { Briefcase, Building2, Clock, Eye, FileCheck2, MapPin, Pencil, Plus, Trash2, UserRound, Users } from 'lucide-react'
+import OrganizacionForm from '../components/forms/OrganizacionForm'
 import ListState from '../components/layout/ListState'
 import { useAuth } from '../context/auth'
 import PageTitle from '../components/layout/PageTitle'
 import useFetch from '../hooks/useFetch'
 import { areaInfo } from '../lib/areas'
-import { deleteVacancy, getApplications, getVacancies } from '../services/api'
+import { deleteVacancy, getApplications, getOrganization, getVacancies } from '../services/api'
 
 function Stat({ icon: Icon, label, value }) {
   return (
@@ -22,15 +23,79 @@ function Stat({ icon: Icon, label, value }) {
   )
 }
 
+// Primera vez: la cuenta de empresa registra su organización antes de publicar vacantes.
+function RegistrarOrganizacion() {
+  return (
+    <section className="mx-auto flex w-full max-w-3xl flex-col gap-8 px-4 py-8 sm:px-6">
+      <PageTitle
+        title="Registra tu organización"
+        subtitle="Antes de publicar vacantes, cuéntanos quiénes son. Podrás editarlo cuando quieras."
+      />
+      <OrganizacionForm mode="crear" onSaved={() => {}} />
+    </section>
+  )
+}
+
+function OrganizacionCard({ org }) {
+  const contacto = org.contacto ?? {}
+  return (
+    <div className="card flex flex-col gap-4 p-5 sm:flex-row sm:items-center">
+      <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-cocoa-soft text-cocoa">
+        <Building2 className="h-5 w-5" />
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="font-body text-base font-semibold text-ink">{org.nombre}</p>
+        <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 font-body text-xs text-muted">
+          <span className="flex items-center gap-1.5">
+            <MapPin className="h-3.5 w-3.5 text-cocoa" />
+            {org.ubicacion.zona}
+          </span>
+          <span>{org.sector}</span>
+          {contacto.responsable && (
+            <span className="flex items-center gap-1.5">
+              <UserRound className="h-3.5 w-3.5 text-cocoa" />
+              Asesor empresarial: {contacto.responsable}
+              {contacto.cargo && ` · ${contacto.cargo}`}
+            </span>
+          )}
+        </div>
+      </div>
+      <div className="flex gap-2">
+        <Link
+          to={`/organizaciones/${org.id}`}
+          className="flex items-center gap-1.5 rounded-lg border border-line bg-surface px-3 py-2 font-body text-xs font-semibold text-ink hover:border-cocoa/50"
+        >
+          <Eye className="h-3.5 w-3.5" />
+          Perfil público
+        </Link>
+        <Link
+          to="/empresa/editar"
+          className="flex items-center gap-1.5 rounded-lg border border-line bg-surface px-3 py-2 font-body text-xs font-semibold text-ink hover:border-cocoa/50"
+        >
+          <Pencil className="h-3.5 w-3.5" />
+          Editar
+        </Link>
+      </div>
+    </div>
+  )
+}
+
 export default function PanelEmpresa() {
   const { usuario } = useAuth()
-  const { data, error, loading, reload } = useFetch(() => Promise.all([getVacancies(), getApplications()]), [])
+  if (!usuario?.perfil_id) return <RegistrarOrganizacion />
+  return <Panel orgId={usuario.perfil_id} />
+}
+
+function Panel({ orgId }) {
+  const { data, error, loading, reload } = useFetch(
+    () => Promise.all([getOrganization(orgId), getVacancies(orgId), getApplications()]),
+    [orgId],
+  )
   const [confirmId, setConfirmId] = useState(null)
   const [actionError, setActionError] = useState(null)
 
-  const [todas, applications] = data ?? [[], []]
-  // Solo las vacantes que publicó esta cuenta (las postulaciones ya llegan filtradas del backend).
-  const vacancies = useMemo(() => todas.filter((v) => v.user_id === usuario?.id), [todas, usuario])
+  // Las vacantes llegan filtradas por organización y las postulaciones, por el backend.
+  const [org, vacancies, applications] = data ?? [null, [], []]
 
   const porVacante = useMemo(() => {
     const map = new Map()
@@ -56,7 +121,7 @@ export default function PanelEmpresa() {
     <section className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-8 sm:px-6">
       <PageTitle
         title="Mi empresa"
-        subtitle="Administra tus vacantes y revisa a quién se postula."
+        subtitle="Administra tu organización y tus vacantes, y revisa a quién se postula."
       >
         <Link
           to="/vacantes/nueva"
@@ -66,6 +131,8 @@ export default function PanelEmpresa() {
           Publicar vacante
         </Link>
       </PageTitle>
+
+      {org && <OrganizacionCard org={org} />}
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <Stat icon={Briefcase} label="Vacantes publicadas" value={vacancies.length} />
@@ -103,7 +170,7 @@ export default function PanelEmpresa() {
                     to={`/vacantes/${v.id}`}
                     className="truncate font-body text-base font-semibold text-ink hover:text-brand"
                   >
-                    {v.nombre_empresa}
+                    {v.titulo || v.nombre_empresa}
                   </Link>
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-cocoa-soft px-2.5 py-0.5 font-body text-[11px] font-medium text-cocoa">
                     <AreaIcon className="h-3 w-3" />
@@ -165,7 +232,7 @@ export default function PanelEmpresa() {
                     </Link>
                     <button
                       type="button"
-                      aria-label={`Eliminar vacante de ${v.nombre_empresa}`}
+                      aria-label={`Eliminar vacante ${v.titulo || v.nombre_empresa}`}
                       onClick={() => setConfirmId(v.id)}
                       className="flex h-9 w-9 items-center justify-center rounded-lg text-muted hover:text-brand"
                     >

@@ -29,10 +29,11 @@ export const suggestedCompanies = [
 ]
 
 // Vacantes de ejemplo con la misma forma que las de la API (`ejemplo` evita enlazar a un detalle inexistente).
-const demo = (nombre_empresa, sector, zona, horas, apoyo, skills) => ({
+const demo = (nombre_empresa, titulo, sector, zona, horas, apoyo, skills) => ({
   id: `demo-${nombre_empresa}`,
   ejemplo: true,
   nombre_empresa,
+  titulo,
   sector,
   ubicacion: { zona },
   requisitos: { carreras_aceptadas: [], skills_clave: skills },
@@ -41,7 +42,7 @@ const demo = (nombre_empresa, sector, zona, horas, apoyo, skills) => ({
 })
 
 export const featuredVacancies = [
-  demo('GPP Soluciones', 'Tecnología', 'Toluca', 20, true, ['React', 'Python']),
-  demo('Nestlé', 'Diseño', 'Lerma', 15, false, ['Figma', 'Branding']),
-  demo('Stellantis', 'Ingeniería', 'Toluca', 30, true, ['AutoCAD', 'Calidad']),
+  demo('GPP Soluciones', 'Desarrollo web', 'Tecnología', 'Toluca', 20, true, ['React', 'Python']),
+  demo('Nestlé', 'Diseño de marca', 'Diseño', 'Lerma', 15, false, ['Figma', 'Branding']),
+  demo('Stellantis', 'Ingeniería de calidad', 'Ingeniería', 'Toluca', 30, true, ['AutoCAD', 'Calidad']),
 ]

@@ -37,7 +37,7 @@ export default function Vacantes() {
     return vacancies.filter((v) => {
       if (sector !== 'Todas' && areaInfo(v.sector).label !== sector) return false
       if (!q) return true
-      const text = [v.nombre_empresa, v.sector, v.ubicacion?.zona, ...(v.requisitos?.skills_clave ?? [])]
+      const text = [v.titulo, v.nombre_empresa, v.sector, v.ubicacion?.zona, ...(v.requisitos?.skills_clave ?? [])]
         .join(' ')
         .toLowerCase()
       return text.includes(q)
@@ -65,7 +65,7 @@ export default function Vacantes() {
         actionLabel="Publicar vacante"
         search={search}
         onSearch={setSearch}
-        searchPlaceholder="Buscar por empresa, sector, zona o skill..."
+        searchPlaceholder="Buscar por puesto, empresa, zona o skill..."
       />
 
       {sectors.length > 2 && (

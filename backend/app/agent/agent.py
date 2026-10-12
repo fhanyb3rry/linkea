@@ -26,6 +26,7 @@ class Percepcion(BaseModel):
 class Decision(BaseModel):
     vacante_id: str
     empresa: str
+    titulo: str = ""
     elegible: bool
     afinidad: int
     compatibilidad: int
@@ -63,6 +64,7 @@ class AgenteVinculacion:
                 Decision(
                     vacante_id=str(vacante.id),
                     empresa=vacante.nombre_empresa,
+                    titulo=vacante.titulo,
                     elegible=elegible,
                     # Afinidad: cuántas proposiciones se cumplen (0-4), desempata entre elegibles
                     afinidad=sum(p.model_dump().values()),

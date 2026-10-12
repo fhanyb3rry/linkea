@@ -54,8 +54,9 @@ export function getMe() {
   return request('/auth/me')
 }
 
-export function getVacancies() {
-  return request('/vacancies')
+// organizacionId opcional: solo las vacantes de esa organización
+export function getVacancies(organizacionId) {
+  return request(`/vacancies${organizacionId ? `?organizacion_id=${organizacionId}` : ''}`)
 }
 
 export function getVacancy(id) {
@@ -145,6 +146,24 @@ export function updateVacancy(id, payload) {
 
 export function deleteVacancy(id) {
   return request(`/vacancies/${id}`, { method: 'DELETE' })
+}
+
+// ---- Organizaciones ----------------------------------------------------------------------
+
+export function getOrganizations() {
+  return request('/organizations')
+}
+
+export function getOrganization(id) {
+  return request(`/organizations/${id}`)
+}
+
+export function createOrganization(payload) {
+  return postJSON('/organizations', payload)
+}
+
+export function updateOrganization(id, payload) {
+  return sendJSON('PUT', `/organizations/${id}`, payload)
 }
 
 // ---- Postulaciones -----------------------------------------------------------------------

@@ -10,5 +10,6 @@ export function useAuth() {
 // Pantalla de inicio de cada rol después de entrar.
 export function inicioDe(usuario) {
   if (usuario?.rol === 'estudiante' && !usuario.perfil_id) return '/perfil/crear'
+  if (usuario?.rol === 'empresa' && !usuario.perfil_id) return '/empresa'
   return '/inicio'
 }

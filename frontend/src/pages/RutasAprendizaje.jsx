@@ -110,7 +110,7 @@ function PlanPerfil({ limite }) {
           <select className={inputCls} value={vid} onChange={(e) => setVacanteId(e.target.value)}>
             {(vacantes ?? []).map((v) => (
               <option key={idDe(v)} value={idDe(v)}>
-                {v.nombre_empresa} · {v.sector}
+                {v.titulo || v.sector} · {v.nombre_empresa}
               </option>
             ))}
           </select>

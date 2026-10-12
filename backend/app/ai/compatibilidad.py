@@ -102,6 +102,7 @@ def datos_del_par(student: Student, vacancy: Vacancy) -> dict:
             "dias": student.disponibilidad.dias,
         },
         "vacante": {
+            "titulo": vacancy.titulo,
             "empresa": vacancy.nombre_empresa,
             "sector": vacancy.sector,
             "descripcion": vacancy.descripcion,

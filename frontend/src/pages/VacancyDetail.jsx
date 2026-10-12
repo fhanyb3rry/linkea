@@ -92,8 +92,17 @@ export default function VacancyDetail() {
             </div>
 
             <div className="p-6 pt-12 sm:p-8 sm:pt-12">
-              <h1 className="text-3xl font-medium">{vacancy.nombre_empresa}</h1>
-              <p className="mt-1 font-body text-sm font-medium text-brand">{vacancy.sector}</p>
+              <h1 className="text-3xl font-medium">{vacancy.titulo || vacancy.nombre_empresa}</h1>
+              <p className="mt-1 font-body text-sm font-medium text-brand">
+                {vacancy.organizacion_id ? (
+                  <Link to={`/organizaciones/${vacancy.organizacion_id}`} className="hover:underline">
+                    {vacancy.nombre_empresa}
+                  </Link>
+                ) : (
+                  vacancy.nombre_empresa
+                )}{' '}
+                · {vacancy.sector}
+              </p>
 
               <div className="mt-6 grid gap-3 sm:grid-cols-3">
                 <Stat icon={MapPin} label="Ubicación" value={vacancy.ubicacion.zona} />

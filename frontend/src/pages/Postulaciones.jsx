@@ -119,7 +119,10 @@ export default function Postulaciones() {
                   </span>
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h2 className="truncate font-body text-base font-semibold text-ink">{vacancy.nombre_empresa}</h2>
+                      <h2 className="truncate font-body text-base font-semibold text-ink">
+                        {vacancy.titulo || vacancy.nombre_empresa}
+                      </h2>
+                      {vacancy.titulo && <span className="font-body text-xs text-muted">{vacancy.nombre_empresa}</span>}
                       <span className="inline-flex items-center gap-1.5 rounded-full bg-cocoa-soft px-2.5 py-0.5 font-body text-[11px] font-medium text-cocoa">
                         <AreaIcon className="h-3 w-3" />
                         {area.label}

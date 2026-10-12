@@ -15,7 +15,7 @@ function Meta({ icon: Icon, children }) {
 }
 
 export default function VacancyCard({ vacancy, match, saved = false, onToggleSave }) {
-  const { id, nombre_empresa, sector, ubicacion, requisitos, estipendio, horarios, ejemplo } = vacancy
+  const { id, titulo, nombre_empresa, sector, ubicacion, requisitos, estipendio, horarios, ejemplo } = vacancy
   const area = areaInfo(sector)
   const AreaIcon = area.icon
   const skills = requisitos?.skills_clave ?? []
@@ -31,9 +31,10 @@ export default function VacancyCard({ vacancy, match, saved = false, onToggleSav
           <h3 className="truncate font-body text-base font-semibold text-ink">
             {/* el enlace cubre toda la tarjeta; el botón de guardar queda por encima */}
             <Link to={to} className="after:absolute after:inset-0 focus-visible:outline-none">
-              {nombre_empresa}
+              {titulo || nombre_empresa}
             </Link>
           </h3>
+          {titulo && <p className="truncate font-body text-xs text-muted">{nombre_empresa}</p>}
           <span className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-cocoa-soft px-2.5 py-0.5 font-body text-[11px] font-medium text-cocoa">
             <AreaIcon className="h-3 w-3" />
             {area.label}

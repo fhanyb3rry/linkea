@@ -5,6 +5,7 @@ import RequireAuth from './components/layout/RequireAuth'
 import Candidatos from './pages/Candidatos'
 import Configuracion from './pages/Configuracion'
 import CrearPerfilEstudiante from './pages/CrearPerfilEstudiante'
+import EditarOrganizacion from './pages/EditarOrganizacion'
 import EditarPerfil from './pages/EditarPerfil'
 import EditarVacante from './pages/EditarVacante'
 import Estudiantes from './pages/Estudiantes'
@@ -15,6 +16,8 @@ import Login from './pages/Login'
 import Mensajes from './pages/Mensajes'
 import MiPerfil from './pages/MiPerfil'
 import NotFound from './pages/NotFound'
+import OrganizacionDetalle from './pages/OrganizacionDetalle'
+import Organizaciones from './pages/Organizaciones'
 import Notificaciones from './pages/Notificaciones'
 import PanelEmpresa from './pages/PanelEmpresa'
 import PerfilEstudiante from './pages/PerfilEstudiante'
@@ -52,6 +55,8 @@ export default function App() {
         <Route path="guardados" element={<Guardados />} />
         <Route path="estudiantes" element={<Estudiantes />} />
         <Route path="estudiantes/:id" element={<PerfilEstudiante />} />
+        <Route path="organizaciones" element={<Organizaciones />} />
+        <Route path="organizaciones/:id" element={<OrganizacionDetalle />} />
 
         <Route element={<RequireAuth roles={['estudiante']} />}>
           <Route path="rutas" element={<RutasAprendizaje />} />
@@ -64,6 +69,7 @@ export default function App() {
         <Route element={<RequireAuth roles={['empresa']} />}>
           <Route path="vacantes/nueva" element={<PublicarVacante />} />
           <Route path="empresa" element={<PanelEmpresa />} />
+          <Route path="empresa/editar" element={<EditarOrganizacion />} />
         </Route>
         <Route element={<RequireAuth roles={['empresa', 'coordinador']} />}>
           <Route path="vacantes/:id/editar" element={<EditarVacante />} />
