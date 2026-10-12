@@ -11,6 +11,7 @@ from app.routers import (
     auth,
     catalogo,
     companies,
+    coordinacion,
     eligibility,
     organizations,
     search,
@@ -46,6 +47,7 @@ app.include_router(search.router)
 app.include_router(ai.router)
 app.include_router(seguimientos.router)
 app.include_router(catalogo.router)
+app.include_router(coordinacion.router)
 
 
 @app.get("/health")

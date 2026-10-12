@@ -11,5 +11,7 @@ export function useAuth() {
 export function inicioDe(usuario) {
   if (usuario?.rol === 'estudiante' && !usuario.perfil_id) return '/perfil/crear'
   if (usuario?.rol === 'empresa' && !usuario.perfil_id) return '/empresa'
+  if (usuario?.rol === 'coordinador') return '/coordinacion'
+  if (usuario?.rol === 'asesor_academico') return '/seguimientos'
   return '/inicio'
 }

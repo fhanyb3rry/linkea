@@ -43,6 +43,28 @@ class RegistroIn(BaseModel):
         return rol
 
 
+class PersonalIn(BaseModel):
+    """Alta de personal de la universidad desde el panel de coordinación."""
+
+    nombre: str = Field(min_length=2, max_length=120)
+    email: str
+    password: str = Field(min_length=8, max_length=72)
+    rol: Rol
+
+    _email = field_validator("email")(_normalizar_email)
+
+    @field_validator("rol")
+    @classmethod
+    def _rol_personal(cls, rol: Rol) -> Rol:
+        if rol in ROLES_REGISTRO:
+            raise ValueError("Estudiantes y empresas se registran solos desde la app")
+        return rol
+
+
+class UsuarioUpdate(BaseModel):
+    activo: bool
+
+
 class LoginIn(BaseModel):
     email: str
     password: str

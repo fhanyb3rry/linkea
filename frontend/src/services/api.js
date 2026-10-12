@@ -300,3 +300,24 @@ export function updateDocumentoCatalogo(id, payload) {
 export function deleteDocumentoCatalogo(id) {
   return request(`/catalogo-documentos/${id}`, { method: 'DELETE' })
 }
+
+export function getIndicadores() {
+  return request('/coordinacion/indicadores')
+}
+
+export function getPostulacionesCoordinacion(estado) {
+  return request(`/coordinacion/postulaciones${estado ? `?estado=${estado}` : ''}`)
+}
+
+export function getIncidenciasCoordinacion() {
+  return request('/coordinacion/incidencias')
+}
+
+// rol: 'asesor_academico' | 'coordinador'
+export function createPersonal(payload) {
+  return postJSON('/auth/usuarios', payload)
+}
+
+export function setUsuarioActivo(id, activo) {
+  return sendJSON('PATCH', `/auth/usuarios/${id}`, { activo })
+}

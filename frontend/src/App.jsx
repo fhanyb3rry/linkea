@@ -4,6 +4,7 @@ import PublicLayout from './components/layout/PublicLayout'
 import RequireAuth from './components/layout/RequireAuth'
 import Candidatos from './pages/Candidatos'
 import Configuracion from './pages/Configuracion'
+import Coordinacion from './pages/Coordinacion'
 import CrearPerfilEstudiante from './pages/CrearPerfilEstudiante'
 import EditarOrganizacion from './pages/EditarOrganizacion'
 import EditarPerfil from './pages/EditarPerfil'
@@ -74,6 +75,9 @@ export default function App() {
           <Route path="vacantes/nueva" element={<PublicarVacante />} />
           <Route path="empresa" element={<PanelEmpresa />} />
           <Route path="empresa/editar" element={<EditarOrganizacion />} />
+        </Route>
+        <Route element={<RequireAuth roles={['coordinador']} />}>
+          <Route path="coordinacion" element={<Coordinacion />} />
         </Route>
         <Route element={<RequireAuth roles={['empresa', 'coordinador']} />}>
           <Route path="vacantes/:id/editar" element={<EditarVacante />} />

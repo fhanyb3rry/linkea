@@ -10,6 +10,7 @@ import {
   Factory,
   GraduationCap,
   Home,
+  LayoutDashboard,
   Network,
   MessageCircle,
   Send,
@@ -23,6 +24,7 @@ const groups = [
     title: 'Explorar',
     items: [
       { to: '/inicio', label: 'Inicio', icon: Home },
+      { to: '/coordinacion', label: 'Coordinación', icon: LayoutDashboard, roles: ['coordinador'] },
       { to: '/vacantes', label: 'Vacantes', icon: Briefcase },
       { to: '/estudiantes', label: 'Estudiantes', icon: GraduationCap },
       { to: '/organizaciones', label: 'Empresas', icon: Factory },
