@@ -97,6 +97,8 @@ def datos_del_par(student: Student, vacancy: Vacancy) -> dict:
             "skills": student.skills,
             "idiomas": student.idiomas,
             "bio": student.bio,
+            "intereses": student.intereses,
+            "proyectos": [p.model_dump() for p in student.proyectos],
             "zona": student.ubicacion.zona,
             "horas_por_semana": student.disponibilidad.horas_por_semana,
             "dias": student.disponibilidad.dias,

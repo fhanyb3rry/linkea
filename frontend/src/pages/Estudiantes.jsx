@@ -56,7 +56,7 @@ export default function Estudiantes() {
     return students.filter((s) => {
       if (carrera !== 'Todas' && s.carrera !== carrera) return false
       if (!q) return true
-      const text = [s.nombre, s.carrera, s.ubicacion?.zona, ...(s.skills ?? [])].join(' ').toLowerCase()
+      const text = [s.nombre, s.matricula, s.carrera, s.ubicacion?.zona, ...(s.skills ?? []), ...(s.intereses ?? [])].join(' ').toLowerCase()
       return text.includes(q)
     })
   }, [students, search, carrera])

@@ -28,6 +28,17 @@ class Enlaces(BaseModel):
     portafolio: str = ""
 
 
+# Matrícula de la UTVT: 9 dígitos (p. ej. 222411176).
+MATRICULA = r"^\d{9}$"
+
+
+class Proyecto(BaseModel):
+    nombre: str = Field(min_length=2, max_length=120)
+    descripcion: str = Field(default="", max_length=500)
+    tecnologias: list[str] = Field(default_factory=list)
+    enlace: str = ""
+
+
 class Curriculum(BaseModel):
     """Metadatos del CV subido; el archivo vive en MongoDB (GridFS, ver app/core/archivos.py)."""
 
@@ -40,6 +51,7 @@ class Curriculum(BaseModel):
 
 class StudentBase(BaseModel):
     nombre: str
+    matricula: str = ""
     carrera: str
     semestre: int
     ubicacion: Ubicacion
@@ -51,14 +63,18 @@ class StudentBase(BaseModel):
     bio: str = ""
     enlaces: Enlaces = Field(default_factory=Enlaces)
     idiomas: list[str] = Field(default_factory=list)
+    proyectos: list[Proyecto] = Field(default_factory=list)
+    # Áreas que le interesan (las mismas del filtro de vacantes: Tecnología, Diseño, …).
+    intereses: list[str] = Field(default_factory=list)
 
 
 class StudentCreate(StudentBase):
-    pass
+    matricula: str = Field(pattern=MATRICULA)
 
 
 class StudentUpdate(BaseModel):
     nombre: str | None = None
+    matricula: str | None = Field(default=None, pattern=MATRICULA)
     carrera: str | None = None
     semestre: int | None = None
     ubicacion: Ubicacion | None = None
@@ -70,6 +86,8 @@ class StudentUpdate(BaseModel):
     bio: str | None = None
     enlaces: Enlaces | None = None
     idiomas: list[str] | None = None
+    proyectos: list[Proyecto] | None = None
+    intereses: list[str] | None = None
 
 
 class Student(StudentBase):

@@ -100,6 +100,7 @@ export default function PerfilEstudiante() {
               </div>
               <p className="mt-1 font-body text-sm text-muted">
                 {student.carrera} · {student.semestre}º semestre
+                {student.matricula && ` · Matrícula ${student.matricula}`}
               </p>
               <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 font-body text-xs text-muted">
                 <Dato icon={MapPin}>{student.ubicacion.zona}</Dato>
@@ -147,6 +148,39 @@ export default function PerfilEstudiante() {
 
               <Card title="Habilidades">
                 <Chips items={student.skills} empty="Aún no ha agregado habilidades." />
+              </Card>
+
+              <Card title="Áreas de interés">
+                <Chips items={student.intereses ?? []} empty="Aún no ha indicado sus intereses." />
+              </Card>
+
+              <Card title="Proyectos">
+                {student.proyectos?.length ? (
+                  <ul className="flex flex-col divide-y divide-line">
+                    {student.proyectos.map((p, i) => (
+                      <li key={i} className="flex flex-col gap-2 py-3 first:pt-0 last:pb-0">
+                        <div className="flex items-center gap-2">
+                          <span className="font-body text-sm font-semibold text-ink">{p.nombre}</span>
+                          {p.enlace && (
+                            <a
+                              href={p.enlace}
+                              target="_blank"
+                              rel="noreferrer noopener"
+                              aria-label={`Abrir ${p.nombre}`}
+                              className="text-muted hover:text-brand"
+                            >
+                              <ExternalLink className="h-3.5 w-3.5" />
+                            </a>
+                          )}
+                        </div>
+                        {p.descripcion && <p className="font-body text-sm text-muted">{p.descripcion}</p>}
+                        {p.tecnologias.length > 0 && <Chips items={p.tecnologias} />}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="font-body text-sm text-muted">Aún no ha agregado proyectos.</p>
+                )}
               </Card>
 
               <div className="grid gap-6 sm:grid-cols-2">

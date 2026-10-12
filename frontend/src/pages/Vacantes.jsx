@@ -5,10 +5,14 @@ import ListState from '../components/layout/ListState'
 import PageHeader from '../components/layout/PageHeader'
 import { useAuth } from '../context/auth'
 import useActiveStudent from '../hooks/useActiveStudent'
+import useFetch from '../hooks/useFetch'
 import useMatches from '../hooks/useMatches'
 import useStoredSet from '../hooks/useStoredSet'
 import { areaInfo } from '../lib/areas'
-import { getVacancies } from '../services/api'
+import { getStudent, getVacancies } from '../services/api'
+
+// Pestaña que filtra por las áreas de interés del estudiante.
+const MIS_INTERESES = 'Mis intereses'
 
 export default function Vacantes() {
   const [vacancies, setVacancies] = useState([])
@@ -21,6 +25,8 @@ export default function Vacantes() {
   const esEmpresa = useAuth().usuario?.rol === 'empresa'
   const matches = useMatches(activeStudent)
   const [sector, setSector] = useState('Todas')
+  const { data: perfil } = useFetch(() => getStudent(activeStudent), [activeStudent], Boolean(activeStudent))
+  const intereses = useMemo(() => new Set((perfil?.intereses ?? []).map((i) => i.toLowerCase())), [perfil])
 
   useEffect(() => {
     getVacancies()
@@ -30,19 +36,25 @@ export default function Vacantes() {
   }, [])
 
   // Filtro por área profesional (la misma clasificación del inicio), solo con las áreas que tienen vacantes
-  const sectors = useMemo(() => ['Todas', ...new Set(vacancies.map((v) => areaInfo(v.sector).label))], [vacancies])
+  const sectors = useMemo(
+    () => ['Todas', ...(intereses.size ? [MIS_INTERESES] : []), ...new Set(vacancies.map((v) => areaInfo(v.sector).label))],
+    [vacancies, intereses],
+  )
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
     return vacancies.filter((v) => {
-      if (sector !== 'Todas' && areaInfo(v.sector).label !== sector) return false
+      const area = areaInfo(v.sector).label
+      if (sector === MIS_INTERESES) {
+        if (!intereses.has(area.toLowerCase())) return false
+      } else if (sector !== 'Todas' && area !== sector) return false
       if (!q) return true
       const text = [v.titulo, v.nombre_empresa, v.sector, v.ubicacion?.zona, ...(v.requisitos?.skills_clave ?? [])]
         .join(' ')
         .toLowerCase()
       return text.includes(q)
     })
-  }, [vacancies, search, sector])
+  }, [vacancies, search, sector, intereses])
 
   // Con un perfil activo, las vacantes se ordenan de mayor a menor compatibilidad
   const sorted = useMemo(() => {

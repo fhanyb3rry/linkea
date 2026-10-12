@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowRight, CheckCircle2 } from 'lucide-react'
 import { useAuth } from '../../context/auth'
+import { AREA_OPTIONS } from '../../lib/areas'
 import { CARRERAS, IDIOMA_SUGGESTIONS, SKILL_SUGGESTIONS } from '../../lib/perfil'
 import { createStudent, deleteCV, descargarCV, updateStudent, uploadCV } from '../../services/api'
 import ChipInput from './ChipInput'
@@ -9,12 +10,14 @@ import DaysPicker from './DaysPicker'
 import FileDrop from './FileDrop'
 import { FormRow, Select, TextArea, TextInput } from './FormField'
 import FormSection from './FormSection'
+import ProyectosEditor from './ProyectosEditor'
 
 const BIO_MAX = 400
 
 function toForm(student) {
   return {
     nombre: student?.nombre ?? '',
+    matricula: student?.matricula ?? '',
     correo: student?.correo ?? '',
     telefono: student?.telefono ?? '',
     carrera: student?.carrera ?? '',
@@ -24,6 +27,8 @@ function toForm(student) {
     dias: student?.disponibilidad?.dias ?? [],
     skills: student?.skills ?? [],
     idiomas: student?.idiomas ?? [],
+    intereses: student?.intereses ?? [],
+    proyectos: student?.proyectos ?? [],
     bio: student?.bio ?? '',
     linkedin: student?.enlaces?.linkedin ?? '',
     github: student?.enlaces?.github ?? '',
@@ -60,8 +65,16 @@ export default function PerfilForm({ mode, initial }) {
       carrera: form.carrera.trim(),
       semestre: Number(form.semestre),
       ubicacion: { zona: form.zona.trim() },
+      matricula: form.matricula.trim(),
       skills: form.skills,
       idiomas: form.idiomas,
+      intereses: form.intereses,
+      proyectos: form.proyectos.map((p) => ({
+        nombre: p.nombre.trim(),
+        descripcion: p.descripcion.trim(),
+        tecnologias: p.tecnologias,
+        enlace: p.enlace.trim(),
+      })),
       bio: form.bio.trim(),
       enlaces: { linkedin: form.linkedin.trim(), github: form.github.trim(), portafolio: form.portafolio.trim() },
       disponibilidad: { horas_por_semana: Number(form.horas), dias: form.dias },
@@ -115,6 +128,17 @@ export default function PerfilForm({ mode, initial }) {
 
       <FormSection title="Información académica">
         <div className="grid gap-5 sm:grid-cols-2">
+          <FormRow label="Matrícula UTVT *">
+            <TextInput
+              value={form.matricula}
+              onChange={(e) => set('matricula')(e.target.value.replace(/\D/g, '').slice(0, 9))}
+              placeholder="222411176"
+              inputMode="numeric"
+              pattern="\d{9}"
+              title="La matrícula tiene 9 dígitos"
+              required
+            />
+          </FormRow>
           <FormRow label="Carrera *">
             <TextInput
               list="carreras"
@@ -172,7 +196,7 @@ export default function PerfilForm({ mode, initial }) {
       </FormSection>
 
       <FormSection
-        title="Habilidades e idiomas"
+        title="Habilidades, intereses e idiomas"
         description="Escribe y presiona Enter para agregar. Las habilidades alimentan tu compatibilidad con cada vacante."
       >
         <FormRow label="Habilidades">
@@ -183,6 +207,14 @@ export default function PerfilForm({ mode, initial }) {
             suggestions={SKILL_SUGGESTIONS}
           />
         </FormRow>
+        <FormRow label="Áreas de interés">
+          <ChipInput
+            value={form.intereses}
+            onChange={set('intereses')}
+            placeholder="Tecnología, Diseño…"
+            suggestions={AREA_OPTIONS}
+          />
+        </FormRow>
         <FormRow label="Idiomas">
           <ChipInput
             value={form.idiomas}
@@ -191,6 +223,13 @@ export default function PerfilForm({ mode, initial }) {
             suggestions={IDIOMA_SUGGESTIONS}
           />
         </FormRow>
+      </FormSection>
+
+      <FormSection
+        title="Proyectos"
+        description="Escolares o personales: muestran lo que sabes hacer más allá de la lista de habilidades."
+      >
+        <ProyectosEditor value={form.proyectos} onChange={set('proyectos')} />
       </FormSection>
 
       <FormSection title="Sobre ti y enlaces">

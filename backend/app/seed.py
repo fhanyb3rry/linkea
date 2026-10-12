@@ -33,6 +33,9 @@ COLECCIONES = ["users", "organizations", "students", "vacancies", "applications"
 ESTUDIANTES = [
     {
         "nombre": "Ana Torres Reyes",
+        "matricula": "222411101",
+        "intereses": ["Tecnología"],
+        "proyectos": [{"nombre": "Tablero de asistencia", "descripcion": "API en FastAPI y tablero con React para registrar asistencia del grupo.", "tecnologias": ["Python", "React", "SQL"], "enlace": "https://github.com/ejemplo/asistencia"}],
         "carrera": "Ingeniería en Software",
         "semestre": 7,
         "ubicacion": {"zona": "Toluca"},
@@ -44,6 +47,9 @@ ESTUDIANTES = [
     },
     {
         "nombre": "Carlos Rojas Medina",
+        "matricula": "222411102",
+        "intereses": ["Tecnología"],
+        "proyectos": [{"nombre": "Tienda en línea", "descripcion": "Catálogo y carrito con Node y React, desplegado en Docker.", "tecnologias": ["Node", "React", "Docker"], "enlace": ""}],
         "carrera": "Ingeniería en Sistemas",
         "semestre": 8,
         "ubicacion": {"zona": "Metepec"},
@@ -54,6 +60,9 @@ ESTUDIANTES = [
     },
     {
         "nombre": "Valeria Gómez Díaz",
+        "matricula": "222411103",
+        "intereses": ["Marketing", "Diseño"],
+        "proyectos": [{"nombre": "Campaña cafetería local", "descripcion": "Estrategia de redes sociales que duplicó seguidores en 3 meses.", "tecnologias": ["Redes sociales", "Copywriting"], "enlace": ""}],
         "carrera": "Mercadotecnia",
         "semestre": 6,
         "ubicacion": {"zona": "Toluca"},
@@ -64,6 +73,9 @@ ESTUDIANTES = [
     },
     {
         "nombre": "Diego Ramírez Soto",
+        "matricula": "222411104",
+        "intereses": ["Ingeniería", "Administración"],
+        "proyectos": [],
         "carrera": "Ingeniería Industrial",
         "semestre": 7,
         "ubicacion": {"zona": "Lerma"},
@@ -74,6 +86,9 @@ ESTUDIANTES = [
     },
     {
         "nombre": "Fernanda López Cruz",
+        "matricula": "222411105",
+        "intereses": ["Diseño"],
+        "proyectos": [{"nombre": "Identidad para panadería", "descripcion": "Logotipo, paleta y empaques.", "tecnologias": ["Illustrator", "Photoshop"], "enlace": ""}],
         "carrera": "Diseño Gráfico",
         "semestre": 5,
         "ubicacion": {"zona": "Zinacantepec"},
@@ -84,6 +99,9 @@ ESTUDIANTES = [
     },
     {
         "nombre": "Jorge Hernández Vega",
+        "matricula": "222411106",
+        "intereses": ["Administración"],
+        "proyectos": [],
         "carrera": "Administración",
         "semestre": 8,
         "ubicacion": {"zona": "Metepec"},

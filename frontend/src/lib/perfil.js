@@ -75,7 +75,10 @@ export function validateCV(file) {
 export function perfilCompleto(student) {
   const items = [
     { label: 'Datos básicos', ok: Boolean(student.nombre && student.carrera && student.ubicacion?.zona) },
+    { label: 'Matrícula', ok: /^\d{9}$/.test(student.matricula ?? '') },
     { label: 'Al menos 3 habilidades', ok: (student.skills?.length ?? 0) >= 3 },
+    { label: 'Áreas de interés', ok: (student.intereses?.length ?? 0) > 0 },
+    { label: 'Al menos un proyecto', ok: (student.proyectos?.length ?? 0) > 0 },
     { label: 'Disponibilidad con días', ok: (student.disponibilidad?.dias?.length ?? 0) > 0 },
     { label: 'Sobre ti', ok: Boolean(student.bio?.trim()) },
     { label: 'Datos de contacto', ok: Boolean(student.correo?.trim()) },

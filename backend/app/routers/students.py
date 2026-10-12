@@ -5,6 +5,7 @@ from bson import ObjectId
 from bson.errors import InvalidId
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from motor.motor_asyncio import AsyncIOMotorDatabase
+from pymongo.errors import DuplicateKeyError
 
 from app.core import archivos
 from app.core.database import get_database
@@ -37,6 +38,12 @@ def _propio(usuario: dict, student_id: str) -> ObjectId:
     return oid
 
 
+def _duplicado(error: DuplicateKeyError) -> HTTPException:
+    if "matricula" in str(error):
+        return HTTPException(status_code=409, detail="Ya existe un estudiante con esa matrícula")
+    return HTTPException(status_code=409, detail="Ya tienes un perfil; edítalo en lugar de crear otro")
+
+
 async def _borrar_cv(db: AsyncIOMotorDatabase, oid: ObjectId) -> None:
     """Elimina de GridFS el CV guardado del estudiante, si tiene."""
     doc = await db.students.find_one({"_id": oid}, {"cv": 1})
@@ -52,7 +59,10 @@ async def create_student(
     if usuario.get("perfil_id"):
         raise HTTPException(status_code=409, detail="Ya tienes un perfil; edítalo en lugar de crear otro")
     user_id = str(usuario["_id"])
-    result = await db.students.insert_one({**student.model_dump(), "user_id": user_id})
+    try:
+        result = await db.students.insert_one({**student.model_dump(), "user_id": user_id})
+    except DuplicateKeyError as error:
+        raise _duplicado(error)
     await db.users.update_one({"_id": usuario["_id"]}, {"$set": {"perfil_id": str(result.inserted_id)}})
     return await db.students.find_one({"_id": result.inserted_id})
 
@@ -82,7 +92,10 @@ async def update_student(
     oid = _propio(usuario, student_id)
     update_data = {k: v for k, v in student.model_dump().items() if v is not None}
     if update_data:
-        result = await db.students.update_one({"_id": oid}, {"$set": update_data})
+        try:
+            result = await db.students.update_one({"_id": oid}, {"$set": update_data})
+        except DuplicateKeyError as error:
+            raise _duplicado(error)
         if result.matched_count == 0:
             raise HTTPException(status_code=404, detail="Estudiante no encontrado")
     updated = await db.students.find_one({"_id": _oid(student_id)})
