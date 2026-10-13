@@ -8,10 +8,11 @@ from app.ai.client import ia_configurada, probar_conexion
 from app.ai.compatibilidad import ErrorIA, evaluar_con_ia, huella
 from app.core.config import settings
 from app.core.database import get_database
-from app.core.seguridad import usuario_actual
+from app.core.seguridad import es_rol, requiere_rol, usuario_actual
 from app.logic.logic_rules import evaluar_elegibilidad
 from app.models.company import Vacancy
 from app.models.student import Student
+from app.models.user import Rol
 from app.routers.companies import _oid as vacancy_oid
 from app.routers.students import _oid as student_oid
 
@@ -24,9 +25,11 @@ async def status():
     return {"configurada": ia_configurada(), "modelo": settings.anthropic_model}
 
 
-@router.post("/test")
+@router.post("/test", dependencies=[Depends(requiere_rol(Rol.COORDINADOR))])
 async def test():
-    """Prueba real de conexión con la API de Claude (una llamada mínima, gasta una fracción de centavo)."""
+    """Prueba real de conexión con la API de Claude (una llamada mínima, gasta una fracción de centavo).
+
+    Solo coordinación: cada llamada gasta saldo de la cuenta de la API."""
     if not ia_configurada():
         return {
             "ok": False,
@@ -58,6 +61,7 @@ async def compatibilidad(
     vacancy_id: str,
     refrescar: bool = False,
     db: AsyncIOMotorDatabase = Depends(get_database),
+    usuario: dict = Depends(usuario_actual),
 ):
     """Filtro 2. Solo evalúa con IA a quien pasó el filtro 1; si la IA falla, responde con las reglas."""
     student_doc = await db.students.find_one({"_id": student_oid(student_id)})
@@ -66,6 +70,17 @@ async def compatibilidad(
     vacancy_doc = await db.vacancies.find_one({"_id": vacancy_oid(vacancy_id)})
     if vacancy_doc is None:
         raise HTTPException(status_code=404, detail="Vacante no encontrada")
+    # Permisos: cada quien solo evalúa lo suyo (la IA gasta saldo y el resultado es información del perfil).
+    #   estudiante -> solo su propio perfil | empresa -> solo sus vacantes y alumnos que se postularon a ellas
+    #   coordinación y asesores -> cualquiera
+    if es_rol(usuario, Rol.ESTUDIANTE) and student_id != usuario.get("perfil_id"):
+        raise HTTPException(status_code=403, detail="Solo puedes ver la compatibilidad de tu propio perfil")
+    if es_rol(usuario, Rol.EMPRESA):
+        postulo = await db.applications.find_one({"student_id": student_id, "vacancy_id": vacancy_id})
+        if vacancy_doc.get("user_id") != str(usuario["_id"]) or postulo is None:
+            raise HTTPException(status_code=403, detail="Solo puedes evaluar a quienes se postularon a tus vacantes")
+        refrescar = False  # una empresa no puede forzar nuevas llamadas de pago
+
     student, vacancy = Student(**student_doc), Vacancy(**vacancy_doc)
 
     # Filtro 1: si no es elegible, aquí termina (no gastamos IA).
