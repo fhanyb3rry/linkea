@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Brain, Check, RefreshCcw, ThumbsDown, ThumbsUp, X } from 'lucide-react'
+import { ArrowRight, Brain, Check, MapPin, RefreshCcw, ThumbsDown, ThumbsUp, X } from 'lucide-react'
 import { useAuth } from '../../context/auth'
 import useActiveStudent from '../../hooks/useActiveStudent'
-import { checkEligibility, getCompatibilidadIA, getStudents } from '../../services/api'
+import { checkEligibility, getCompatibilidadIA, getStudents, getTrasladoPar } from '../../services/api'
 
 // Proposiciones atómicas de la fórmula, en el orden en que se muestran.
 const proposiciones = [
@@ -103,6 +103,61 @@ function FiltroIA({ studentId, vacancyId, elegible }) {
               Evaluado por IA ({data.modelo}){data.desde_cache ? ' · resultado guardado' : ''}. Es una orientación, no una decisión.
             </p>
           )}
+        </>
+      )}
+    </div>
+  )
+}
+
+// Cuánto tarda el estudiante en llegar a la zona de la vacante (A* sobre el mapa de zonas).
+function TrasladoCard({ studentId, vacancyId }) {
+  const [estado, setEstado] = useState({ key: '', data: null })
+  const key = `${studentId}:${vacancyId}`
+
+  useEffect(() => {
+    let cancelled = false
+    getTrasladoPar(studentId, vacancyId)
+      .then((data) => !cancelled && setEstado({ key, data }))
+      .catch(() => !cancelled && setEstado({ key, data: null }))
+    return () => {
+      cancelled = true
+    }
+  }, [studentId, vacancyId, key])
+
+  const t = estado.key === key ? estado.data : null
+  if (!t) return null
+
+  return (
+    <div className="flex flex-col gap-2 rounded-xl border border-line p-3">
+      <p className="flex items-center gap-2 font-body text-xs font-semibold text-ink">
+        <MapPin className="h-4 w-4 text-cocoa" />
+        Traslado estimado
+      </p>
+      {!t.conocido ? (
+        <p className="font-body text-xs text-muted">No tenemos tu zona o la de la vacante en el mapa de traslados.</p>
+      ) : (
+        <>
+          <p className="font-body text-sm text-ink">
+            <b>{t.minutos_reales === 0 ? 'Misma zona' : `${t.minutos_reales} min`}</b>
+            <span className={t.compatible ? 'text-teal' : 'text-brand'}>
+              {' '}· {t.compatible ? 'dentro' : 'fuera'} del límite de {t.limite_minutos} min
+            </span>
+          </p>
+          <p className="flex flex-wrap items-center gap-1 font-body text-xs text-muted">
+            {t.ruta.map((z, i) => (
+              <span key={`${z}-${i}`} className="flex items-center gap-1">
+                {z}
+                {i < t.ruta.length - 1 && <ArrowRight className="h-3 w-3" />}
+              </span>
+            ))}
+          </p>
+          <p className="font-body text-[11px] text-muted">
+            Calculado con A*: estimó {t.minutos_estimados} min al inicio, revisó {t.nodos_explorados} zonas y el tiempo real del
+            mapa es {t.minutos_reales} min.{' '}
+            <Link to={`/traslado?desde=${encodeURIComponent(t.origen)}&hasta=${encodeURIComponent(t.destino)}`} className="font-semibold text-brand hover:underline">
+              Ver cómo se calcula
+            </Link>
+          </p>
         </>
       )}
     </div>
@@ -269,6 +324,7 @@ export default function EligibilityPanel({ vacancyId }) {
         </>
       )}
 
+      {shown && !loading && <TrasladoCard studentId={studentId} vacancyId={vacancyId} />}
       {shown && !loading && <FiltroIA studentId={studentId} vacancyId={vacancyId} elegible={shown.elegible} />}
     </aside>
   )

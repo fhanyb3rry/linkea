@@ -28,6 +28,7 @@ import PublicarVacante from './pages/PublicarVacante'
 import Recuperar from './pages/Recuperar'
 import Register from './pages/Register'
 import RutasAprendizaje from './pages/RutasAprendizaje'
+import Traslado from './pages/Traslado'
 import SeguimientoDetalle from './pages/SeguimientoDetalle'
 import Seguimientos from './pages/Seguimientos'
 import VacancyDetail from './pages/VacancyDetail'
@@ -61,6 +62,10 @@ export default function App() {
         <Route path="estudiantes/:id" element={<PerfilEstudiante />} />
         <Route path="organizaciones" element={<Organizaciones />} />
         <Route path="organizaciones/:id" element={<OrganizacionDetalle />} />
+
+        <Route element={<RequireAuth roles={['estudiante', 'coordinador', 'asesor_academico']} />}>
+          <Route path="traslado" element={<Traslado />} />
+        </Route>
 
         <Route element={<RequireAuth roles={['estudiante']} />}>
           <Route path="rutas" element={<RutasAprendizaje />} />

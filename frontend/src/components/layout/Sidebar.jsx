@@ -11,6 +11,7 @@ import {
   GraduationCap,
   Home,
   LayoutDashboard,
+  MapPin,
   Network,
   MessageCircle,
   Send,
@@ -30,6 +31,7 @@ const groups = [
       { to: '/organizaciones', label: 'Empresas', icon: Factory },
       { to: '/guardados', label: 'Guardados', icon: Bookmark },
       { to: '/rutas', label: 'Rutas de aprendizaje', icon: Network, roles: ['estudiante'] },
+      { to: '/traslado', label: 'Traslado', icon: MapPin, roles: ['estudiante', 'coordinador', 'asesor_academico'] },
     ],
   },
   {

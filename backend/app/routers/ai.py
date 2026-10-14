@@ -8,6 +8,7 @@ from app.ai.client import ia_configurada, probar_conexion
 from app.ai.compatibilidad import ErrorIA, evaluar_con_ia, huella
 from app.core.config import settings
 from app.core.database import get_database
+from app.core.permisos import verificar_acceso_par
 from app.core.seguridad import es_rol, requiere_rol, usuario_actual
 from app.logic.logic_rules import evaluar_elegibilidad
 from app.models.company import Vacancy
@@ -71,14 +72,8 @@ async def compatibilidad(
     if vacancy_doc is None:
         raise HTTPException(status_code=404, detail="Vacante no encontrada")
     # Permisos: cada quien solo evalúa lo suyo (la IA gasta saldo y el resultado es información del perfil).
-    #   estudiante -> solo su propio perfil | empresa -> solo sus vacantes y alumnos que se postularon a ellas
-    #   coordinación y asesores -> cualquiera
-    if es_rol(usuario, Rol.ESTUDIANTE) and student_id != usuario.get("perfil_id"):
-        raise HTTPException(status_code=403, detail="Solo puedes ver la compatibilidad de tu propio perfil")
+    await verificar_acceso_par(db, usuario, student_id, vacancy_doc)
     if es_rol(usuario, Rol.EMPRESA):
-        postulo = await db.applications.find_one({"student_id": student_id, "vacancy_id": vacancy_id})
-        if vacancy_doc.get("user_id") != str(usuario["_id"]) or postulo is None:
-            raise HTTPException(status_code=403, detail="Solo puedes evaluar a quienes se postularon a tus vacantes")
         refrescar = False  # una empresa no puede forzar nuevas llamadas de pago
 
     student, vacancy = Student(**student_doc), Vacancy(**vacancy_doc)

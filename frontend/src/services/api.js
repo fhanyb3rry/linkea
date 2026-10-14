@@ -321,3 +321,39 @@ export function createPersonal(payload) {
 export function setUsuarioActivo(id, activo) {
   return sendJSON('PATCH', `/auth/usuarios/${id}`, { activo })
 }
+
+// Traslado entre zonas: BFS, DFS, UCS, Greedy y A*
+export function getTrasladoMapa() {
+  return request('/search/traslado/mapa')
+}
+
+export function getTrasladoHeuristica(hacia) {
+  return request(`/search/traslado/heuristica?${new URLSearchParams({ hacia })}`)
+}
+
+function paramsTraslado({ desde, hasta, limite, algoritmo }) {
+  const p = new URLSearchParams({ desde, hasta })
+  if (algoritmo) p.set('algoritmo', algoritmo)
+  if (limite != null) p.set('limite', limite)
+  return p
+}
+
+export function buscarTraslado(args) {
+  return request(`/search/traslado/buscar?${paramsTraslado(args)}`)
+}
+
+export function compararTraslado(args) {
+  return request(`/search/traslado/comparar?${paramsTraslado(args)}`)
+}
+
+export function todasLasRutasTraslado(args) {
+  return request(`/search/traslado/todas?${paramsTraslado(args)}`)
+}
+
+export function getTrasladoResumen() {
+  return request('/search/traslado/resumen')
+}
+
+export function getTrasladoPar(studentId, vacancyId) {
+  return request(`/search/traslado/${studentId}/${vacancyId}`)
+}

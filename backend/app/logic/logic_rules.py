@@ -12,6 +12,7 @@ from app.logic.equivalences import de_morgan, son_equivalentes
 from app.logic.formulas import And, Formula, Implies, Not, Or, Var, asignaciones
 from app.models.company import Vacancy
 from app.models.student import Student
+from app.search.traslado import LIMITE_TRASLADO_MIN, ubicacion_compatible
 
 CARRERA = Var("carrera_match")
 SKILL = Var("skill_clave")
@@ -73,7 +74,9 @@ def _evaluar_disponibilidad_horaria(student: Student, vacancy: Vacancy) -> bool:
 
 
 def _evaluar_ubicacion_compatible(student: Student, vacancy: Vacancy) -> bool:
-    return student.ubicacion.zona.strip().lower() == vacancy.ubicacion.zona.strip().lower()
+    # Compatible si el traslado estimado (búsqueda A* sobre el mapa de zonas) cabe en el límite de
+    # minutos. Si alguna zona no está en el mapa, se usa la regla de antes: misma zona.
+    return ubicacion_compatible(student.ubicacion.zona, vacancy.ubicacion.zona)
 
 
 def evaluar_proposiciones(student: Student, vacancy: Vacancy) -> Proposiciones:
@@ -100,7 +103,7 @@ def calcular_compatibilidad(student: Student, vacancy: Vacancy) -> int:
 
     Es determinista (NO es el filtro de IA): reparte 100 puntos entre carrera (30),
     cobertura de las skills clave de la vacante (30), horas disponibles frente a las
-    requeridas (20) y misma zona (20). Sirve para ordenar y mostrar un porcentaje;
+    requeridas (20) y ubicación compatible por tiempo de traslado (20). Sirve para ordenar y mostrar un porcentaje;
     la decisión de elegibilidad sigue siendo la fórmula proposicional.
     """
     p = evaluar_proposiciones(student, vacancy)
@@ -142,7 +145,7 @@ def explicar(p: Proposiciones) -> list[str]:
     if not p.disponibilidad_horaria:
         razones.append("Las horas disponibles no alcanzan (¬Disponibilidad)")
     if not p.ubicacion_compatible:
-        razones.append("La ubicación no es compatible (¬Ubicación)")
+        razones.append(f"La ubicación no es compatible: el traslado supera {LIMITE_TRASLADO_MIN} min (¬Ubicación)")
     return razones
 
 
