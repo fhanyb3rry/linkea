@@ -102,8 +102,8 @@ class Iff(_Binaria):
 
 
 def asignaciones(variables: list[str]):
-    """Todas las combinaciones de valores de verdad (2^n), en orden F..F a V..V."""
-    for combo in product([False, True], repeat=len(variables)):
+    """Todas las combinaciones de valores de verdad (2^n), en orden V..V a F..F."""
+    for combo in product([True, False], repeat=len(variables)):
         yield dict(zip(variables, combo))
 
 
