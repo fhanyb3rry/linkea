@@ -313,6 +313,21 @@
     transform: scaleX(1);
   }
 
+  /* Cajita de dato (número + etiqueta) y chip de texto: fondo suave y texto del tema, siempre legibles.
+     OJO: `.tile` es el fondo OSCURO de los avatares; no se usa para cajas con texto normal. */
+  .stat {
+    border-radius: 0.75rem;
+    border: 1px solid var(--line);
+    background: var(--cocoa-soft);
+    color: var(--ink);
+  }
+
+  .chip {
+    border-radius: 0.5rem;
+    background: var(--cocoa-soft);
+    color: var(--ink);
+  }
+
   /* Monograma / avatar con degradado de marca */
   .tile {
     background: var(--tile);

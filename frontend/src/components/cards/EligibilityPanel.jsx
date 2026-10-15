@@ -139,7 +139,7 @@ function TrasladoCard({ studentId, vacancyId }) {
         <>
           <p className="font-body text-sm text-ink">
             <b>{t.minutos_reales === 0 ? 'Misma zona' : `${t.minutos_reales} min`}</b>
-            <span className={t.compatible ? 'text-teal' : 'text-brand'}>
+            <span className={t.compatible ? 'font-semibold text-ink' : 'font-semibold text-brand'}>
               {' '}· {t.compatible ? 'dentro' : 'fuera'} del límite de {t.limite_minutos} min
             </span>
           </p>
@@ -151,13 +151,13 @@ function TrasladoCard({ studentId, vacancyId }) {
               </span>
             ))}
           </p>
-          <p className="font-body text-[11px] text-muted">
-            Calculado con A*: estimó {t.minutos_estimados} min al inicio, revisó {t.nodos_explorados} zonas y el tiempo real del
-            mapa es {t.minutos_reales} min.{' '}
-            <Link to={`/traslado?desde=${encodeURIComponent(t.origen)}&hasta=${encodeURIComponent(t.destino)}`} className="font-semibold text-brand hover:underline">
-              Ver cómo se calcula
-            </Link>
-          </p>
+          <p className="font-body text-xs leading-relaxed text-ink">{t.frase}</p>
+          <Link
+            to={`/traslado?desde=${encodeURIComponent(t.origen)}&hasta=${encodeURIComponent(t.destino)}`}
+            className="font-body text-xs font-semibold text-brand hover:underline"
+          >
+            Ver el mapa de mi traslado
+          </Link>
         </>
       )}
     </div>

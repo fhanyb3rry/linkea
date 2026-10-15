@@ -117,6 +117,12 @@ def _zona_o_404(texto: str) -> str:
     return zona
 
 
+def _tipo_o_400(tipo: str) -> str:
+    if tipo not in tr.TIPOS_DISTANCIA:
+        raise HTTPException(status_code=400, detail="Heurística inválida: usa euclidiana o manhattan")
+    return tipo
+
+
 @router.get("/traslado/mapa")
 async def traslado_mapa():
     """El mapa completo: zonas con coordenadas, tramos con minutos reales, y datos de la heurística."""
@@ -124,15 +130,24 @@ async def traslado_mapa():
         "zonas": [{"nombre": z, "lat": lat, "lng": lng} for z, (lat, lng) in tr.ZONAS.items()],
         "tramos": [{"a": a, "b": b, "minutos": m} for a, b, m in tr._TRAMOS],
         "limite_traslado_min": tr.LIMITE_TRASLADO_MIN,
-        "velocidad_max_kmh": tr.VELOCIDAD_MAX_KMH,
-        "heuristica": tr.verificar_heuristica(),
+        "tipos_distancia": list(tr.TIPOS_DISTANCIA),
+        "velocidades_kmh": {t: tr.velocidad_maxima(t) for t in tr.TIPOS_DISTANCIA},
+        "heuristicas": {t: tr.verificar_heuristica(t) for t in tr.TIPOS_DISTANCIA},
     }
 
 
 @router.get("/traslado/heuristica")
-async def traslado_heuristica(hacia: str):
-    """h(n) de cada zona hacia el destino elegido (minutos estimados en línea recta)."""
-    return tr.heuristica_hacia(_zona_o_404(hacia))
+async def traslado_heuristica(hacia: str, tipo: str = Query("euclidiana", description="euclidiana | manhattan")):
+    """h(n) de cada zona hacia el destino elegido (minutos estimados: distancia en línea recta ÷ velocidad máxima)."""
+    return tr.heuristica_hacia(_zona_o_404(hacia), _tipo_o_400(tipo))
+
+
+@router.get("/traslado/distancia")
+async def traslado_distancia(
+    desde: str, hasta: str, tipo: str = Query("euclidiana", description="euclidiana | manhattan")
+):
+    """El procedimiento de la distancia entre dos zonas (tabla, fórmula, pasos) y cómo se vuelve h en minutos."""
+    return tr.calculo_distancia(_zona_o_404(desde), _zona_o_404(hasta), _tipo_o_400(tipo))
 
 
 @router.get("/traslado/buscar", response_model=tr.ResultadoTraslado)
@@ -141,17 +156,24 @@ async def traslado_buscar(
     hasta: str,
     algoritmo: str = Query("astar", description="bfs | dfs | ucs | greedy | astar"),
     limite: int | None = Query(None, ge=0, le=20, description="Límite de profundidad (vacío = sin límite)"),
+    heuristica: str = Query("euclidiana", description="euclidiana | manhattan"),
 ):
     if algoritmo not in tr.ALGORITMOS_TRASLADO:
         raise HTTPException(status_code=400, detail="Algoritmo inválido: usa bfs, dfs, ucs, greedy o astar")
-    return tr.ALGORITMOS_TRASLADO[algoritmo](_zona_o_404(desde), _zona_o_404(hasta), limite)
+    return tr.ALGORITMOS_TRASLADO[algoritmo](_zona_o_404(desde), _zona_o_404(hasta), limite, _tipo_o_400(heuristica))
 
 
 @router.get("/traslado/comparar", response_model=list[tr.ResultadoTraslado])
-async def traslado_comparar(desde: str, hasta: str, limite: int | None = Query(None, ge=0, le=20)):
+async def traslado_comparar(
+    desde: str,
+    hasta: str,
+    limite: int | None = Query(None, ge=0, le=20),
+    heuristica: str = Query("euclidiana", description="euclidiana | manhattan"),
+):
     """Los cinco algoritmos sobre el mismo origen y destino."""
     a, b = _zona_o_404(desde), _zona_o_404(hasta)
-    return [funcion(a, b, limite) for funcion in tr.ALGORITMOS_TRASLADO.values()]
+    tipo = _tipo_o_400(heuristica)
+    return [funcion(a, b, limite, tipo) for funcion in tr.ALGORITMOS_TRASLADO.values()]
 
 
 @router.get("/traslado/todas", response_model=tr.TodasLasRutas)
@@ -161,9 +183,15 @@ async def traslado_todas(desde: str, hasta: str, limite: int | None = Query(6, g
 
 
 @router.get("/traslado/resumen")
-async def traslado_resumen():
+async def traslado_resumen(heuristica: str = Query("euclidiana", description="euclidiana | manhattan")):
     """Los 5 algoritmos en TODOS los pares de zonas: cuántas veces no dan la ruta óptima y cuánto exploran."""
-    return tr.resumen_todos_los_pares()
+    return tr.resumen_todos_los_pares(_tipo_o_400(heuristica))
+
+
+@router.get("/traslado/usuario", response_model=tr.ResumenTraslado)
+async def traslado_usuario(desde: str, hasta: str):
+    """Lo que ve el usuario: la ruta más rápida, otras opciones, un resumen en español y los datos del mapa limpio."""
+    return tr.resumen_traslado(_zona_o_404(desde), _zona_o_404(hasta))
 
 
 @router.get("/traslado/{student_id}/{vacancy_id}", response_model=tr.TrasladoPar)

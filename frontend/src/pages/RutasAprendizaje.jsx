@@ -20,7 +20,7 @@ function Flecha({ ruta }) {
     <span className="flex flex-wrap items-center gap-1.5">
       {ruta.map((n, i) => (
         <span key={`${n}-${i}`} className="flex items-center gap-1.5">
-          <span className="rounded-md bg-tile px-2 py-1 font-body text-xs font-medium text-ink">{n}</span>
+          <span className="chip px-2 py-1 font-body text-xs font-medium text-ink">{n}</span>
           {i < ruta.length - 1 && <ArrowRight className="h-3 w-3 text-muted" />}
         </span>
       ))}
@@ -122,7 +122,7 @@ function PlanPerfil({ limite }) {
                 <p className="font-body text-sm text-muted">¡No te falta ninguna habilidad para esta vacante!</p>
               )}
               {plan.faltantes_en_grafo.map((p) => (
-                <div key={p.skill_faltante} className="tile flex flex-col gap-2 p-4">
+                <div key={p.skill_faltante} className="stat flex flex-col gap-2 p-4">
                   <p className="font-body text-sm font-semibold text-ink">
                     Te falta «{p.skill_faltante}» · {p.pasos} {p.pasos === 1 ? 'paso' : 'pasos'}
                   </p>
@@ -218,7 +218,7 @@ export default function RutasAprendizaje() {
             <GrafoSVG grafo={grafo} rutas={res.rutas} inicio={desde} objetivo={hasta} />
             <p className="flex flex-wrap gap-4 px-2 font-body text-xs text-muted">
               <span><b className="text-brand">━</b> ruta más corta</span>
-              <span><b className="text-caramel">━</b> otras rutas</span>
+              <span className="flex items-center gap-1.5"><i className="inline-block h-1 w-6 rounded-full bg-caramel" /> otras rutas</span>
               <span>● extremos de la búsqueda</span>
             </p>
           </div>
@@ -249,15 +249,15 @@ export default function RutasAprendizaje() {
               </p>
               <ol className="flex max-h-40 flex-wrap gap-1.5 overflow-y-auto">
                 {res.orden_exploracion.map((n, i) => (
-                  <li key={i} className="rounded-md bg-tile px-2 py-1 font-body text-xs text-ink">
+                  <li key={i} className="chip px-2 py-1 font-body text-xs text-ink">
                     <span className="text-muted">{i + 1}.</span> {n}
                   </li>
                 ))}
               </ol>
               <dl className="grid grid-cols-2 gap-3 font-body text-xs">
-                <div className="tile p-3"><dt className="text-muted">Límite de profundidad</dt><dd className="mt-1 text-base font-semibold text-ink">{res.limite_profundidad ?? 'sin límite'}</dd></div>
-                <div className="tile p-3"><dt className="text-muted">Ramas cortadas por el límite</dt><dd className="mt-1 text-base font-semibold text-ink">{res.podados_por_limite}</dd></div>
-                <div className="tile col-span-2 p-3">
+                <div className="stat p-3"><dt className="text-muted">Límite de profundidad</dt><dd className="mt-1 text-base font-semibold text-ink">{res.limite_profundidad ?? 'sin límite'}</dd></div>
+                <div className="stat p-3"><dt className="text-muted">Ramas cortadas por el límite</dt><dd className="mt-1 text-base font-semibold text-ink">{res.podados_por_limite}</dd></div>
+                <div className="stat col-span-2 p-3">
                   <dt className="text-muted">Contra ciclos infinitos</dt>
                   <dd className="mt-1 text-ink">{res.mecanismo_ciclos}. Ciclos evitados: <b>{res.ciclos_evitados.length}</b>
                     {res.ciclos_evitados[0] && <> (ej.: {res.ciclos_evitados[0].join(' → ')})</>}

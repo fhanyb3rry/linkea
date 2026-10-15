@@ -327,13 +327,24 @@ export function getTrasladoMapa() {
   return request('/search/traslado/mapa')
 }
 
-export function getTrasladoHeuristica(hacia) {
-  return request(`/search/traslado/heuristica?${new URLSearchParams({ hacia })}`)
+export function getTrasladoHeuristica(hacia, tipo = 'euclidiana') {
+  return request(`/search/traslado/heuristica?${new URLSearchParams({ hacia, tipo })}`)
 }
 
-function paramsTraslado({ desde, hasta, limite, algoritmo }) {
+// Lo que ve el usuario: ruta más rápida, otras opciones, resumen en español y datos del mapa limpio.
+export function getTrasladoUsuario({ desde, hasta }) {
+  return request(`/search/traslado/usuario?${new URLSearchParams({ desde, hasta })}`)
+}
+
+// El procedimiento de la distancia entre dos zonas (tabla, fórmula, pasos) y cómo se vuelve h en minutos.
+export function getTrasladoDistancia({ desde, hasta, tipo = 'euclidiana' }) {
+  return request(`/search/traslado/distancia?${new URLSearchParams({ desde, hasta, tipo })}`)
+}
+
+function paramsTraslado({ desde, hasta, limite, algoritmo, heuristica }) {
   const p = new URLSearchParams({ desde, hasta })
   if (algoritmo) p.set('algoritmo', algoritmo)
+  if (heuristica) p.set('heuristica', heuristica)
   if (limite != null) p.set('limite', limite)
   return p
 }
@@ -350,8 +361,8 @@ export function todasLasRutasTraslado(args) {
   return request(`/search/traslado/todas?${paramsTraslado(args)}`)
 }
 
-export function getTrasladoResumen() {
-  return request('/search/traslado/resumen')
+export function getTrasladoResumen(heuristica = 'euclidiana') {
+  return request(`/search/traslado/resumen?${new URLSearchParams({ heuristica })}`)
 }
 
 export function getTrasladoPar(studentId, vacancyId) {
