@@ -17,10 +17,11 @@ export default function PublicLayout() {
   const { pathname } = useLocation()
 
   return (
-    <div className="min-h-screen bg-canvas">
+    <div className="min-h-screen">
+      <div className="app-bg" aria-hidden="true" />
       <header className="absolute inset-x-0 top-0 z-30">
         <nav className="mx-auto flex max-w-7xl items-center gap-8 px-4 py-5 sm:px-6">
-          <Link to="/" className="font-heading text-3xl font-semibold text-ink">
+          <Link to="/" className="brand-mark text-5xl text-ink">
             Linkea<span className="text-brand">✦</span>
           </Link>
 
@@ -72,7 +73,7 @@ export default function PublicLayout() {
         </nav>
 
         {open && (
-          <div className="mx-4 flex flex-col gap-1 rounded-2xl border border-line bg-surface p-3 shadow-lg md:hidden">
+          <div className="glass-strong mx-4 flex flex-col gap-1 rounded-2xl p-3 shadow-lg md:hidden">
             {links.map((l) => (
               <a
                 key={l.href}
@@ -102,7 +103,7 @@ export default function PublicLayout() {
       <footer id="contacto" className="border-t border-line bg-surface">
         <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-10 sm:px-6 md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="font-heading text-2xl text-ink">
+            <p className="brand-mark text-4xl text-ink">
               Linkea<span className="text-brand">✦</span>
             </p>
             <p className="mt-1 font-body text-sm text-muted">

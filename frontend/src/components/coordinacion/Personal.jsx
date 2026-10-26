@@ -4,6 +4,7 @@ import { useAuth } from '../../context/auth'
 import useFetch from '../../hooks/useFetch'
 import { ROLES } from '../../lib/roles'
 import { createPersonal, getUsuarios, setUsuarioActivo } from '../../services/api'
+import { faltanEnPassword } from '../../lib/password'
 import { FormRow, Select, TextInput } from '../forms/FormField'
 import ListState from '../layout/ListState'
 import { Boton, ErrorTexto, Seccion } from '../seguimiento/ui'
@@ -28,6 +29,11 @@ export default function Personal() {
 
   async function crear(event) {
     event.preventDefault()
+    const faltan = faltanEnPassword(form.password)
+    if (faltan.length > 0) {
+      setError(`La contraseña necesita: ${faltan.join(', ').toLowerCase()}.`)
+      return
+    }
     setBusy(true)
     setError(null)
     try {
@@ -89,7 +95,8 @@ export default function Personal() {
               <TextInput type="email" value={form.email} onChange={onText('email')} required placeholder="asesor@utvt.edu.mx" />
             </FormRow>
             <FormRow label="Contraseña inicial *">
-              <TextInput type="text" value={form.password} onChange={onText('password')} required minLength={8} maxLength={72} autoComplete="off" />
+              <TextInput type="text" value={form.password} onChange={onText('password')} required minLength={10} maxLength={72} autoComplete="off" />
+              <p className="mt-1 font-body text-[11px] text-muted">Mínimo 10 caracteres con mayúscula, número y símbolo.</p>
             </FormRow>
             <FormRow label="Rol">
               <Select value={form.rol} onChange={onText('rol')}>

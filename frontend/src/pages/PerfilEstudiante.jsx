@@ -14,6 +14,7 @@ import {
 } from 'lucide-react'
 import ListState from '../components/layout/ListState'
 import PageTitle from '../components/layout/PageTitle'
+import { useAuth } from '../context/auth'
 import useActiveStudent from '../hooks/useActiveStudent'
 import useFetch from '../hooks/useFetch'
 import useStoredSet from '../hooks/useStoredSet'
@@ -59,6 +60,7 @@ function Dato({ icon: Icon, children }) {
 
 export default function PerfilEstudiante() {
   const { id } = useParams()
+  const { usuario } = useAuth()
   const [activeId] = useActiveStudent()
   const [connections, toggleConnection] = useStoredSet('linkea-connections')
   const { data: student, error, loading } = useFetch(() => getStudent(id), [id])
@@ -75,7 +77,14 @@ export default function PerfilEstudiante() {
 
   return (
     <section className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-8 sm:px-6">
-      <PageTitle title={student ? 'Perfil' : 'Perfil de estudiante'} back={{ to: '/estudiantes', label: 'Estudiantes' }} />
+      <PageTitle
+        title={student ? 'Perfil' : 'Perfil de estudiante'}
+        back={
+          usuario?.rol === 'estudiante'
+            ? { to: '/inicio', label: 'Inicio' }
+            : { to: '/estudiantes', label: 'Estudiantes' }
+        }
+      />
 
       <ListState loading={loading} error={error} />
 
@@ -284,7 +293,7 @@ function Completitud({ student }) {
           <li key={label} className="flex items-center gap-2 font-body text-xs text-ink">
             <span
               className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full ${
-                ok ? 'bg-teal text-white' : 'border border-line text-transparent'
+                ok ? 'bg-teal text-on-teal' : 'border border-line text-transparent'
               }`}
             >
               <Check className="h-2.5 w-2.5" />

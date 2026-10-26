@@ -19,6 +19,32 @@ const DEFAULTS = {
   mostrarContacto: true,
 }
 
+// Qué avisos tiene sentido recibir según el rol: el estudiante no publica vacantes
+// y la empresa no se postula.
+const SWITCHES_NOTIF = {
+  estudiante: [
+    ['emailMatches', 'Nuevas vacantes compatibles', 'Cuando haya una práctica elegible para ti.'],
+    ['emailPostulaciones', 'Cambios en mis postulaciones', 'Cuando una empresa actualice el estado.'],
+    ['resumenSemanal', 'Resumen semanal', 'Un correo con lo más relevante de la semana.'],
+  ],
+  empresa: [
+    ['emailPostulaciones', 'Nuevas postulaciones', 'Cuando un estudiante se postule a una de tus vacantes.'],
+    ['emailMatches', 'Candidatos compatibles', 'Cuando haya estudiantes con alto match para tus vacantes.'],
+    ['resumenSemanal', 'Resumen semanal', 'Un correo con lo más relevante de la semana.'],
+  ],
+  _staff: [
+    ['emailPostulaciones', 'Movimientos de postulaciones', 'Cambios de estado en las postulaciones activas.'],
+    ['emailMatches', 'Incidencias nuevas', 'Cuando se reporte una incidencia en un seguimiento.'],
+    ['resumenSemanal', 'Resumen semanal', 'Un correo con lo más relevante de la semana.'],
+  ],
+}
+
+// Qué comparte cada rol: el estudiante su perfil, la empresa su organización.
+const VISIBLE_LABEL = {
+  estudiante: ['Perfil visible para empresas', 'Si lo desactivas, no aparecerás en los candidatos sugeridos.'],
+  empresa: ['Organización visible para estudiantes', 'Si la desactivas, no aparecerás en el directorio de empresas.'],
+}
+
 function readSettings() {
   try {
     return { ...DEFAULTS, ...JSON.parse(localStorage.getItem(KEY) ?? '{}') }
@@ -156,33 +182,26 @@ export default function Configuracion() {
       </Block>
 
       <Block title="Notificaciones" description="Elige qué avisos quieres recibir.">
-        <Switch
-          checked={settings.emailMatches}
-          onChange={(v) => update('emailMatches', v)}
-          label="Nuevas vacantes compatibles"
-          description="Cuando haya una práctica elegible para ti."
-        />
-        <Switch
-          checked={settings.emailPostulaciones}
-          onChange={(v) => update('emailPostulaciones', v)}
-          label="Cambios en mis postulaciones"
-          description="Cuando una empresa actualice el estado."
-        />
-        <Switch
-          checked={settings.resumenSemanal}
-          onChange={(v) => update('resumenSemanal', v)}
-          label="Resumen semanal"
-          description="Un correo con lo más relevante de la semana."
-        />
+        {(SWITCHES_NOTIF[usuario.rol] ?? SWITCHES_NOTIF._staff).map(([key, label, description]) => (
+          <Switch
+            key={key}
+            checked={settings[key]}
+            onChange={(v) => update(key, v)}
+            label={label}
+            description={description}
+          />
+        ))}
       </Block>
 
       <Block title="Privacidad">
-        <Switch
-          checked={settings.perfilVisible}
-          onChange={(v) => update('perfilVisible', v)}
-          label="Perfil visible para empresas"
-          description="Si lo desactivas, no aparecerás en los candidatos sugeridos."
-        />
+        {VISIBLE_LABEL[usuario.rol] && (
+          <Switch
+            checked={settings.perfilVisible}
+            onChange={(v) => update('perfilVisible', v)}
+            label={VISIBLE_LABEL[usuario.rol][0]}
+            description={VISIBLE_LABEL[usuario.rol][1]}
+          />
+        )}
         <Switch
           checked={settings.mostrarContacto}
           onChange={(v) => update('mostrarContacto', v)}

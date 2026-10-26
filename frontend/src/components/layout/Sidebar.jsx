@@ -27,9 +27,12 @@ const groups = [
       { to: '/inicio', label: 'Inicio', icon: Home },
       { to: '/coordinacion', label: 'Coordinación', icon: LayoutDashboard, roles: ['coordinador'] },
       { to: '/vacantes', label: 'Vacantes', icon: Briefcase },
-      { to: '/estudiantes', label: 'Estudiantes', icon: GraduationCap },
-      { to: '/organizaciones', label: 'Empresas', icon: Factory },
-      { to: '/guardados', label: 'Guardados', icon: Bookmark },
+      // El directorio de estudiantes sirve a quien recluta o supervisa, no al propio estudiante.
+      { to: '/estudiantes', label: 'Estudiantes', icon: GraduationCap, roles: ['empresa', 'coordinador', 'asesor_academico'] },
+      // La empresa ya tiene "Mi empresa"; el directorio de empresas es para quien busca dónde hacer la estadía.
+      { to: '/organizaciones', label: 'Empresas', icon: Factory, roles: ['estudiante', 'coordinador', 'asesor_academico'] },
+      // Guardar vacantes solo tiene sentido para quien se postula.
+      { to: '/guardados', label: 'Guardados', icon: Bookmark, roles: ['estudiante'] },
       { to: '/rutas', label: 'Rutas de aprendizaje', icon: Network, roles: ['estudiante'] },
       { to: '/traslado', label: 'Traslado', icon: MapPin, roles: ['estudiante', 'coordinador', 'asesor_academico'] },
     ],
@@ -69,8 +72,17 @@ function Item({ to, label, icon: Icon, onNavigate }) {
   )
 }
 
+// La tarjeta de abajo apunta a la acción más útil de cada rol.
+const PROMO = {
+  estudiante: { text: 'Conecta con oportunidades que impulsan tu futuro.', label: 'Explorar vacantes', to: '/vacantes' },
+  empresa: { text: 'Encuentra estudiantes que encajan con tus vacantes.', label: 'Ver estudiantes', to: '/estudiantes' },
+  coordinador: { text: 'Supervisa postulaciones y estadías en curso.', label: 'Panel de coordinación', to: '/coordinacion' },
+  asesor_academico: { text: 'Da seguimiento a tus estudiantes asignados.', label: 'Ver seguimientos', to: '/seguimientos' },
+}
+
 export default function Sidebar({ onNavigate, onClose }) {
   const { usuario } = useAuth()
+  const promo = PROMO[usuario?.rol] ?? PROMO.estudiante
   // Cada rol ve solo las opciones que le tocan (los items sin `roles` son para todos).
   const visibles = groups
     .map((g) => ({ ...g, items: g.items.filter((i) => !i.roles || i.roles.includes(usuario?.rol)) }))
@@ -79,7 +91,7 @@ export default function Sidebar({ onNavigate, onClose }) {
   return (
     <div className="flex h-full flex-col gap-5 px-4 py-6">
       <div className="flex items-center justify-between px-2">
-        <Link to="/inicio" onClick={onNavigate} className="font-heading text-3xl font-semibold text-ink">
+        <Link to="/inicio" onClick={onNavigate} className="brand-mark text-5xl text-ink">
           Linkea<span className="text-brand">✦</span>
         </Link>
         {onClose && (
@@ -105,15 +117,15 @@ export default function Sidebar({ onNavigate, onClose }) {
       <div className="relative shrink-0 overflow-hidden rounded-2xl bg-night p-5 text-white">
         <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-salmon/35 blur-3xl" />
         <p className="relative font-heading text-lg leading-snug text-white">
-          Conecta con oportunidades que impulsan tu futuro.
+          {promo.text}
         </p>
         <span className="relative mt-3 block h-0.5 w-8 bg-salmon" />
         <Link
-          to="/vacantes"
+          to={promo.to}
           onClick={onNavigate}
           className="relative mt-4 flex items-center justify-between rounded-lg border border-white/20 px-3 py-2 font-body text-sm text-white transition-colors hover:bg-white/10"
         >
-          Explorar vacantes
+          {promo.label}
           <ArrowRight className="h-4 w-4" />
         </Link>
       </div>

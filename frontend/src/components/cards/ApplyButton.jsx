@@ -60,7 +60,7 @@ export default function ApplyButton({ vacancyId }) {
     return (
       <div className="mt-10 rounded-xl border border-line bg-canvas p-5">
         <div className="flex flex-wrap items-center gap-3">
-          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-teal text-white">
+          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-teal text-on-teal">
             <Check className="h-5 w-5" />
           </span>
           <div className="flex-1">

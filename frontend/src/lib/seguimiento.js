@@ -7,7 +7,7 @@ export const FIRMANTE_DE_ROL = { asesor_academico: 'academico', empresa: 'empres
 
 export const ESTADO_SEGUIMIENTO = {
   en_curso: { label: 'En curso', className: 'bg-accent/25 text-ink' },
-  concluida: { label: 'Concluida', className: 'bg-teal text-white' },
+  concluida: { label: 'Concluida', className: 'bg-teal text-on-teal' },
   cancelada: { label: 'Cancelada', className: 'bg-brand-soft text-brand' },
 }
 

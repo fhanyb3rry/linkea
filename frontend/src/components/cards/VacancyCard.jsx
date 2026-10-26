@@ -40,6 +40,7 @@ export default function VacancyCard({ vacancy, match, saved = false, onToggleSav
             {area.label}
           </span>
         </div>
+        {onToggleSave && (
         <button
           type="button"
           aria-label={saved ? 'Quitar de guardados' : 'Guardar vacante'}
@@ -53,6 +54,7 @@ export default function VacancyCard({ vacancy, match, saved = false, onToggleSav
         >
           <Bookmark key={String(saved)} className={`h-4 w-4 ${saved ? 'animate-pop fill-current' : ''}`} />
         </button>
+        )}
       </div>
 
       {sector && sector !== area.label && (

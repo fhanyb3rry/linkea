@@ -1,17 +1,37 @@
+import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Bell, LogOut, Menu, Moon, Search, Sun } from 'lucide-react'
+import { Bell, LogOut, Menu, Moon, PanelLeftClose, PanelLeftOpen, Search, Sun } from 'lucide-react'
 import { useAuth } from '../../context/auth'
+import useActiveStudent from '../../hooks/useActiveStudent'
 import useTheme from '../../hooks/useTheme'
+import { cargarNotificaciones, leidasGuardadas } from '../../lib/notificaciones'
 import { initials } from '../../lib/perfil'
 import { ROLES } from '../../lib/roles'
 
 // A dónde lleva el botón de la cuenta según el rol.
 const CUENTA = { estudiante: '/perfil', empresa: '/empresa' }
 
-export default function Topbar({ onOpenMenu }) {
+export default function Topbar({ onOpenMenu, onToggleSidebar, sidebarAbierta }) {
   const { theme, toggle } = useTheme()
   const navigate = useNavigate()
   const { usuario, logout } = useAuth()
+  const [activeStudent] = useActiveStudent()
+  const [sinLeer, setSinLeer] = useState(0)
+
+  // Punto de la campana: solo aparece si hay notificaciones reales sin leer.
+  useEffect(() => {
+    if (!usuario) return undefined
+    let cancel = false
+    cargarNotificaciones(usuario.rol, activeStudent)
+      .then((lista) => !cancel && setSinLeer(lista.filter((n) => !leidasGuardadas().has(n.id)).length))
+      .catch(() => {})
+    const onCambio = (e) => setSinLeer(e.detail.sinLeer)
+    window.addEventListener('linkea-notif', onCambio)
+    return () => {
+      cancel = true
+      window.removeEventListener('linkea-notif', onCambio)
+    }
+  }, [usuario, activeStudent])
 
   function salir() {
     logout()
@@ -20,11 +40,12 @@ export default function Topbar({ onOpenMenu }) {
 
   function onSearch(event) {
     event.preventDefault()
-    navigate('/vacantes')
+    // Cada rol busca en su directorio relevante.
+    navigate(usuario?.rol === 'empresa' ? '/estudiantes' : '/vacantes')
   }
 
   return (
-    <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-line bg-canvas/85 px-4 py-3 backdrop-blur-md sm:px-6">
+    <header className="glass sticky top-0 z-30 flex items-center gap-3 border-x-0 border-t-0 px-4 py-3 sm:px-6">
       <button
         type="button"
         onClick={onOpenMenu}
@@ -33,12 +54,21 @@ export default function Topbar({ onOpenMenu }) {
       >
         <Menu className="h-5 w-5" />
       </button>
+      <button
+        type="button"
+        onClick={onToggleSidebar}
+        aria-label={sidebarAbierta ? 'Ocultar menú lateral' : 'Mostrar menú lateral'}
+        title={sidebarAbierta ? 'Ocultar menú' : 'Mostrar menú'}
+        className="hidden h-10 w-10 items-center justify-center rounded-xl border border-line bg-surface text-ink transition-colors hover:border-brand/40 lg:flex"
+      >
+        {sidebarAbierta ? <PanelLeftClose className="h-5 w-5" /> : <PanelLeftOpen className="h-5 w-5" />}
+      </button>
 
       <form onSubmit={onSearch} className="relative max-w-xl flex-1">
         <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
         <input
           type="search"
-          placeholder="Buscar vacantes, estudiantes, empresas..."
+          placeholder={usuario?.rol === 'empresa' ? 'Buscar estudiantes...' : 'Buscar vacantes, estudiantes, empresas...'}
           className="w-full rounded-xl border border-line bg-surface py-2.5 pl-10 pr-4 font-body text-sm text-ink outline-none transition-shadow placeholder:text-muted focus:ring-2 focus:ring-brand/30"
         />
       </form>
@@ -58,7 +88,7 @@ export default function Topbar({ onOpenMenu }) {
           className="relative hidden h-10 w-10 items-center justify-center rounded-full text-ink transition-colors hover:bg-surface sm:flex"
         >
           <Bell className="h-[18px] w-[18px]" />
-          <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-brand" />
+          {sinLeer > 0 && <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-brand" />}
         </Link>
         <Link
           to={CUENTA[usuario?.rol] ?? '/configuracion'}

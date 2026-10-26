@@ -22,8 +22,9 @@ INDICES = [
     ("applications", [("student_id", 1), ("vacancy_id", 1)], {"unique": True}),
     ("applications", [("vacancy_id", 1)], {}),
     ("applications", [("student_id", 1), ("estado", 1)], {}),
-    # Cuentas: un correo por cuenta; un perfil de estudiante por cuenta.
+    # Cuentas: un correo por cuenta y un nombre por cuenta (normalizado, sin acentos ni mayúsculas).
     ("users", [("email", 1)], {"unique": True}),
+    ("users", [("nombre_norm", 1)], {"unique": True}),
     ("students", [("user_id", 1)], {"unique": True, "partialFilterExpression": {"user_id": {"$type": "string"}}}),
     ("vacancies", [("user_id", 1)], {}),
     # La matrícula UTVT identifica al estudiante (solo cuenta si está capturada).

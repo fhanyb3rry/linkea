@@ -7,11 +7,11 @@ import useFetch from '../hooks/useFetch'
 import { getTrasladoMapa } from '../services/api'
 
 // Dos vistas del mismo cálculo:
-//   "Mi traslado"      -> lo que necesita saber el usuario (resumen, recorrido y un mapa limpio).
-//   "Detalle técnico"  -> cómo lo calcula: algoritmos, heurística, comparativos.
+//   "Mi traslado"        -> lo que necesita saber el usuario (resumen, recorrido y un mapa limpio).
+//   "Cómo lo calculamos" -> el mismo cálculo por dentro: métodos de búsqueda, estimaciones, comparativas.
 const VISTAS = [
   ['usuario', 'Mi traslado'],
-  ['tecnico', 'Detalle técnico'],
+  ['tecnico', 'Cómo lo calculamos'],
 ]
 
 export default function Traslado() {
@@ -36,7 +36,11 @@ export default function Traslado() {
     <section className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-8 sm:px-6">
       <PageTitle
         title="Traslado a la vacante"
-        subtitle={vista === 'usuario' ? 'Elige dónde vives y dónde está la vacante, y te decimos cuánto tardas en llegar.' : undefined}
+        subtitle={
+          vista === 'usuario'
+            ? 'Elige dónde vives y dónde está la vacante, y te decimos cuánto tardas en llegar.'
+            : 'El mismo cálculo, pero mostrando paso a paso cómo lo hacemos por dentro.'
+        }
       />
 
       <div role="tablist" aria-label="Vista" className="flex w-fit gap-1 rounded-full border border-line bg-surface p-1">

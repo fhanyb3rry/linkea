@@ -12,11 +12,11 @@ import {
 import GrafoTecnico from './GrafoTecnico'
 
 const ALGORITMOS = [
-  { id: 'astar', label: 'A* · costo real + estimado' },
-  { id: 'greedy', label: 'Greedy · solo estimado' },
-  { id: 'ucs', label: 'UCS · solo costo real' },
-  { id: 'bfs', label: 'BFS · por niveles' },
-  { id: 'dfs', label: 'DFS · en profundidad' },
+  { id: 'astar', label: 'A* · el más inteligente (tiempo real + estimación)' },
+  { id: 'greedy', label: 'Greedy · el impaciente (solo la estimación)' },
+  { id: 'ucs', label: 'UCS · el preciso (solo el tiempo real)' },
+  { id: 'bfs', label: 'BFS · revisa por niveles' },
+  { id: 'dfs', label: 'DFS · va a lo profundo primero' },
 ]
 const CON_HEURISTICA = ['astar', 'greedy']
 const SIN_LIMITE = 9
@@ -107,21 +107,21 @@ export default function VistaTecnica({ zonas, mapa, desde, hasta, setDesde, setH
             </Campo>
           </div>
           <div className="flex flex-col gap-4 lg:border-l lg:border-line lg:pl-6">
-            <p className="font-body text-xs font-bold uppercase tracking-wider text-muted">Método</p>
+            <p className="font-body text-xs font-bold uppercase tracking-wider text-muted">Cómo buscarlo</p>
             <div className="grid gap-4 sm:grid-cols-2">
-              <Campo etiqueta="Algoritmo">
+              <Campo etiqueta="Método de búsqueda">
                 <select className={selectCls} value={algoritmo} onChange={(e) => setAlgoritmo(e.target.value)}>
                   {ALGORITMOS.map((a) => <option key={a.id} value={a.id}>{a.label}</option>)}
                 </select>
               </Campo>
-              <Campo etiqueta="Heurística (distancia)">
+              <Campo etiqueta="Cómo estimar la distancia">
                 <select className={selectCls} value={tipoH} onChange={(e) => setTipoH(e.target.value)}>
-                  <option value="euclidiana">Euclidiana</option>
-                  <option value="manhattan">Manhattan</option>
+                  <option value="euclidiana">En línea recta (euclidiana)</option>
+                  <option value="manhattan">Como por calles en cuadrícula (manhattan)</option>
                 </select>
               </Campo>
             </div>
-            <Campo etiqueta={`Límite de profundidad: ${lim ?? 'sin límite'}`}>
+            <Campo etiqueta={`Máximo de tramos: ${lim ?? 'sin límite'}`}>
               <input
                 type="range" min="1" max={SIN_LIMITE} value={limite}
                 onChange={(e) => setLimite(Number(e.target.value))}
@@ -151,19 +151,19 @@ export default function VistaTecnica({ zonas, mapa, desde, hasta, setDesde, setH
                 {res.encontrado ? (
                   <Ruta ruta={res.camino} />
                 ) : (
-                  <p className="font-body text-sm text-ink">No hay ruta dentro del límite de profundidad. Sube el límite para encontrarla.</p>
+                  <p className="font-body text-sm text-ink">No hay ruta dentro del máximo de tramos. Sube el límite para encontrarla.</p>
                 )}
                 <dl className="grid grid-cols-2 gap-3">
-                  <Dato etiqueta="Costo real (g)" valor={res.encontrado ? `${res.costo_real} min` : '—'} />
-                  <Dato etiqueta="Estimado inicial (h)" valor={`${res.costo_estimado} min`} destacado={usaH} />
+                  <Dato etiqueta="Tiempo real del recorrido" valor={res.encontrado ? `${res.costo_real} min` : '—'} />
+                  <Dato etiqueta="Estimado antes de buscar" valor={`${res.costo_estimado} min`} destacado={usaH} />
                   <Dato etiqueta="Tramos" valor={res.aristas} />
-                  <Dato etiqueta="Zonas exploradas" valor={res.cantidad_expandidos} />
+                  <Dato etiqueta="Zonas revisadas" valor={res.cantidad_expandidos} />
                 </dl>
               </div>
 
               <div className="card flex flex-col gap-5 p-6">
                 <div>
-                  <h3 className="mb-3 font-body text-sm font-semibold text-ink">Orden de exploración</h3>
+                  <h3 className="mb-3 font-body text-sm font-semibold text-ink">Orden en que revisó las zonas</h3>
                   <ol className="flex flex-wrap gap-2">
                     {res.expandidos.map((z, i) => (
                       <li key={`${z}-${i}`} className="chip flex items-center gap-2 px-2.5 py-1 font-body text-sm">
@@ -174,14 +174,15 @@ export default function VistaTecnica({ zonas, mapa, desde, hasta, setDesde, setH
                   </ol>
                 </div>
                 <details className="group rounded-lg border border-line px-4 py-3 font-body text-sm text-ink">
-                  <summary className="cursor-pointer font-semibold">Cómo evita los ciclos</summary>
+                  <summary className="cursor-pointer font-semibold">Cómo evita dar vueltas</summary>
                   <p className="mt-2 leading-relaxed">
-                    {res.mecanismo_ciclos}. Repetidos evitados: <b>{res.ciclos_evitados.length}</b>
+                    Nunca vuelve a una zona que ya forma parte de la ruta que está armando, así no puede quedarse
+                    girando en círculo. Vueltas evitadas: <b>{res.ciclos_evitados.length}</b>
                     {res.ciclos_evitados[0] && <> (por ejemplo, {res.ciclos_evitados[0].join(' → ')})</>}.
                   </p>
                 </details>
                 <details className="group rounded-lg border border-line px-4 py-3 font-body text-sm text-ink">
-                  <summary className="cursor-pointer font-semibold">Paso a paso del algoritmo</summary>
+                  <summary className="cursor-pointer font-semibold">Paso a paso de la búsqueda</summary>
                   <ol className="mt-2 flex max-h-64 flex-col gap-1 overflow-y-auto leading-snug">
                     {res.registro.map((linea, i) => (
                       <li key={i} className={linea.startsWith('  ') ? 'pl-4 text-muted' : 'font-medium'}>{linea.trim()}</li>
@@ -196,18 +197,25 @@ export default function VistaTecnica({ zonas, mapa, desde, hasta, setDesde, setH
 
       {/* 3. CÓMO SE CALCULA h */}
       {dist && (
-        <Seccion n="3" titulo={`Cómo se calcula h (distancia ${dist.tipo})`}>
+        <Seccion n="3" titulo={`De dónde sale la estimación (distancia ${dist.tipo})`}>
           <div className="card flex flex-col gap-5 p-6">
             {verif && (
-              <div
-                className={`flex w-fit items-center gap-2 rounded-full px-4 py-1.5 font-body text-sm font-semibold text-ink ${
-                  verif.admisible ? 'bg-teal/25' : 'bg-brand-soft'
-                }`}
-              >
-                {verif.admisible ? <BadgeCheck className="h-4 w-4 text-teal" /> : <TriangleAlert className="h-4 w-4 text-brand" />}
-                Heurística {verif.admisible ? 'admisible' : 'NO admisible'}
-                {verif.consistente ? ' y consistente' : ''}
-              </div>
+              <>
+                <div
+                  className={`flex w-fit items-center gap-2 rounded-full px-4 py-1.5 font-body text-sm font-semibold text-ink ${
+                    verif.admisible ? 'bg-teal/25' : 'bg-brand-soft'
+                  }`}
+                >
+                  {verif.admisible ? <BadgeCheck className="h-4 w-4 text-teal" /> : <TriangleAlert className="h-4 w-4 text-brand" />}
+                  Estimación {verif.admisible ? 'confiable' : 'optimista de más'}
+                  {verif.consistente ? ' y coherente' : ''}
+                </div>
+                <p className="font-body text-xs text-muted">
+                  {verif.admisible
+                    ? 'Nunca exagera: siempre promete un tiempo menor o igual que el real, por eso la búsqueda sigue siendo exacta.'
+                    : 'Puede prometer menos tiempo del real en algunos casos: la búsqueda podría no encontrar la ruta más rápida.'}
+                </p>
+              </>
             )}
             <div className="grid gap-6 md:grid-cols-2">
               <div>
@@ -243,15 +251,15 @@ export default function VistaTecnica({ zonas, mapa, desde, hasta, setDesde, setH
 
       {/* 4. COMPARACIÓN */}
       {comparacion && (
-        <Seccion n="4" titulo="Los 5 algoritmos, mismo origen y destino">
+        <Seccion n="4" titulo="Los 5 métodos buscando lo mismo">
           <div className="card overflow-x-auto p-2 sm:p-4">
             <table className="w-full min-w-[640px] border-collapse font-body text-sm text-ink">
               <thead>
                 <tr className="border-b border-line text-left text-muted">
-                  <th className="px-3 py-3 font-semibold">Algoritmo</th>
+                  <th className="px-3 py-3 font-semibold">Método</th>
                   <th className="px-3 font-semibold">Ruta encontrada</th>
                   <th className="px-3 font-semibold">Minutos</th>
-                  <th className="px-3 font-semibold">Zonas exploradas</th>
+                  <th className="px-3 font-semibold">Zonas revisadas</th>
                 </tr>
               </thead>
               <tbody>
@@ -289,7 +297,7 @@ export default function VistaTecnica({ zonas, mapa, desde, hasta, setDesde, setH
           <Seccion n="5" titulo={`Todas las rutas (${todas.rutas.length})`}>
             <div className="card flex flex-col gap-4 p-6">
               <p className="font-body text-sm text-muted">
-                Ciclos evitados: <b className="text-ink">{todas.ciclos_evitados.length}</b> · ramas cortadas por el límite:{' '}
+                Vueltas evitadas: <b className="text-ink">{todas.ciclos_evitados.length}</b> · caminos descartados por pasar del límite:{' '}
                 <b className="text-ink">{todas.podados_por_limite}</b>
               </p>
               <ol className="flex max-h-80 flex-col gap-3 overflow-y-auto pr-1">
@@ -308,15 +316,15 @@ export default function VistaTecnica({ zonas, mapa, desde, hasta, setDesde, setH
         )}
 
         {resumen && (
-          <Seccion n="6" titulo="¿Sirve la heurística?">
+          <Seccion n="6" titulo="¿Ayuda la estimación?">
             <div className="card flex flex-col gap-4 p-6">
-              <p className="font-body text-sm text-muted">Los 5 algoritmos en las {resumen.pares} combinaciones de zonas.</p>
+              <p className="font-body text-sm text-muted">Los 5 métodos probados en las {resumen.pares} combinaciones de zonas.</p>
               <table className="w-full border-collapse font-body text-sm text-ink">
                 <thead>
                   <tr className="border-b border-line text-left text-muted">
-                    <th className="py-2 font-semibold">Algoritmo</th>
-                    <th className="font-semibold">Rutas no óptimas</th>
-                    <th className="font-semibold">Zonas exploradas (promedio)</th>
+                    <th className="py-2 font-semibold">Método</th>
+                    <th className="font-semibold">Veces que no dio la ruta más rápida</th>
+                    <th className="font-semibold">Zonas revisadas (promedio)</th>
                   </tr>
                 </thead>
                 <tbody>

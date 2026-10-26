@@ -7,9 +7,9 @@ import useFetch from '../hooks/useFetch'
 import { buscarRutas, getGrafoSkills, getPlanAprendizaje, getVacancies } from '../services/api'
 
 const ALGORITMOS = [
-  { id: 'dfs_todas', label: 'DFS · todas las rutas' },
-  { id: 'dfs', label: 'DFS · primera ruta' },
-  { id: 'bfs', label: 'BFS · ruta más corta' },
+  { id: 'dfs_todas', label: 'Todas las rutas (recomendado)' },
+  { id: 'dfs', label: 'La primera ruta que encuentre' },
+  { id: 'bfs', label: 'La ruta más corta' },
 ]
 
 const inputCls =
@@ -98,7 +98,7 @@ function PlanPerfil({ limite }) {
       <div>
         <h2 className="text-2xl font-medium">Para mi perfil</h2>
         <p className="mt-1 font-body text-sm text-muted">
-          Parte de las habilidades del perfil activo y busca cómo llegar a las que le faltan para la vacante elegida.
+          Parte de tus habilidades y te muestra cómo llegar a las que te faltan para la vacante que elijas.
         </p>
       </div>
       {!studentId ? (
@@ -128,13 +128,13 @@ function PlanPerfil({ limite }) {
                   </p>
                   <Flecha ruta={p.ruta_recomendada} />
                   <p className="font-body text-xs text-muted">
-                    {p.rutas_alternativas} rutas posibles dentro del límite · {p.nodos_explorados} nodos explorados
+                    {p.rutas_alternativas} caminos posibles · {p.nodos_explorados} habilidades revisadas
                   </p>
                 </div>
               ))}
               {plan.sin_ruta.length > 0 && (
                 <p className="font-body text-xs text-muted">
-                  Sin ruta (no están en el grafo o quedan más lejos que el límite): {plan.sin_ruta.join(', ')}
+                  Sin camino (no conectan con el resto o quedan más lejos que el máximo de pasos): {plan.sin_ruta.join(', ')}
                 </p>
               )}
             </div>
@@ -174,7 +174,7 @@ export default function RutasAprendizaje() {
     <section className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-8 sm:px-6">
       <PageTitle
         title="Rutas de aprendizaje"
-        subtitle="Cómo llegar de una habilidad que ya tienes a una que te piden, recorriendo el grafo de habilidades con DFS o BFS."
+        subtitle="Te mostramos caminos posibles para llegar de una habilidad que ya tienes a la que te pide una vacante, pasando por habilidades relacionadas."
       />
 
       <div className="card grid gap-4 p-6 sm:grid-cols-2 lg:grid-cols-[1fr_auto_1fr_1fr_1fr]">
@@ -199,13 +199,13 @@ export default function RutasAprendizaje() {
           </select>
         </label>
         <label className="flex flex-col gap-1.5 font-body text-xs font-semibold text-muted">
-          Algoritmo
+          Qué quieres ver
           <select className={inputCls} value={algoritmo} onChange={(e) => setAlgoritmo(e.target.value)}>
             {ALGORITMOS.map((a) => <option key={a.id} value={a.id}>{a.label}</option>)}
           </select>
         </label>
         <label className="flex flex-col gap-1.5 font-body text-xs font-semibold text-muted">
-          Límite de profundidad: {limite}
+          Máximo de pasos: {limite}
           <input type="range" min="1" max="8" value={limite} onChange={(e) => setLimite(Number(e.target.value))} className="mt-2 accent-[var(--brand)]" />
         </label>
       </div>
@@ -217,9 +217,9 @@ export default function RutasAprendizaje() {
           <div className="card p-4">
             <GrafoSVG grafo={grafo} rutas={res.rutas} inicio={desde} objetivo={hasta} />
             <p className="flex flex-wrap gap-4 px-2 font-body text-xs text-muted">
-              <span><b className="text-brand">━</b> ruta más corta</span>
-              <span className="flex items-center gap-1.5"><i className="inline-block h-1 w-6 rounded-full bg-caramel" /> otras rutas</span>
-              <span>● extremos de la búsqueda</span>
+              <span><b className="text-brand">━</b> la ruta más corta</span>
+              <span className="flex items-center gap-1.5"><i className="inline-block h-1 w-6 rounded-full bg-caramel" /> otras rutas posibles</span>
+              <span>● inicio y destino</span>
             </p>
           </div>
 
@@ -230,7 +230,7 @@ export default function RutasAprendizaje() {
                 {res.rutas.length === 0 ? 'Sin ruta' : `Ruta${res.rutas.length > 1 ? 's' : ''} encontrada${res.rutas.length > 1 ? 's' : ''} (${res.rutas.length})`}
               </h2>
               {res.rutas.length === 0 && (
-                <p className="font-body text-sm text-muted">No hay ruta dentro del límite. Prueba subirlo.</p>
+                <p className="font-body text-sm text-muted">No encontramos camino dentro del máximo de pasos. Prueba subirlo.</p>
               )}
               <div className="flex max-h-56 flex-col gap-2 overflow-y-auto">
                 {res.rutas.map((r, i) => (
@@ -243,9 +243,9 @@ export default function RutasAprendizaje() {
             </div>
 
             <div className="card flex flex-col gap-3 p-6">
-              <h2 className="text-xl font-medium">Cómo lo exploró</h2>
+              <h2 className="text-xl font-medium">Cómo lo buscamos</h2>
               <p className="font-body text-xs text-muted">
-                Orden de exploración ({res.orden_exploracion.length} visitas, {res.nodos_explorados.length} nodos distintos). No es lo mismo que la ruta encontrada.
+                Orden en que revisamos las habilidades ({res.orden_exploracion.length} habilidades revisadas). No es lo mismo que la ruta final.
               </p>
               <ol className="flex max-h-40 flex-wrap gap-1.5 overflow-y-auto">
                 {res.orden_exploracion.map((n, i) => (
@@ -255,11 +255,11 @@ export default function RutasAprendizaje() {
                 ))}
               </ol>
               <dl className="grid grid-cols-2 gap-3 font-body text-xs">
-                <div className="stat p-3"><dt className="text-muted">Límite de profundidad</dt><dd className="mt-1 text-base font-semibold text-ink">{res.limite_profundidad ?? 'sin límite'}</dd></div>
-                <div className="stat p-3"><dt className="text-muted">Ramas cortadas por el límite</dt><dd className="mt-1 text-base font-semibold text-ink">{res.podados_por_limite}</dd></div>
+                <div className="stat p-3"><dt className="text-muted">Máximo de pasos</dt><dd className="mt-1 text-base font-semibold text-ink">{res.limite_profundidad ?? 'sin límite'}</dd></div>
+                <div className="stat p-3"><dt className="text-muted">Caminos descartados por pasar del límite</dt><dd className="mt-1 text-base font-semibold text-ink">{res.podados_por_limite}</dd></div>
                 <div className="stat col-span-2 p-3">
-                  <dt className="text-muted">Contra ciclos infinitos</dt>
-                  <dd className="mt-1 text-ink">{res.mecanismo_ciclos}. Ciclos evitados: <b>{res.ciclos_evitados.length}</b>
+                  <dt className="text-muted">Para no dar vueltas</dt>
+                  <dd className="mt-1 text-ink">Nunca repetimos una habilidad dentro de la misma ruta. Vueltas evitadas: <b>{res.ciclos_evitados.length}</b>
                     {res.ciclos_evitados[0] && <> (ej.: {res.ciclos_evitados[0].join(' → ')})</>}
                   </dd>
                 </div>

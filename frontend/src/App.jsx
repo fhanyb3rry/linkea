@@ -57,10 +57,21 @@ export default function App() {
 
         <Route path="vacantes" element={<Vacantes />} />
         <Route path="vacantes/:id" element={<VacancyDetail />} />
-        <Route path="guardados" element={<Guardados />} />
-        <Route path="estudiantes" element={<Estudiantes />} />
+
+        {/* Guardar vacantes solo sirve a quien se postula. */}
+        <Route element={<RequireAuth roles={['estudiante']} />}>
+          <Route path="guardados" element={<Guardados />} />
+        </Route>
+
+        {/* Solo se restringen los DIRECTORIOS; las fichas de detalle quedan abiertas
+            porque se enlazan desde muchos lados (p. ej. MiPerfil → /estudiantes/:id). */}
+        <Route element={<RequireAuth roles={['empresa', 'coordinador', 'asesor_academico']} />}>
+          <Route path="estudiantes" element={<Estudiantes />} />
+        </Route>
+        <Route element={<RequireAuth roles={['estudiante', 'coordinador', 'asesor_academico']} />}>
+          <Route path="organizaciones" element={<Organizaciones />} />
+        </Route>
         <Route path="estudiantes/:id" element={<PerfilEstudiante />} />
-        <Route path="organizaciones" element={<Organizaciones />} />
         <Route path="organizaciones/:id" element={<OrganizacionDetalle />} />
 
         <Route element={<RequireAuth roles={['estudiante', 'coordinador', 'asesor_academico']} />}>

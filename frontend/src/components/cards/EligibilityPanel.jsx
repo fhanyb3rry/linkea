@@ -5,13 +5,15 @@ import { useAuth } from '../../context/auth'
 import useActiveStudent from '../../hooks/useActiveStudent'
 import { checkEligibility, getCompatibilidadIA, getStudents, getTrasladoPar } from '../../services/api'
 
-// Proposiciones atómicas de la fórmula, en el orden en que se muestran.
+// Los 4 aspectos que se revisan; cada uno puede sumar hasta 25 puntos.
 const proposiciones = [
-  { key: 'carrera_match', label: 'Carrera aceptada' },
-  { key: 'skill_clave', label: 'Skill clave en común' },
-  { key: 'disponibilidad_horaria', label: 'Horas disponibles suficientes' },
-  { key: 'ubicacion_compatible', label: 'Ubicación compatible' },
+  { key: 'carrera_match', campo: 'carrera', label: 'Carrera aceptada' },
+  { key: 'skill_clave', campo: 'skills', label: 'Habilidades coincidentes' },
+  { key: 'disponibilidad_horaria', campo: 'disponibilidad', label: 'Horas suficientes' },
+  { key: 'ubicacion_compatible', campo: 'ubicacion', label: 'Zona cercana' },
 ]
+
+const fmtPts = (n) => (Number.isInteger(n) ? n : n.toFixed(1))
 
 // Filtro 2: la IA solo evalúa a quien pasó el filtro 1. Si la IA no está disponible, el backend
 // responde con el porcentaje por reglas y un aviso (fuente: 'reglas').
@@ -40,7 +42,7 @@ function FiltroIA({ studentId, vacancyId, elegible }) {
       <div className="flex items-center justify-between gap-2">
         <p className="flex items-center gap-2 font-body text-xs font-semibold text-ink">
           <Brain className="h-4 w-4 text-cocoa" />
-          Filtro 2 · compatibilidad con IA
+          Análisis con IA
         </p>
         {data?.fuente === 'ia' && (
           <button
@@ -59,7 +61,7 @@ function FiltroIA({ studentId, vacancyId, elegible }) {
 
       {!elegible && (
         <p className="font-body text-xs text-muted">
-          Se evalúa solo cuando pasas el filtro 1 (elegibilidad).
+          Se evalúa cuando se cumplen los requisitos de la vacante.
         </p>
       )}
       {cargando && <div className="h-24 animate-pulse rounded-lg bg-canvas" aria-busy="true" />}
@@ -210,7 +212,7 @@ export default function EligibilityPanel({ vacancyId }) {
       <div>
         <h2 className="text-xl">Tu compatibilidad</h2>
         <p className="mt-1 font-body text-xs text-muted">
-          Dos filtros: elegibilidad con lógica proposicional y compatibilidad con IA.
+          Así encaja el perfil con esta vacante: carrera, habilidades, horarios y cercanía.
         </p>
       </div>
 
@@ -264,7 +266,7 @@ export default function EligibilityPanel({ vacancyId }) {
           >
             <span
               className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${
-                shown.elegible ? 'bg-teal text-white' : 'bg-brand text-on-brand'
+                shown.elegible ? 'bg-teal text-on-teal' : 'bg-brand text-on-brand'
               }`}
             >
               {shown.elegible ? <Check className="h-5 w-5" /> : <X className="h-5 w-5" />}
@@ -273,7 +275,7 @@ export default function EligibilityPanel({ vacancyId }) {
               <p className="font-body text-sm font-semibold text-ink">
                 {shown.elegible ? 'Eres elegible' : 'No eres elegible'}
               </p>
-              <p className="font-body text-xs text-muted">Filtro 1 · lógica proposicional</p>
+              <p className="font-body text-xs text-muted">Revisión de requisitos</p>
             </div>
           </div>
 
@@ -289,23 +291,27 @@ export default function EligibilityPanel({ vacancyId }) {
               />
             </div>
             <p className="mt-1.5 font-body text-[11px] leading-snug text-muted">
-              Calculada por reglas: carrera, skills, horas y zona. El análisis con IA va en el filtro 2.
+              Cada aspecto suma hasta 25 puntos: carrera, habilidades, horas y qué tan cerca queda.
             </p>
           </div>
 
           <ul className="flex flex-col gap-2">
-            {proposiciones.map(({ key, label }) => {
+            {proposiciones.map(({ key, campo, label }) => {
               const ok = shown.proposiciones[key]
+              const pts = shown.desglose?.[campo]
               return (
                 <li key={key} className="flex items-center gap-2.5 font-body text-sm text-ink">
                   <span
                     className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${
-                      ok ? 'bg-teal text-white' : 'bg-line text-muted'
+                      ok ? 'bg-teal text-on-teal' : 'bg-line text-muted'
                     }`}
                   >
                     {ok ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
                   </span>
-                  {label}
+                  <span className="flex-1">{label}</span>
+                  {pts !== undefined && (
+                    <span className="font-body text-xs tabular-nums text-muted">{fmtPts(pts)}/25</span>
+                  )}
                 </li>
               )
             })}

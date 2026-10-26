@@ -37,7 +37,7 @@ export function Vacio({ children }) {
 const ESTILOS = {
   primario: 'bg-brand text-on-brand hover:opacity-90',
   cafe: 'bg-cocoa text-on-cocoa hover:opacity-90',
-  verde: 'bg-teal text-white hover:opacity-90',
+  verde: 'bg-teal text-on-teal hover:opacity-90',
   borde: 'border border-line bg-surface text-ink hover:border-cocoa/50',
   texto: 'text-muted hover:text-brand',
 }

@@ -8,8 +8,6 @@ import { getCandidates, getStudents, getVacancies } from '../services/api'
 
 export default function Estudiantes() {
   const { usuario } = useAuth()
-  // Solo un estudiante que aún no tiene perfil ve el botón para crearlo.
-  const crearPerfil = usuario?.rol === 'estudiante' && !usuario.perfil_id ? '/perfil/crear' : undefined
   const [students, setStudents] = useState([])
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -49,6 +47,9 @@ export default function Estudiantes() {
 
   const matches = refVacancy && candidates.key === refVacancy ? candidates.map : null
 
+  // La empresa compara contra sus propias vacantes; el personal académico puede usar cualquiera.
+  const refVacancies = usuario?.rol === 'empresa' ? vacancies.filter((v) => v.user_id === usuario.id) : vacancies
+
   const carreras = useMemo(() => ['Todas', ...new Set(students.map((s) => s.carrera))], [students])
 
   const filtered = useMemo(() => {
@@ -73,8 +74,6 @@ export default function Estudiantes() {
         title="Estudiantes"
         subtitle="Perfiles de estudiantes que buscan una práctica profesional."
         count={loading || error ? undefined : students.length}
-        actionTo={crearPerfil}
-        actionLabel="Crear perfil"
         search={search}
         onSearch={setSearch}
         searchPlaceholder="Buscar por nombre, carrera, zona o skill..."
@@ -101,16 +100,16 @@ export default function Estudiantes() {
         </div>
       )}
 
-      {vacancies.length > 0 && (
+      {refVacancies.length > 0 && (
         <label className="flex flex-wrap items-center gap-2 font-body text-xs text-muted">
           Ver compatibilidad con la vacante
           <select
             value={refVacancy}
             onChange={(e) => setRefVacancy(e.target.value)}
-            className="rounded-xl border border-line bg-surface px-3 py-2 text-ink outline-none focus:ring-2 focus:ring-cocoa/30"
+            className="w-full min-w-0 max-w-full rounded-xl border border-line bg-surface px-3 py-2 text-ink outline-none focus:ring-2 focus:ring-cocoa/30 sm:w-auto"
           >
             <option value="">Ninguna</option>
-            {vacancies.map((v) => (
+            {refVacancies.map((v) => (
               <option key={v.id} value={v.id}>
                 {v.titulo || v.sector} · {v.nombre_empresa}
               </option>
@@ -128,8 +127,6 @@ export default function Estudiantes() {
             ? 'Aún no hay estudiantes registrados.'
             : 'Ningún estudiante coincide con tu búsqueda.'
         }
-        actionTo={students.length === 0 ? crearPerfil : undefined}
-        actionLabel="Crear el primer perfil"
       />
 
       {!loading && !error && filtered.length > 0 && (

@@ -7,7 +7,7 @@ export default function CrearPerfilEstudiante() {
       <PageTitle
         title="Crea tu perfil"
         subtitle="Con esta información Linkea calcula tu elegibilidad y tu compatibilidad con cada vacante. Puedes completarlo después."
-        back={{ to: '/estudiantes', label: 'Estudiantes' }}
+        back={{ to: '/inicio', label: 'Inicio' }}
       />
       <PerfilForm mode="crear" />
     </section>

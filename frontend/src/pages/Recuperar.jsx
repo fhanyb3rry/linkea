@@ -19,6 +19,7 @@ export default function Recuperar() {
         Volver a iniciar sesión
       </Link>
 
+      <div className="glass-strong rounded-3xl p-8 shadow-2xl">
       <h1 className="text-3xl">Recupera tu contraseña</h1>
       <p className="mt-2 font-body text-sm text-muted">
         Escribe tu correo y te enviaremos las instrucciones para crear una contraseña nueva.
@@ -48,6 +49,7 @@ export default function Recuperar() {
           </button>
         </form>
       )}
+      </div>
     </section>
   )
 }

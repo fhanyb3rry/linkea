@@ -31,17 +31,18 @@ export default function Login() {
 
   return (
     <section className="mx-auto flex min-h-[70vh] max-w-md flex-col justify-center px-4 py-16 sm:px-6">
-      <div className="mb-6 flex items-center gap-2 font-heading text-xl font-semibold text-ink">
-        <Sparkles className="h-5 w-5 text-brand" />
-        Linkea
-      </div>
+      <div className="glass-strong rounded-3xl p-8 shadow-2xl">
+        <div className="mb-6 flex items-center gap-2 text-ink">
+          <Sparkles className="h-5 w-5 text-brand" />
+          <span className="brand-mark text-4xl">Linkea</span>
+        </div>
 
-      <h1 className="text-2xl">Inicia sesión</h1>
-      <p className="mt-1 font-body text-sm text-muted">
-        Accede a tu cuenta para ver tus recomendaciones y vacantes.
-      </p>
+        <h1 className="text-2xl">Inicia sesión</h1>
+        <p className="mt-1 font-body text-sm text-muted">
+          Accede a tu cuenta para ver tus recomendaciones y vacantes.
+        </p>
 
-      <form onSubmit={onSubmit} className="mt-6 flex flex-col gap-4">
+        <form onSubmit={onSubmit} className="mt-6 flex flex-col gap-4">
         <FormRow label="Correo electrónico">
           <TextInput
             type="email"
@@ -76,14 +77,15 @@ export default function Login() {
           {busy ? 'Entrando…' : 'Iniciar sesión'}
           <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
         </button>
-      </form>
+        </form>
 
-      <p className="mt-6 text-center font-body text-sm text-muted">
-        ¿No tienes cuenta?{' '}
-        <Link to="/registro" className="font-semibold text-brand hover:underline">
-          Regístrate
-        </Link>
-      </p>
+        <p className="mt-6 text-center font-body text-sm text-muted">
+          ¿No tienes cuenta?{' '}
+          <Link to="/registro" className="font-semibold text-brand hover:underline">
+            Regístrate
+          </Link>
+        </p>
+      </div>
     </section>
   )
 }

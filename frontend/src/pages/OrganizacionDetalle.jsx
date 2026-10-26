@@ -3,6 +3,7 @@ import { Building2, Globe, Mail, MapPin, Phone, UserRound } from 'lucide-react'
 import VacancyCard from '../components/cards/VacancyCard'
 import ListState from '../components/layout/ListState'
 import PageTitle from '../components/layout/PageTitle'
+import { useAuth } from '../context/auth'
 import useFetch from '../hooks/useFetch'
 import useStoredSet from '../hooks/useStoredSet'
 import { getOrganization, getVacancies } from '../services/api'
@@ -20,12 +21,21 @@ export default function OrganizacionDetalle() {
   const { id } = useParams()
   const { data, error, loading } = useFetch(() => Promise.all([getOrganization(id), getVacancies(id)]), [id])
   const [saved, toggleSaved] = useStoredSet('linkea-saved')
+  const { usuario } = useAuth()
+  const puedeGuardar = usuario?.rol === 'estudiante'
   const [org, vacancies] = data ?? [null, []]
   const contacto = org?.contacto ?? {}
 
   return (
     <section className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-8 sm:px-6">
-      <PageTitle title={org?.nombre ?? 'Organización'} back={{ to: '/organizaciones', label: 'Empresas' }} />
+      <PageTitle
+        title={org?.nombre ?? 'Organización'}
+        back={
+          usuario?.rol === 'empresa'
+            ? { to: '/empresa', label: 'Mi empresa' }
+            : { to: '/organizaciones', label: 'Empresas' }
+        }
+      />
       <ListState loading={loading} error={error} />
 
       {org && (
@@ -63,7 +73,7 @@ export default function OrganizacionDetalle() {
           {vacancies.length > 0 && (
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {vacancies.map((v) => (
-                <VacancyCard key={v.id} vacancy={v} saved={saved.has(v.id)} onToggleSave={() => toggleSaved(v.id)} />
+                <VacancyCard key={v.id} vacancy={v} saved={puedeGuardar && saved.has(v.id)} onToggleSave={puedeGuardar ? () => toggleSaved(v.id) : undefined} />
               ))}
             </div>
           )}

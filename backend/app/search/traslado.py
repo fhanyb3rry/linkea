@@ -643,6 +643,28 @@ def ubicacion_compatible(zona_estudiante: str, zona_vacante: str) -> bool:
     return t.compatible
 
 
+# Para el puntaje de compatibilidad la cercanía se valora por rangos (no solo sí/no):
+# hasta 30 min vale el 100% de la categoría, de 31 a 45 la mitad, de 46 a 60 un cuarto y más de una
+# hora no suma nada.
+RANGOS_CERCANIA: tuple[tuple[int, float], ...] = ((30, 1.0), (45, 0.5), (60, 0.25))
+
+
+def factor_cercania(zona_estudiante: str, zona_vacante: str) -> float:
+    """De 0 a 1 qué tan cerca queda la vacante según los minutos de traslado (A*).
+
+    Si alguna zona no está en el mapa, misma regla de respaldo que `ubicacion_compatible`:
+    misma zona = 1.0, zonas distintas = 0.0.
+    """
+    t = tiempo_traslado(zona_estudiante, zona_vacante)
+    if not t.conocido:
+        return 1.0 if _clave(zona_estudiante) == _clave(zona_vacante) else 0.0
+    minutos = t.minutos_reales or 0
+    for limite, factor in RANGOS_CERCANIA:
+        if minutos <= limite:
+            return factor
+    return 0.0
+
+
 class ResumenAlgoritmo(BaseModel):
     algoritmo: str
     no_optimas: int  # en cuántos pares NO dio la ruta de menos minutos

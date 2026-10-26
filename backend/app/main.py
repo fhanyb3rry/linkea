@@ -36,6 +36,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+@app.middleware("http")
+async def cabeceras_seguridad(request, call_next):
+    """Cabeceras que recomiendan los escáneres de seguridad (OWASP ZAP y cía.)."""
+    respuesta = await call_next(request)
+    respuesta.headers["X-Content-Type-Options"] = "nosniff"
+    respuesta.headers["X-Frame-Options"] = "DENY"
+    respuesta.headers["Referrer-Policy"] = "no-referrer"
+    respuesta.headers["Cache-Control"] = "no-store"
+    return respuesta
+
 app.include_router(auth.router)
 app.include_router(students.router)
 app.include_router(organizations.router)

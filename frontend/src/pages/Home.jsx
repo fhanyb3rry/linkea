@@ -23,6 +23,7 @@ import useActiveStudent from '../hooks/useActiveStudent'
 import useMatches from '../hooks/useMatches'
 import useStoredSet from '../hooks/useStoredSet'
 import { AREAS, OTROS, areaOf, countByArea } from '../lib/areas'
+import { ROLES } from '../lib/roles'
 import { getStudents, getVacancies } from '../services/api'
 import {
   featuredVacancies,
@@ -39,6 +40,15 @@ const tabs = [
   { id: 'vacantes', label: 'Vacantes' },
   { id: 'empresas', label: 'Empresas' },
 ]
+
+// A cada rol le sirven sugerencias distintas: el estudiante no busca estudiantes,
+// la empresa no busca empresas. Sin entrada = ve todas (personal de la universidad).
+const TABS_POR_ROL = {
+  estudiante: ['vacantes', 'empresas'],
+  empresa: ['estudiantes'],
+}
+
+const VER_MAS = { estudiantes: '/estudiantes', vacantes: '/vacantes', empresas: '/organizaciones' }
 
 const cardClass = 'card'
 
@@ -59,28 +69,38 @@ function Chip({ children }) {
   )
 }
 
-// Chip de cristal flotando sobre el hero
-function FloatChip({ className = '', delay = 0, children }) {
-  return (
-    <div
-      className={`animate-float absolute hidden items-center gap-2.5 rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-white shadow-xl backdrop-blur-md xl:flex ${className}`}
-      style={{ animationDelay: `${delay}s` }}
-    >
-      {children}
-    </div>
-  )
-}
-
-// Botón principal del inicio según el rol (el personal de la universidad no tiene uno).
-const ACCION_PRINCIPAL = {
-  empresa: { to: '/vacantes/nueva', label: 'Publicar vacante' },
-  estudiante: { to: '/perfil', label: 'Mi perfil' },
+// Saludo y acciones del inicio, según lo que cada rol viene a hacer.
+// (La explicación de "qué es Linkea" vive en la landing pública, no aquí.)
+const HERO = {
+  estudiante: {
+    intro: 'Estas son las vacantes que encajan con tu perfil. Postula directo o guárdalas para después.',
+    primary: { to: '/vacantes', label: 'Explorar vacantes' },
+    secondary: { to: '/perfil', label: 'Mi perfil' },
+  },
+  empresa: {
+    intro: 'Publica vacantes y revisa los estudiantes elegibles que las cubren.',
+    primary: { to: '/vacantes/nueva', label: 'Publicar vacante' },
+    secondary: { to: '/estudiantes', label: 'Ver estudiantes' },
+  },
+  coordinador: {
+    intro: 'Actividad de postulaciones y estadías en curso.',
+    primary: { to: '/coordinacion', label: 'Panel de coordinación' },
+    secondary: { to: '/seguimientos', label: 'Seguimientos' },
+  },
+  asesor_academico: {
+    intro: 'Seguimiento de los estudiantes que tienes asignados.',
+    primary: { to: '/seguimientos', label: 'Ver seguimientos' },
+    secondary: { to: '/estudiantes', label: 'Estudiantes' },
+  },
 }
 
 function Hero() {
-  const principal = ACCION_PRINCIPAL[useAuth().usuario?.rol]
+  const { usuario } = useAuth()
+  const h = HERO[usuario?.rol] ?? HERO.estudiante
+  const nombre = (usuario?.nombre ?? '').split(' ')[0]
+
   return (
-    <section className="animate-fade-in-up relative overflow-hidden rounded-3xl border border-line bg-night px-6 py-10 sm:px-10 sm:py-14">
+    <section className="animate-fade-in-up relative overflow-hidden rounded-3xl border border-line bg-night px-6 py-10 sm:px-10">
       <div className="bg-dots pointer-events-none absolute inset-0 opacity-60 [mask-image:linear-gradient(to_right,transparent,black_70%)]" />
       <div className="animate-blob pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-salmon/40 blur-3xl" />
       <div className="animate-blob pointer-events-none absolute -bottom-32 right-1/3 h-72 w-72 rounded-full bg-salmon/15 blur-3xl [animation-delay:-4s]" />
@@ -91,65 +111,29 @@ function Hero() {
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-salmon opacity-75" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-salmon" />
           </span>
-          Conecta · Postula · Crece
+          {ROLES[usuario?.rol] ?? 'Linkea'}
         </p>
         <h1 className="animate-fade-in-up mt-5 text-4xl font-medium leading-[1.05] text-white [animation-delay:200ms] sm:text-6xl">
-          Convierte tu talento
-          <br />
-          en <em className="text-shimmer">oportunidades.</em>
+          Hola, <em className="script-accent text-shimmer">{nombre}.</em>
         </h1>
         <p className="animate-fade-in-up mt-5 max-w-md font-body text-sm leading-relaxed text-white/75 [animation-delay:300ms] sm:text-base">
-          Linkea conecta estudiantes universitarios con empresas que ofrecen prácticas profesionales.
-          La elegibilidad se decide con lógica proposicional y la compatibilidad con IA.
+          {h.intro}
         </p>
         <div className="animate-fade-in-up mt-7 flex flex-wrap gap-3 [animation-delay:400ms]">
-          {principal && (
-            <Link
-              to={principal.to}
-              className="btn-sheen group flex items-center gap-2 rounded-lg bg-brand px-5 py-3 font-body text-sm font-semibold text-on-brand transition-transform duration-200 hover:scale-[1.03] active:scale-95"
-            >
-              {principal.label}
-              <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-            </Link>
-          )}
           <Link
-            to="/vacantes"
+            to={h.primary.to}
+            className="btn-sheen group flex items-center gap-2 rounded-lg bg-brand px-5 py-3 font-body text-sm font-semibold text-on-brand transition-transform duration-200 hover:scale-[1.03] active:scale-95"
+          >
+            {h.primary.label}
+            <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+          </Link>
+          <Link
+            to={h.secondary.to}
             className="rounded-lg border border-white/25 px-5 py-3 font-body text-sm font-semibold text-white transition-[background-color,transform] duration-200 hover:scale-[1.03] hover:bg-white/10 active:scale-95"
           >
-            Explorar vacantes
+            {h.secondary.label}
           </Link>
         </div>
-      </div>
-
-      <FloatChip className="right-[30%] top-8" delay={0}>
-        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-salmon text-night">
-          <Check className="h-4 w-4" />
-        </span>
-        <div>
-          <p className="font-body text-xs font-semibold">Eres elegible</p>
-          <p className="font-body text-[11px] text-white/70">92% de compatibilidad</p>
-        </div>
-      </FloatChip>
-
-      <FloatChip className="right-8 top-24" delay={1.2}>
-        <div className="flex">
-          {['AT', 'CR', 'VG'].map((i, idx) => (
-            <span
-              key={i}
-              className={`flex h-8 w-8 items-center justify-center rounded-full border-2 border-night bg-salmon/80 font-body text-[10px] font-bold text-night ${idx ? '-ml-2' : ''}`}
-            >
-              {i}
-            </span>
-          ))}
-        </div>
-        <p className="font-body text-[11px] text-white/80">+12 vacantes nuevas</p>
-      </FloatChip>
-
-      <div className="animate-float relative mt-8 hidden max-w-xs rounded-2xl border border-white/15 bg-white/10 p-6 backdrop-blur-md [animation-delay:2s] lg:absolute lg:bottom-8 lg:right-8 lg:mt-0 lg:block">
-        <span className="block h-0.5 w-8 bg-salmon" />
-        <p className="mt-4 font-heading text-xl leading-snug text-white">
-          Las grandes carreras empiezan con buenas conexiones.
-        </p>
       </div>
     </section>
   )
@@ -297,7 +281,10 @@ function CardAction({ tab, item, connected, onConnect }) {
 }
 
 function Suggestions({ data, fallback, matches, hasStudent }) {
-  const [active, setActive] = useState('estudiantes')
+  const rol = useAuth().usuario?.rol
+  const visibles = tabs.filter((t) => !TABS_POR_ROL[rol] || TABS_POR_ROL[rol].includes(t.id))
+  const [elegida, setElegida] = useState(null)
+  const active = visibles.some((t) => t.id === elegida) ? elegida : visibles[0]?.id
   const [connections, toggleConnection] = useStoredSet('linkea-connections')
   const items = data[active]
 
@@ -312,7 +299,7 @@ function Suggestions({ data, fallback, matches, hasStudent }) {
             )}
           </h2>
           <Link
-            to={active === 'estudiantes' ? '/estudiantes' : '/vacantes'}
+            to={VER_MAS[active] ?? '/vacantes'}
             className="group flex items-center gap-1 font-body text-sm text-ink hover:text-brand"
           >
             Ver más
@@ -320,14 +307,15 @@ function Suggestions({ data, fallback, matches, hasStudent }) {
           </Link>
         </div>
 
+        {visibles.length > 1 && (
         <div role="tablist" className="mt-4 flex gap-6 border-b border-line">
-          {tabs.map((t) => (
+          {visibles.map((t) => (
             <button
               key={t.id}
               type="button"
               role="tab"
               aria-selected={t.id === active}
-              onClick={() => setActive(t.id)}
+              onClick={() => setElegida(t.id)}
               className={`relative pb-3 font-body text-sm transition-colors after:absolute after:inset-x-0 after:-bottom-px after:h-0.5 after:origin-center after:bg-brand after:transition-transform after:duration-300 ${
                 t.id === active
                   ? 'font-semibold text-ink after:scale-x-100'
@@ -338,6 +326,7 @@ function Suggestions({ data, fallback, matches, hasStudent }) {
             </button>
           ))}
         </div>
+        )}
 
         {active === 'vacantes' && !hasStudent && !fallback.vacantes && (
           <p className="mt-4 font-body text-xs text-muted">
@@ -400,6 +389,7 @@ const MAX_FEATURED = 7
 
 function Featured({ vacancies, fallback, matches }) {
   const esEmpresa = useAuth().usuario?.rol === 'empresa'
+  const puedeGuardar = useAuth().usuario?.rol === 'estudiante'
   const [saved, toggleSaved] = useStoredSet('linkea-saved')
   const [area, setArea] = useState('todas')
 
@@ -473,8 +463,8 @@ function Featured({ vacancies, fallback, matches }) {
               <VacancyCard
                 vacancy={v}
                 match={matches.get(v.id)}
-                saved={saved.has(v.id)}
-                onToggleSave={() => toggleSaved(v.id)}
+                saved={puedeGuardar && saved.has(v.id)}
+                onToggleSave={puedeGuardar ? () => toggleSaved(v.id) : undefined}
               />
             </div>
           ))}
@@ -506,11 +496,13 @@ export default function Home() {
   const { sugerencias, destacadas, fallback } = useHomeData()
   const [activeStudent] = useActiveStudent()
   const matches = useMatches(activeStudent)
+  const esPersonal = ['coordinador', 'asesor_academico'].includes(useAuth().usuario?.rol)
 
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-8 px-4 py-6 sm:px-6">
       <Hero />
-      <StatsRow />
+      {/* Las cifras globales de la plataforma solo le sirven a quien la supervisa. */}
+      {esPersonal && <StatsRow />}
       <Suggestions data={sugerencias} fallback={fallback} matches={matches} hasStudent={Boolean(activeStudent)} />
       <Featured vacancies={destacadas} fallback={fallback.destacadas} matches={matches} />
     </div>

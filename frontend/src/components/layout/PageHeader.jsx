@@ -6,10 +6,12 @@ export default function PageHeader({ title, subtitle, count, actionTo, actionLab
     <header className="flex flex-col gap-5">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-4xl font-medium">
+          <h1 className="flex flex-wrap items-baseline gap-3 text-4xl font-medium">
             {title}
             {count !== undefined && (
-              <span className="ml-3 align-middle font-body text-sm font-medium text-muted">{count} en total</span>
+              <span className="inline-flex items-center rounded-full bg-brand-soft px-3 py-1 font-body text-xs font-semibold text-brand">
+                {count} {count === 1 ? 'resultado' : 'resultados'}
+              </span>
             )}
           </h1>
           <p className="mt-2 font-body text-sm text-muted">{subtitle}</p>

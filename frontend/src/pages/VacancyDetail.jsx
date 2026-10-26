@@ -77,15 +77,17 @@ export default function VacancyDetail() {
           <article className="overflow-hidden rounded-2xl border border-line bg-surface">
             <div className="relative h-32 bg-night">
               <div className="absolute -right-8 -top-12 h-44 w-44 rounded-full bg-salmon/50 blur-3xl" />
-              <button
-                type="button"
-                aria-label={saved ? 'Quitar de guardados' : 'Guardar vacante'}
-                aria-pressed={saved}
-                onClick={() => toggleSaved(id)}
-                className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-lg bg-white/15 text-white backdrop-blur transition-colors hover:bg-white/25"
-              >
-                <Bookmark key={String(saved)} className={`h-4 w-4 ${saved ? 'animate-pop fill-current text-salmon' : ''}`} />
-              </button>
+              {usuario?.rol === 'estudiante' && (
+                <button
+                  type="button"
+                  aria-label={saved ? 'Quitar de guardados' : 'Guardar vacante'}
+                  aria-pressed={saved}
+                  onClick={() => toggleSaved(id)}
+                  className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-lg bg-white/15 text-white backdrop-blur transition-colors hover:bg-white/25"
+                >
+                  <Bookmark key={String(saved)} className={`h-4 w-4 ${saved ? 'animate-pop fill-current text-salmon' : ''}`} />
+                </button>
+              )}
               <span className="absolute bottom-0 left-6 flex h-16 w-16 translate-y-1/2 items-center justify-center rounded-2xl border-4 border-surface bg-brand font-body text-lg font-bold text-on-brand">
                 {vacancy.nombre_empresa.slice(0, 2).toUpperCase()}
               </span>

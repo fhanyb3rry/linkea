@@ -22,7 +22,7 @@ import {
 const ACCIONES = {
   en_revision: { label: 'Marcar en revisión', className: 'border border-line bg-surface text-ink hover:border-cocoa/50' },
   aceptada: { label: 'Aceptar', icon: Check, className: 'bg-cocoa text-on-cocoa hover:opacity-90' },
-  asignada: { label: 'Asignar estadía', icon: BadgeCheck, className: 'bg-teal text-white hover:opacity-90' },
+  asignada: { label: 'Asignar estadía', icon: BadgeCheck, className: 'bg-teal text-on-teal hover:opacity-90' },
   rechazada: { label: 'Rechazar', icon: X, className: 'text-muted hover:text-brand' },
 }
 

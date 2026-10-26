@@ -2,11 +2,18 @@ import { useState } from 'react'
 import { ArrowLeft, Send } from 'lucide-react'
 import PageTitle from '../components/layout/PageTitle'
 import PreviewNotice from '../components/layout/PreviewNotice'
-import { conversaciones as inicial } from '../data/mockSocial'
+import { useAuth } from '../context/auth'
+import { conversacionesPara } from '../data/mockSocial'
 import { initials } from '../lib/perfil'
 
+const SUBTITULO = {
+  estudiante: 'Conversa con las empresas que revisan tus postulaciones.',
+  empresa: 'Conversa con los estudiantes que se postulan a tus vacantes.',
+}
+
 export default function Mensajes() {
-  const [chats, setChats] = useState(inicial)
+  const { usuario } = useAuth()
+  const [chats, setChats] = useState(() => conversacionesPara(usuario?.rol))
   const [selectedId, setSelectedId] = useState(null)
   const [draft, setDraft] = useState('')
 
@@ -29,7 +36,7 @@ export default function Mensajes() {
 
   return (
     <section className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-8 sm:px-6">
-      <PageTitle title="Mensajes" subtitle="Conversa con las empresas y los estudiantes con los que conectas." />
+      <PageTitle title="Mensajes" subtitle={SUBTITULO[usuario?.rol] ?? 'Mensajes de la plataforma.'} />
       <PreviewNotice>Los mensajes de esta pantalla son de ejemplo y no se envían: todavía no existe el servicio de mensajería.</PreviewNotice>
 
       <div className="panel grid min-h-[30rem] overflow-hidden lg:grid-cols-[20rem_1fr]">

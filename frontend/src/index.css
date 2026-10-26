@@ -1,50 +1,57 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=Inter:wght@300..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=Italianno&family=Quicksand:wght@300..700&display=swap');
 @import "tailwindcss";
 
-/* Tema por variables: claro por defecto, oscuro con <html data-theme="dark"> */
+/* Tema por variables: claro por defecto, oscuro con <html data-theme="dark">
+   Paleta: mulled wine · woodland · antique marble · charcoal smoke · sandlight · goat milk */
 :root {
-  --canvas: #fff9f0;
-  --surface: #fffefb;
-  --ink: #4a3028;
-  --muted: #6b4f43;
-  --line: #eddfd0;
-  --brand: #6d1e2e;
-  --brand-soft: #f6e8de;
-  --on-brand: #ffffff;
-  --night: #2b1a15;
-  --teal: #76a8a5;
-  --accent: #e8a72e;
-  --salmon: #d88a7c;
-  --cocoa: #6b4f43;
-  --on-cocoa: #ffffff;
-  --cocoa-soft: #f1e4d9;
-  --caramel: #b47c59;
-  --latte: #d8b49a;
-  --tile: linear-gradient(135deg, #4a3028, #a37f6f);
-  --on-tile: #ffffff;
+  --canvas: #e7e5db;        /* goat milk */
+  --surface: #f3f1ea;       /* goat milk aclarada: las tarjetas resaltan sobre el fondo */
+  --ink: #191a1e;           /* charcoal smoke */
+  --muted: #56483b;         /* woodland */
+  --line: #cdc6b8;          /* antique marble */
+  --brand: #49110b;         /* mulled wine */
+  --brand-soft: #e5dbce;    /* vino al ~10% sobre goat milk */
+  --on-brand: #f5f2e9;
+  --night: #191a1e;         /* superficies siempre oscuras (hero, promo) */
+  --teal: #4f6b52;          /* salvia apagado: éxito / elegible */
+  --on-teal: #ffffff;
+  --accent: #a98b55;        /* oro viejo */
+  --salmon: #c9906f;        /* terracota: el vino "encendido" sobre fondos oscuros */
+  --cocoa: #56483b;         /* woodland: acciones secundarias */
+  --on-cocoa: #f3f1ea;
+  --cocoa-soft: #ddd6c8;
+  --caramel: #8a6f52;       /* bronce medio */
+  --latte: #c7b299;         /* sandlight aclarado */
+  --tile: linear-gradient(135deg, #49110b, #6b5138);
+  --on-tile: #f3eee3;
+  --glass-bg: color-mix(in srgb, var(--surface) 68%, transparent);
+  --glass-line: color-mix(in srgb, var(--ink) 10%, transparent);
   color-scheme: light;
 }
 
 :root[data-theme='dark'] {
-  --canvas: #1c1411;
-  --surface: #271b17;
-  --ink: #f5e6d8;
-  --muted: #bba396;
-  --line: #3d2c25;
-  --brand: #d88a7c;
-  --brand-soft: #3a211d;
-  --on-brand: #2a1510;
-  --night: #140d0b;
-  --teal: #76a8a5;
-  --accent: #e8a72e;
-  --salmon: #d88a7c;
-  --cocoa: #d8b49a;
-  --on-cocoa: #2b1b14;
-  --cocoa-soft: #3a2b24;
-  --caramel: #c8946f;
-  --latte: #e2c3ab;
-  --tile: linear-gradient(135deg, #e2c3ab, #b47c59);
-  --on-tile: #2b1b14;
+  --canvas: #191a1e;        /* charcoal smoke */
+  --surface: #25241f;       /* carbón cálido un punto más claro */
+  --ink: #edeae0;           /* goat milk para texto */
+  --muted: #b2ab9d;         /* antique marble bajado */
+  --line: #3d3a32;
+  --brand: #ad9e89;         /* sandlight: CTAs "champagne" sobre carbón */
+  --brand-soft: #373329;
+  --on-brand: #191a1e;
+  --night: #111215;
+  --teal: #8da98a;
+  --on-teal: #191a1e;
+  --accent: #d6bf92;
+  --salmon: #c9906f;
+  --cocoa: #c9bba0;         /* botones secundarios claros */
+  --on-cocoa: #1d1b16;
+  --cocoa-soft: #35322a;
+  --caramel: #c7b299;
+  --latte: #ad9e89;
+  --tile: linear-gradient(135deg, #ad9e89, #6b5b45);
+  --on-tile: #191a1e;
+  --glass-bg: color-mix(in srgb, var(--surface) 55%, transparent);
+  --glass-line: color-mix(in srgb, var(--ink) 14%, transparent);
   color-scheme: dark;
 }
 
@@ -59,17 +66,21 @@
   --color-on-brand: var(--on-brand);
   --color-night: var(--night);
   --color-teal: var(--teal);
+  --color-on-teal: var(--on-teal);
   --color-accent: var(--accent);
-  --color-salmon: #d88a7c;
+  --color-salmon: var(--salmon);
   --color-cocoa: var(--cocoa);
   --color-on-cocoa: var(--on-cocoa);
   --color-cocoa-soft: var(--cocoa-soft);
   --color-caramel: var(--caramel);
   --color-latte: var(--latte);
+  --color-glass: var(--glass-bg);
+  --color-glass-line: var(--glass-line);
 
-  --font-system: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-system: "Quicksand", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --font-heading: "Fraunces", Georgia, "Times New Roman", serif;
   --font-body: var(--font-system);
+  --font-script: "Italianno", "Fraunces", cursive;
 }
 
 @layer base {
@@ -77,6 +88,8 @@
     background-color: var(--canvas);
     color: var(--muted);
     font-family: var(--font-body);
+    /* clip (no hidden) para no romcer el position: sticky de la barra superior */
+    overflow-x: clip;
     transition: background-color 0.2s, color 0.2s;
   }
 
@@ -202,9 +215,9 @@
     animation: pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
-  /* Texto con degradado animado, usa salmón y miel de la paleta */
+  /* Texto con degradado animado, terracota y oro viejo de la paleta */
   .text-shimmer {
-    background-image: linear-gradient(90deg, #d88a7c 0%, var(--accent) 45%, #d88a7c 90%);
+    background-image: linear-gradient(90deg, var(--salmon) 0%, var(--accent) 45%, var(--salmon) 90%);
     background-size: 200% 100%;
     -webkit-background-clip: text;
     background-clip: text;
@@ -248,6 +261,34 @@
   .reveal.is-visible {
     opacity: 1;
     transform: none;
+  }
+
+  /* Glassmorphism: panel translúcido. Necesita algo detrás (ver .app-bg) para que el blur se note. */
+  .glass {
+    background: var(--glass-bg);
+    -webkit-backdrop-filter: blur(16px) saturate(150%);
+    backdrop-filter: blur(16px) saturate(150%);
+    border: 1px solid var(--glass-line);
+  }
+
+  .glass-strong {
+    background: color-mix(in srgb, var(--surface) 84%, transparent);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    backdrop-filter: blur(20px) saturate(160%);
+    border: 1px solid var(--glass-line);
+  }
+
+  /* Fondo ambiente fijo: veladuras de la paleta detrás del contenido.
+     Sin él, el glass estaría sobre un color plano y no refractaría nada. */
+  .app-bg {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(45% 35% at 88% -5%, color-mix(in srgb, var(--latte) 38%, transparent), transparent 70%),
+      radial-gradient(40% 32% at -5% 100%, color-mix(in srgb, var(--salmon) 20%, transparent), transparent 70%),
+      radial-gradient(30% 28% at 100% 95%, color-mix(in srgb, var(--caramel) 18%, transparent), transparent 70%);
   }
 }
 
@@ -333,6 +374,24 @@
     background: var(--tile);
     color: var(--on-tile);
     box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.18), 0 6px 14px -6px color-mix(in srgb, var(--caramel) 60%, transparent);
+  }
+
+  /* Wordmark: "Linkea" en script elegante (como el logo de referencia).
+     Solo para la marca y acentos cortos: en textos largos cansaría la vista. */
+  .brand-mark {
+    font-family: var(--font-script);
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: 0.01em;
+  }
+
+  /* Acento caligráfico dentro de un titular (<em>), sin romper la línea */
+  em.script-accent {
+    font-family: var(--font-script);
+    font-style: normal;
+    font-size: 1.18em;
+    line-height: 0;
+    padding-inline: 0.04em;
   }
 
   @media (prefers-reduced-motion: reduce) {

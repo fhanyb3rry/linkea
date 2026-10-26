@@ -23,6 +23,7 @@ export default function Vacantes() {
   const [saved, toggleSaved] = useStoredSet('linkea-saved')
   const [activeStudent] = useActiveStudent()
   const esEmpresa = useAuth().usuario?.rol === 'empresa'
+  const puedeGuardar = useAuth().usuario?.rol === 'estudiante'
   const matches = useMatches(activeStudent)
   const [sector, setSector] = useState('Todas')
   const { data: perfil } = useFetch(() => getStudent(activeStudent), [activeStudent], Boolean(activeStudent))
@@ -121,8 +122,8 @@ export default function Vacantes() {
               key={vacancy.id}
               vacancy={vacancy}
               match={matches.get(vacancy.id)}
-              saved={saved.has(vacancy.id)}
-              onToggleSave={() => toggleSaved(vacancy.id)}
+              saved={puedeGuardar && saved.has(vacancy.id)}
+              onToggleSave={puedeGuardar ? () => toggleSaved(vacancy.id) : undefined}
             />
           ))}
         </div>

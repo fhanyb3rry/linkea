@@ -150,7 +150,7 @@ VACANTES = [
              "Apoyo en procesos administrativos y control de proveedores."),
 ]
 
-PASSWORD_DEMO = "linkea123"
+PASSWORD_DEMO = "Linkea#2026"
 
 # Personal de la universidad (no se puede registrar desde la app).
 PERSONAL = [

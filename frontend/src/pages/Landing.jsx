@@ -22,11 +22,11 @@ const benefits = [
 
 const steps = [
   { n: '01', icon: UserPlus, title: 'Crea tu perfil', text: 'Cuéntanos tu carrera, tus habilidades, tu disponibilidad y tu zona.' },
-  { n: '02', icon: Search, title: 'Descubre vacantes', text: 'Linkea filtra las vacantes para las que eres elegible, con lógica proposicional.' },
+  { n: '02', icon: Search, title: 'Descubre vacantes', text: 'Linkea filtra y te muestra solo las vacantes que encajan con tu perfil.' },
   { n: '03', icon: Send, title: 'Postula con tu match', text: 'La IA calcula tu compatibilidad y te explica por qué encajas.' },
 ]
 
-const floatCard = 'absolute rounded-2xl border border-line bg-surface/95 shadow-xl backdrop-blur'
+const floatCard = 'glass absolute rounded-2xl shadow-xl'
 
 function HeroVisual() {
   return (
@@ -131,7 +131,7 @@ export default function Landing() {
             <h1 className="mt-5 text-5xl font-medium leading-[1.05] sm:text-6xl">
               Convierte tu talento
               <br />
-              en <em className="text-brand">oportunidades</em>
+              en <em className="script-accent text-brand">oportunidades</em>
             </h1>
             <p className="mt-6 max-w-lg font-body text-base leading-relaxed text-muted">
               Linkea conecta estudiantes universitarios con empresas que ofrecen prácticas profesionales.
@@ -187,7 +187,7 @@ export default function Landing() {
           <p className="font-body text-xs font-medium uppercase tracking-[0.2em] text-brand">¿Cómo funciona?</p>
           <h2 className="mt-3 text-4xl font-medium leading-tight">
             De tu perfil
-            <br />a una <em className="text-brand">gran práctica.</em>
+            <br />a una <em className="script-accent text-brand">gran práctica.</em>
           </h2>
           <p className="mt-4 max-w-sm font-body text-sm leading-relaxed text-muted">
             Te acompañamos en cada paso para convertir tu formación en una experiencia profesional real.
