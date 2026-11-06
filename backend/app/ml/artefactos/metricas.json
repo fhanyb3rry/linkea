@@ -1,0 +1,54 @@
+{
+  "features": [
+    "carrera",
+    "cobertura_skills",
+    "razon_horas",
+    "minutos"
+  ],
+  "filas_dataset": 430,
+  "exactitud_reglas": 1.0,
+  "exactitud_modelo": 1.0,
+  "reporte": {
+    "No elegible": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 92.0
+    },
+    "Elegible": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 37.0
+    },
+    "accuracy": 1.0,
+    "macro avg": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 129.0
+    },
+    "weighted avg": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 129.0
+    }
+  },
+  "matriz_confusion": [
+    [
+      92,
+      0
+    ],
+    [
+      0,
+      37
+    ]
+  ],
+  "importancia_por_variable": {
+    "carrera": 0.015,
+    "cobertura_skills": 0.156,
+    "razon_horas": 0.49,
+    "minutos": 0.34
+  }
+}

@@ -44,7 +44,7 @@ function FiltroIA({ studentId, vacancyId, elegible }) {
           <Brain className="h-4 w-4 text-cocoa" />
           Análisis con IA
         </p>
-        {data?.fuente === 'ia' && (
+        {(data?.fuente === 'ia' || data?.fuente === 'modelo') && (
           <button
             type="button"
             title="Volver a evaluar"
@@ -71,7 +71,11 @@ function FiltroIA({ studentId, vacancyId, elegible }) {
         <>
           <div>
             <div className="mb-1.5 flex items-center justify-between font-body text-xs">
-              <span className="text-muted">{data.fuente === 'ia' ? 'Compatibilidad con IA' : 'Compatibilidad estimada'}</span>
+              <span className="text-muted">
+                {data.fuente === 'ia' ? 'Compatibilidad con IA'
+                  : data.fuente === 'modelo' ? 'Según el modelo propio'
+                  : 'Compatibilidad estimada'}
+              </span>
               <span className="font-semibold text-ink">{data.puntaje}%</span>
             </div>
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-line">
@@ -90,7 +94,7 @@ function FiltroIA({ studentId, vacancyId, elegible }) {
               ))}
             </ul>
           )}
-          {data.razones_en_contra.length > 0 && data.fuente === 'ia' && (
+          {data.razones_en_contra.length > 0 && (data.fuente === 'ia' || data.fuente === 'modelo') && (
             <ul className="flex flex-col gap-1.5">
               {data.razones_en_contra.map((r) => (
                 <li key={r} className="flex gap-2 font-body text-xs leading-snug text-muted">
@@ -100,9 +104,21 @@ function FiltroIA({ studentId, vacancyId, elegible }) {
               ))}
             </ul>
           )}
+          {data.habilidades_por_aprender?.length > 0 && (
+            <p className="font-body text-xs leading-snug text-ink">
+              <span className="font-semibold">Habilidades que sumarían: </span>
+              {data.habilidades_por_aprender.join(', ')}
+            </p>
+          )}
           {data.fuente === 'ia' && (
             <p className="font-body text-[10px] text-muted">
               Evaluado por IA ({data.modelo}){data.desde_cache ? ' · resultado guardado' : ''}. Es una orientación, no una decisión.
+            </p>
+          )}
+          {data.fuente === 'modelo' && (
+            <p className="font-body text-[10px] text-muted">
+              Evaluado por el modelo propio de Linkea (árbol de decisión entrenado con datos de la plataforma).
+              Es una orientación, no una decisión.
             </p>
           )}
         </>

@@ -11,6 +11,8 @@ from app.core.database import get_database
 from app.core.permisos import verificar_acceso_par
 from app.core.seguridad import es_rol, requiere_rol, usuario_actual
 from app.logic.logic_rules import evaluar_elegibilidad
+from app.ml.modelo import predecir as predecir_ml
+from app.ml.generar_dataset import ARTEFACTOS as ML_ARTEFACTOS
 from app.models.company import Vacancy
 from app.models.student import Student
 from app.models.user import Rol
@@ -24,6 +26,21 @@ router = APIRouter(prefix="/ai", tags=["ai"], dependencies=[Depends(usuario_actu
 async def status():
     """¿Hay key configurada? No gasta nada ni llama a la API."""
     return {"configurada": ia_configurada(), "modelo": settings.anthropic_model}
+
+
+@router.get("/modelo")
+async def metricas_modelo():
+    """Métricas y reglas del modelo propio (para documentación/demo), sin gastar nada."""
+    metricas = ML_ARTEFACTOS / "metricas.json"
+    arbol = ML_ARTEFACTOS / "arbol.txt"
+    if not metricas.exists():
+        return {"entrenado": False, "aviso": "Corre `python -m app.ml.entrenar` para generar el modelo."}
+    import json
+    return {
+        "entrenado": True,
+        **json.loads(metricas.read_text(encoding="utf-8")),
+        "arbol_aprendido": arbol.read_text(encoding="utf-8") if arbol.exists() else "",
+    }
 
 
 @router.post("/test", dependencies=[Depends(requiere_rol(Rol.COORDINADOR))])
@@ -46,7 +63,7 @@ async def test():
 
 
 class CompatibilidadRespuesta(BaseModel):
-    fuente: Literal["ia", "reglas", "no_aplica"]  # quién calculó el puntaje
+    fuente: Literal["ia", "modelo", "reglas", "no_aplica"]  # quién calculó el puntaje
     puntaje: int | None = None
     razones_a_favor: list[str] = []
     razones_en_contra: list[str] = []
@@ -54,6 +71,9 @@ class CompatibilidadRespuesta(BaseModel):
     aviso: str = ""  # por qué no se usó la IA, si aplica
     modelo: str | None = None
     desde_cache: bool = False
+    # Solo cuando fuente="modelo": qué aspecto pesa más y qué skills faltan.
+    importancias: dict[str, float] = {}
+    habilidades_por_aprender: list[str] = []
 
 
 @router.get("/compatibility/{student_id}/{vacancy_id}", response_model=CompatibilidadRespuesta)
@@ -89,6 +109,27 @@ async def compatibilidad(
 
     def respaldo(aviso: str) -> CompatibilidadRespuesta:
         return CompatibilidadRespuesta(fuente="reglas", puntaje=filtro1.compatibilidad, aviso=aviso)
+
+    # Filtro 2 con nuestro primer modelo propio (árbol de decisión entrenado con los
+    # datos de Linkea): gratis e instantáneo, así que va primero. La IA externa queda
+    # como opción cuando el archivo del modelo no exista (sin entrenar todavía).
+    prediccion = predecir_ml(student, vacancy)
+    if prediccion is not None:
+        porcentaje = round(prediccion["probabilidad"] * 100)
+        resumen = f"El modelo estima {porcentaje}% de compatibilidad para este par."
+        if prediccion["habilidades_por_aprender"]:
+            resumen += " Habilidades que le sumarían: " + ", ".join(
+                prediccion["habilidades_por_aprender"]) + "."
+        return CompatibilidadRespuesta(
+            fuente="modelo",
+            puntaje=porcentaje,
+            razones_a_favor=prediccion["a_favor"],
+            razones_en_contra=prediccion["en_contra"],
+            resumen=resumen,
+            modelo=prediccion["version"],
+            importancias=prediccion["importancias"],
+            habilidades_por_aprender=prediccion["habilidades_por_aprender"],
+        )
 
     if not ia_configurada():
         return respaldo("La IA no está configurada; se muestra el porcentaje por reglas (estimado).")
