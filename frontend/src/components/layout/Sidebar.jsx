@@ -8,6 +8,7 @@ import {
   Building2,
   CalendarCheck,
   Factory,
+  GitBranch,
   GraduationCap,
   Home,
   LayoutDashboard,
@@ -35,6 +36,7 @@ const groups = [
       { to: '/guardados', label: 'Guardados', icon: Bookmark, roles: ['estudiante'] },
       { to: '/rutas', label: 'Rutas de aprendizaje', icon: Network, roles: ['estudiante'] },
       { to: '/traslado', label: 'Traslado', icon: MapPin, roles: ['estudiante', 'coordinador', 'asesor_academico'] },
+      { to: '/prediccion', label: 'Predicción ML', icon: GitBranch },
     ],
   },
   {

@@ -24,6 +24,7 @@ import Notificaciones from './pages/Notificaciones'
 import PanelEmpresa from './pages/PanelEmpresa'
 import PerfilEstudiante from './pages/PerfilEstudiante'
 import Postulaciones from './pages/Postulaciones'
+import PrediccionML from './pages/PrediccionML'
 import PublicarVacante from './pages/PublicarVacante'
 import Recuperar from './pages/Recuperar'
 import Register from './pages/Register'
@@ -73,6 +74,7 @@ export default function App() {
         </Route>
         <Route path="estudiantes/:id" element={<PerfilEstudiante />} />
         <Route path="organizaciones/:id" element={<OrganizacionDetalle />} />
+        <Route path="prediccion" element={<PrediccionML />} />
 
         <Route element={<RequireAuth roles={['estudiante', 'coordinador', 'asesor_academico']} />}>
           <Route path="traslado" element={<Traslado />} />

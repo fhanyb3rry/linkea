@@ -8,6 +8,8 @@ python-multipart
 anthropic
 bcrypt
 pyjwt
+numpy
 pandas
 scikit-learn
+matplotlib
 joblib

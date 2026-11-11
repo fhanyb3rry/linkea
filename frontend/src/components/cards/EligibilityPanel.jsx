@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight, Brain, Check, MapPin, RefreshCcw, ThumbsDown, ThumbsUp, X } from 'lucide-react'
+import { ArrowRight, Brain, Check, GitBranch, MapPin, RefreshCcw, ThumbsDown, ThumbsUp, X } from 'lucide-react'
 import { useAuth } from '../../context/auth'
 import useActiveStudent from '../../hooks/useActiveStudent'
-import { checkEligibility, getCompatibilidadIA, getStudents, getTrasladoPar } from '../../services/api'
+import { checkEligibility, getCompatibilidadIA, getPrediccionML, getStudents, getTrasladoPar } from '../../services/api'
 
 // Los 4 aspectos que se revisan; cada uno puede sumar hasta 25 puntos.
 const proposiciones = [
@@ -347,7 +347,75 @@ export default function EligibilityPanel({ vacancyId }) {
       )}
 
       {shown && !loading && <TrasladoCard studentId={studentId} vacancyId={vacancyId} />}
+      {shown && !loading && <PrediccionMLCard studentId={studentId} vacancyId={vacancyId} />}
       {shown && !loading && <FiltroIA studentId={studentId} vacancyId={vacancyId} elegible={shown.elegible} />}
     </aside>
+  )
+}
+
+// Compara el veredicto de Reglas Fijas contra el Árbol de Decisión entrenado (Machine Learning).
+function PrediccionMLCard({ studentId, vacancyId }) {
+  const [estado, setEstado] = useState({ key: '', data: null, error: null })
+  const key = `${studentId}:${vacancyId}`
+
+  useEffect(() => {
+    let cancelled = false
+    getPrediccionML(studentId, vacancyId)
+      .then((data) => !cancelled && setEstado({ key, data, error: null }))
+      .catch((err) => !cancelled && setEstado({ key, data: null, error: err.message }))
+    return () => {
+      cancelled = true
+    }
+  }, [studentId, vacancyId, key])
+
+  const actual = estado.key === key ? estado : null
+  const data = actual?.data
+
+  return (
+    <div className="flex flex-col gap-3 rounded-xl border border-line p-3">
+      <p className="flex items-center gap-2 font-body text-xs font-semibold text-ink">
+        <GitBranch className="h-4 w-4 text-cocoa" />
+        Modelo ML · Árbol de decisión vs reglas
+      </p>
+
+      {!actual && <div className="h-20 animate-pulse rounded-lg bg-canvas" aria-busy="true" />}
+      {actual?.error && <p className="font-body text-xs text-muted">No se pudo calcular: {actual.error}</p>}
+
+      {data && (
+        <>
+          <div>
+            <div className="mb-1.5 flex items-center justify-between font-body text-xs">
+              <span className="text-muted">Probabilidad de aceptación (ML)</span>
+              <span className="font-semibold text-ink">{data.ml.probabilidad_aceptacion}%</span>
+            </div>
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-line">
+              <div
+                className={`h-full rounded-full ${data.ml.prediccion === 1 ? 'bg-teal' : 'bg-brand'}`}
+                style={{ width: `${data.ml.probabilidad_aceptacion}%` }}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 font-body text-xs">
+            <div className="stat px-2.5 py-2">
+              <p className="text-[10px] uppercase tracking-wide text-muted">Reglas fijas</p>
+              <p className="mt-0.5 font-semibold text-ink">{data.reglas.etiqueta}</p>
+            </div>
+            <div className={`stat px-2.5 py-2 ${data.ml.prediccion === 1 ? 'ring-1 ring-teal/50' : ''}`}>
+              <p className="text-[10px] uppercase tracking-wide text-muted">Árbol ML</p>
+              <p className="mt-0.5 font-semibold text-ink">{data.ml.etiqueta}</p>
+            </div>
+          </div>
+
+          <p className="font-body text-[11px] leading-relaxed text-muted">{data.resumen}</p>
+          <Link
+            to={`/prediccion?estudiante=${encodeURIComponent(studentId)}&vacante=${encodeURIComponent(vacancyId)}`}
+            className="font-body text-xs font-semibold text-brand hover:underline"
+          >
+            Abrir simulador y detalle técnico (60/20/20)
+          </Link>
+        </>
+      )}
+    </div>
   )
 }

@@ -368,3 +368,31 @@ export function getTrasladoResumen(heuristica = 'euclidiana') {
 export function getTrasladoPar(studentId, vacancyId) {
   return request(`/search/traslado/${studentId}/${vacancyId}`)
 }
+
+// ---- Machine Learning (Árbol de decisión vs Reglas fijas) --------------------------------
+
+export function getEstadoML() {
+  return request('/ml/estado')
+}
+
+export function entrenarML({ cantidad = 500, semilla = 42 } = {}) {
+  return postJSON('/ml/entrenar', { cantidad, semilla })
+}
+
+export function getPrediccionML(studentId, vacancyId) {
+  return request(`/ml/predict/${studentId}/${vacancyId}`)
+}
+
+export function simularML(caracteristicas) {
+  return postJSON('/ml/simular', caracteristicas)
+}
+
+export async function obtenerGraficaBlobML(nombre) {
+  const response = await send(`/ml/grafica/${nombre}`)
+  if (!response.ok) throw new Error('No se pudo cargar la gráfica')
+  return response.blob()
+}
+
+export function descargarGraficaML(nombre, archivo = `${nombre}.png`) {
+  return descargar(`/ml/grafica/${nombre}`, archivo)
+}
