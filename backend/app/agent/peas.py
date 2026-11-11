@@ -1,8 +1,4 @@
-"""Especificación PEAS del agente de vinculación de Linkea.
-
-PEAS = Performance (medida de desempeño), Environment (entorno),
-       Actuators (actuadores), Sensors (sensores).
-"""
+"""Especificación PEAS del agente de vinculación de Linkea."""
 
 PEAS = {
     "agente": "Agente de vinculación Linkea",

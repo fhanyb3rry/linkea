@@ -1,14 +1,10 @@
 """Algoritmos de búsqueda ciega sobre el grafo de habilidades (DFS y BFS).
 
-Va dividido en partes, igual que los ejercicios de clase:
+dividido en partes:
   PARTE 1  Qué devolvemos (el resultado, con todo lo que pide la tarea)
   PARTE 2  DFS clásico: la primera ruta que encuentre (visitados globales)
   PARTE 3  DFS de todas las rutas: backtracking + control de ciclos + límite de profundidad
   PARTE 4  BFS: la ruta más corta (por niveles)
-
-Ojo con la diferencia que pide la maestra:
-  - nodos explorados  = todo lo que el algoritmo tuvo que revisar (puede ser mucho)
-  - ruta encontrada   = solo el camino que de verdad llega al objetivo
 """
 
 from collections import deque

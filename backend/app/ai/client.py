@@ -1,15 +1,10 @@
-"""Conexión con la API de Claude.
-
-Todo lo que habla con la IA pasa por aquí, para que la key y el modelo vivan en un solo lugar.
-Si no hay key en el .env, `ia_configurada()` devuelve False y el resto de la app sigue funcionando
-sin IA (el matching por reglas no depende de esto).
-"""
+"""Conexión con la API de Claude"""
 
 import anthropic
 
 from app.core.config import settings
 
-# Cliente único (se crea la primera vez que se necesita, no al arrancar el servidor).
+# Cliente único (se crea la primera vez que se necesita).
 _cliente: anthropic.AsyncAnthropic | None = None
 
 

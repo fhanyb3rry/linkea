@@ -6,6 +6,7 @@ import { ESTADO_SEGUIMIENTO } from '../../lib/seguimiento'
 import { getIndicadores } from '../../services/api'
 import ListState from '../layout/ListState'
 import { Seccion } from '../seguimiento/ui'
+import { BarrasH, Dona } from './Graficas'
 
 const ESTADO_ESTUDIANTE = { activo: 'Buscando', en_proceso: 'En proceso', colocado: 'Con estadía' }
 
@@ -66,10 +67,10 @@ export default function Indicadores() {
 
       <div className="grid gap-6 lg:grid-cols-3">
         <Seccion title="Estudiantes">
-          <Conteos items={Object.entries(i.estudiantes_por_estado).map(([k, n]) => [ESTADO_ESTUDIANTE[k] ?? k, n])} />
+          <Dona centro="Estudiantes" items={Object.entries(i.estudiantes_por_estado).map(([k, n]) => [ESTADO_ESTUDIANTE[k] ?? k, n])} />
         </Seccion>
         <Seccion title="Postulaciones">
-          <Conteos items={Object.entries(i.postulaciones_por_estado).map(([k, n]) => [ESTADOS[k]?.label ?? k, n])} />
+          <BarrasH items={Object.entries(i.postulaciones_por_estado).map(([k, n]) => [ESTADOS[k]?.label ?? k, n])} />
         </Seccion>
         <Seccion title="Estadías">
           <Conteos items={Object.entries(i.estadias_por_estado).map(([k, n]) => [ESTADO_SEGUIMIENTO[k]?.label ?? k, n])} />
@@ -78,7 +79,7 @@ export default function Indicadores() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Seccion title="Documentos por completar" description="En estadías en curso, agrupados por documento.">
-          <Conteos items={i.documentos_pendientes.map((d) => [d.nombre, d.pendientes])} />
+          <BarrasH color="var(--accent)" items={i.documentos_pendientes.map((d) => [d.nombre, d.pendientes])} />
         </Seccion>
         <Seccion title="Organizaciones" description="Vacantes publicadas y postulaciones recibidas.">
           {i.organizaciones_detalle.length === 0 ? (
