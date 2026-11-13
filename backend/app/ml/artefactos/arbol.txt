@@ -1,4 +1,4 @@
-|--- minutos <= 44.70
+|--- minutos <= 44.80
 |   |--- razon_horas <= 1.00
 |   |   |--- class: 0
 |   |--- razon_horas >  1.00
@@ -9,5 +9,5 @@
 |   |   |   |   |--- class: 1
 |   |   |--- cobertura_skills >  0.00
 |   |   |   |--- class: 1
-|--- minutos >  44.70
+|--- minutos >  44.80
 |   |--- class: 0

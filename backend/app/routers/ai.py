@@ -36,11 +36,38 @@ async def metricas_modelo():
     if not metricas.exists():
         return {"entrenado": False, "aviso": "Corre `python -m app.ml.entrenar` para generar el modelo."}
     import json
+    comparacion = ML_ARTEFACTOS / "comparacion.json"
     return {
         "entrenado": True,
         **json.loads(metricas.read_text(encoding="utf-8")),
         "arbol_aprendido": arbol.read_text(encoding="utf-8") if arbol.exists() else "",
+        # Práctica 5: tabla árbol vs bosque vs KNN (si se corrió app.ml.comparar).
+        "comparacion_algoritmos": (
+            json.loads(comparacion.read_text(encoding="utf-8")) if comparacion.exists() else None
+        ),
     }
+
+
+@router.get("/segmentos")
+async def segmentos():
+    """Segmentos de estudiantes por K-Means (práctica 8 adaptada a Linkea)."""
+    archivo = ML_ARTEFACTOS / "segmentos" / "segmentos.json"
+    if not archivo.exists():
+        return {"disponible": False,
+                "aviso": "Corre `python -m app.ml.segmentar` para generar los segmentos."}
+    import json
+    return {"disponible": True, **json.loads(archivo.read_text(encoding="utf-8"))}
+
+
+@router.get("/pca")
+async def pca():
+    """Proyección PCA del perfil de estudiantes (práctica 9 adaptada a Linkea)."""
+    archivo = ML_ARTEFACTOS / "pca" / "pca.json"
+    if not archivo.exists():
+        return {"disponible": False,
+                "aviso": "Corre `python -m app.ml.pca` para generar la proyección."}
+    import json
+    return {"disponible": True, **json.loads(archivo.read_text(encoding="utf-8"))}
 
 
 @router.post("/test", dependencies=[Depends(requiere_rol(Rol.COORDINADOR))])

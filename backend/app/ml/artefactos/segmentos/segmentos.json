@@ -1,0 +1,110 @@
+{
+  "variables": [
+    "cobertura_skills_prom",
+    "carrera_match",
+    "horas_disponibles",
+    "minutos_prom"
+  ],
+  "total_estudiantes": 306,
+  "estudiantes_reales": 6,
+  "silhouette": 0.477,
+  "ari_promedio": 1.0,
+  "inicializaciones": [
+    {
+      "inicializacion": "k-means++",
+      "inercia": 252.57,
+      "silhouette": 0.477
+    },
+    {
+      "inicializacion": "random",
+      "inercia": 252.57,
+      "silhouette": 0.477
+    }
+  ],
+  "escaladores": [
+    {
+      "escalador": "StandardScaler",
+      "silhouette": 0.477
+    },
+    {
+      "escalador": "MinMaxScaler",
+      "silhouette": 0.4883
+    }
+  ],
+  "nombres_segmentos": {
+    "1": "Requiere acompañamiento",
+    "0": "Perfil medio",
+    "2": "Perfil fuerte"
+  },
+  "segmentos_reales": [
+    {
+      "id": "6ade34e5c9d18979310b80f9",
+      "nombre": "Ana Torres Reyes",
+      "segmento": "Perfil medio",
+      "silhouette": 0.2275,
+      "posible_atipico": true
+    },
+    {
+      "id": "6ade34e5c9d18979310b80fb",
+      "nombre": "Carlos Rojas Medina",
+      "segmento": "Perfil medio",
+      "silhouette": 0.2885,
+      "posible_atipico": true
+    },
+    {
+      "id": "6ade34e5c9d18979310b80fd",
+      "nombre": "Valeria Gómez Díaz",
+      "segmento": "Perfil medio",
+      "silhouette": 0.1628,
+      "posible_atipico": true
+    },
+    {
+      "id": "6ade34e5c9d18979310b80ff",
+      "nombre": "Diego Ramírez Soto",
+      "segmento": "Perfil medio",
+      "silhouette": 0.2254,
+      "posible_atipico": true
+    },
+    {
+      "id": "6ade34e5c9d18979310b8101",
+      "nombre": "Fernanda López Cruz",
+      "segmento": "Perfil medio",
+      "silhouette": -0.0013,
+      "posible_atipico": true
+    },
+    {
+      "id": "6ade34e5c9d18979310b8103",
+      "nombre": "Jorge Hernández Vega",
+      "segmento": "Perfil medio",
+      "silhouette": 0.2846,
+      "posible_atipico": true
+    }
+  ],
+  "perfiles": [
+    {
+      "cluster": 0,
+      "cobertura_skills_prom": 0.473,
+      "carrera_match": 0.467,
+      "horas_disponibles": 21.522,
+      "minutos_prom": 38.95,
+      "segmento": "Perfil medio"
+    },
+    {
+      "cluster": 1,
+      "cobertura_skills_prom": 0.186,
+      "carrera_match": 0.221,
+      "horas_disponibles": 12.1,
+      "minutos_prom": 60.018,
+      "segmento": "Requiere acompañamiento"
+    },
+    {
+      "cluster": 2,
+      "cobertura_skills_prom": 0.792,
+      "carrera_match": 0.839,
+      "horas_disponibles": 31.67,
+      "minutos_prom": 21.075,
+      "segmento": "Perfil fuerte"
+    }
+  ],
+  "nota": "Un posible atípico solo está lejos del centro de su grupo; no significa mal perfil ni error."
+}

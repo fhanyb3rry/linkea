@@ -1,0 +1,5 @@
+tipo,inicializacion,inercia,silhouette,escalador
+inicializacion,k-means++,252.57,0.477,
+inicializacion,random,252.57,0.477,
+escalador,,,0.477,StandardScaler
+escalador,,,0.4883,MinMaxScaler

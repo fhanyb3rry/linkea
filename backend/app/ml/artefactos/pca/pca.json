@@ -1,0 +1,113 @@
+{
+  "variables": [
+    "cobertura_skills_prom",
+    "carrera_match",
+    "horas_disponibles",
+    "minutos_prom"
+  ],
+  "varianza": [
+    {
+      "componente": "PC1",
+      "varianza_explicada": 0.8436,
+      "porcentaje": 84.36,
+      "acumulada": 84.36
+    },
+    {
+      "componente": "PC2",
+      "varianza_explicada": 0.0746,
+      "porcentaje": 7.46,
+      "acumulada": 91.82
+    },
+    {
+      "componente": "PC3",
+      "varianza_explicada": 0.0516,
+      "porcentaje": 5.16,
+      "acumulada": 96.98
+    },
+    {
+      "componente": "PC4",
+      "varianza_explicada": 0.0302,
+      "porcentaje": 3.02,
+      "acumulada": 100.0
+    }
+  ],
+  "componentes_para_85pct": 2,
+  "error_reconstruccion": 0.0818,
+  "cargas": {
+    "cobertura_skills_prom": {
+      "PC1": 0.5116,
+      "PC2": 0.387,
+      "PC3": -0.1122,
+      "PC4": 0.7589
+    },
+    "carrera_match": {
+      "PC1": 0.5061,
+      "PC2": 0.3899,
+      "PC3": -0.4696,
+      "PC4": -0.6094
+    },
+    "horas_disponibles": {
+      "PC1": 0.5018,
+      "PC2": 0.0115,
+      "PC3": 0.8363,
+      "PC4": -0.2205
+    },
+    "minutos_prom": {
+      "PC1": -0.48,
+      "PC2": 0.8355,
+      "PC3": 0.2596,
+      "PC4": -0.0641
+    }
+  },
+  "coordenadas_reales": [
+    {
+      "id": "6ade34e5c9d18979310b80f9",
+      "nombre": "Ana Torres Reyes",
+      "segmento": "Perfil medio",
+      "PC1": 0.406,
+      "PC2": -1.862,
+      "PC3": 0.758
+    },
+    {
+      "id": "6ade34e5c9d18979310b80fb",
+      "nombre": "Carlos Rojas Medina",
+      "segmento": "Perfil medio",
+      "PC1": -0.16,
+      "PC2": -1.77,
+      "PC3": 0.399
+    },
+    {
+      "id": "6ade34e5c9d18979310b80fd",
+      "nombre": "Valeria Gómez Díaz",
+      "segmento": "Perfil medio",
+      "PC1": -0.613,
+      "PC2": -2.229,
+      "PC3": 0.147
+    },
+    {
+      "id": "6ade34e5c9d18979310b80ff",
+      "nombre": "Diego Ramírez Soto",
+      "segmento": "Perfil medio",
+      "PC1": 0.235,
+      "PC2": -1.831,
+      "PC3": 1.582
+    },
+    {
+      "id": "6ade34e5c9d18979310b8101",
+      "nombre": "Fernanda López Cruz",
+      "segmento": "Perfil medio",
+      "PC1": -1.095,
+      "PC2": -1.121,
+      "PC3": -0.323
+    },
+    {
+      "id": "6ade34e5c9d18979310b8103",
+      "nombre": "Jorge Hernández Vega",
+      "segmento": "Perfil medio",
+      "PC1": -0.022,
+      "PC2": -1.874,
+      "PC3": 1.107
+    }
+  ],
+  "nota": "PC1+PC2 muestran la mayor parte de la variabilidad; si los segmentos se ven algo mezclados en 2D no significa que K-Means falló: parte de la separación puede vivir en PC3/PC4."
+}
