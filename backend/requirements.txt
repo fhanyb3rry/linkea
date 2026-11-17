@@ -11,5 +11,6 @@ pyjwt
 numpy
 pandas
 scikit-learn
+scipy
 matplotlib
 joblib

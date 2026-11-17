@@ -1,0 +1,4 @@
+algoritmo,mejor_f1,combinaciones,hiperparametros
+Arbol de decision,0.9845956354300384,108,"{""criterion"": ""gini"", ""max_depth"": 3, ""min_samples_leaf"": 1, ""min_samples_split"": 2}"
+Random Forest,0.9894736842105264,108,"{""max_depth"": 3, ""min_samples_leaf"": 1, ""min_samples_split"": 2, ""n_estimators"": 200}"
+KNN,0.8752493957372007,24,"{""clasificador__metric"": ""manhattan"", ""clasificador__n_neighbors"": 15, ""clasificador__weights"": ""distance""}"

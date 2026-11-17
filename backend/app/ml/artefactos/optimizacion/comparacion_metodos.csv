@@ -1,0 +1,4 @@
+algoritmo,gridsearch,combinaciones_x,params_grid,randomizedsearch,combinaciones_y,params_random
+Arbol de decision,0.9845956354300384,108,"{""criterion"": ""gini"", ""max_depth"": 3, ""min_samples_leaf"": 1, ""min_samples_split"": 2}",0.9845956354300384,20,"{""criterion"": ""gini"", ""max_depth"": 5, ""min_samples_leaf"": 5, ""min_samples_split"": 12}"
+Random Forest,0.9894736842105264,108,"{""max_depth"": 3, ""min_samples_leaf"": 1, ""min_samples_split"": 2, ""n_estimators"": 200}",0.9894736842105264,20,"{""max_depth"": 3, ""min_samples_leaf"": 2, ""min_samples_split"": 6, ""n_estimators"": 179}"
+KNN,0.8752493957372007,24,"{""clasificador__metric"": ""manhattan"", ""clasificador__n_neighbors"": 15, ""clasificador__weights"": ""distance""}",0.8752493957372007,20,"{""clasificador__weights"": ""distance"", ""clasificador__n_neighbors"": 15, ""clasificador__metric"": ""manhattan""}"

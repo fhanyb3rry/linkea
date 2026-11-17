@@ -16,6 +16,7 @@ Los tres segmentos salen con nombres descriptivos según sus centroides:
     Perfil fuerte / Perfil medio / Requiere acompañamiento
 
 También replica los análisis de la práctica:
+    - método del codo + silhouette para elegir K (práctica 7)
     - k-means++ vs random (inercia y silhouette)
     - StandardScaler vs MinMaxScaler
     - estabilidad entre semillas con Adjusted Rand Index
@@ -36,6 +37,7 @@ Deja en app/ml/artefactos/segmentos/:
 import asyncio
 import json
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from sklearn.cluster import KMeans
@@ -53,7 +55,7 @@ from app.models.company import Vacancy
 from app.models.student import Student
 
 SEMILLA = 42
-NUM_CLUSTERS = 3
+RANGO_K = range(2, 9)          # el método del codo explora K de 2 a 8
 NUM_INICIALIZACIONES = 20
 PERCENTIL_ATIPICOS = 95
 N_SINTETICOS = 300
@@ -62,9 +64,50 @@ CARPETA = ARTEFACTOS / "segmentos"
 
 VARIABLES = ["cobertura_skills_prom", "carrera_match", "horas_disponibles", "minutos_prom"]
 
-# Nombres ordenados de peor a mejor segmento (se asignan por el promedio
-# de cobertura+carrera del centroide, no por número de cluster).
+# Nombres ordenados de peor a mejor segmento cuando K=3 (se asignan por el
+# promedio de cobertura+carrera del centroide, no por número de cluster).
+# Si el barrido elige otro K se usan nombres genéricos, como en la práctica.
 NOMBRES = ["Requiere acompañamiento", "Perfil medio", "Perfil fuerte"]
+
+
+# ------------------------------------------------------------
+# 1b. Método del codo + silhouette: cuántos grupos tiene sentido buscar
+# ------------------------------------------------------------
+def _elegir_k(X_std: np.ndarray) -> tuple[int, int, pd.DataFrame]:
+    """Prueba K de 2 a 8 midiendo inercia (codo) y silhouette. Devuelve el
+    K elegido, el K que ganó por silhouette y la tabla para documentación.
+
+    El K elegido se busca con silhouette pero descartando K=2: para el caso
+    de uso (diseñar estrategias de acompañamiento) necesitamos al menos tres
+    niveles — una división alto/bajo no es accionable. La práctica misma lo
+    indica: el K se justifica con el codo, silhouette y el conocimiento del
+    problema, no solo con la métrica."""
+    filas = []
+    for k in RANGO_K:
+        m = KMeans(n_clusters=k, init="k-means++",
+                   n_init=NUM_INICIALIZACIONES, random_state=SEMILLA)
+        etiquetas = m.fit_predict(X_std)
+        filas.append({
+            "k": k, "inercia": round(float(m.inertia_), 2),
+            "silhouette": round(float(silhouette_score(X_std, etiquetas)), 4),
+        })
+        print(f"  K={k} | inercia {m.inertia_:.2f} | silhouette {filas[-1]['silhouette']}")
+    tabla = pd.DataFrame(filas)
+    k_silhouette = int(tabla.loc[tabla["silhouette"].idxmax(), "k"])
+    mejor_k = int(tabla[tabla["k"] >= len(NOMBRES)]
+                  .loc[lambda t: t["silhouette"].idxmax(), "k"])
+
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11, 4.5))
+    ax1.plot(tabla["k"], tabla["inercia"], marker="o")
+    ax1.set_title("Método del codo (WCSS)")
+    ax1.set_xlabel("K"), ax1.set_ylabel("Inercia"), ax1.grid(alpha=0.3)
+    ax2.plot(tabla["k"], tabla["silhouette"], marker="o")
+    ax2.set_title("Silhouette por K")
+    ax2.set_xlabel("K"), ax2.set_ylabel("Silhouette"), ax2.grid(alpha=0.3)
+    fig.tight_layout()
+    fig.savefig(CARPETA / "codo_silhouette.png", dpi=150)
+    plt.close(fig)
+    return mejor_k, k_silhouette, tabla
 
 
 # ------------------------------------------------------------
@@ -121,15 +164,13 @@ def _estudiantes_sinteticos(n: int) -> pd.DataFrame:
 # ------------------------------------------------------------
 # 2. Comparaciones de la práctica: init, escalador y estabilidad
 # ------------------------------------------------------------
-def _comparaciones(X: np.ndarray) -> dict:
+def _comparaciones(X: np.ndarray, X_std: np.ndarray, k: int) -> dict:
     resumen = {}
 
     # k-means++ vs random (mismo escalado y semilla para comparar parejo).
-    escalador = StandardScaler()
-    X_std = escalador.fit_transform(X)
     inicializaciones = []
     for init in ["k-means++", "random"]:
-        m = KMeans(n_clusters=NUM_CLUSTERS, init=init,
+        m = KMeans(n_clusters=k, init=init,
                    n_init=NUM_INICIALIZACIONES, random_state=SEMILLA)
         etiquetas = m.fit_predict(X_std)
         inicializaciones.append({
@@ -142,7 +183,7 @@ def _comparaciones(X: np.ndarray) -> dict:
     escaladores = []
     for nombre, esc in [("StandardScaler", StandardScaler()), ("MinMaxScaler", MinMaxScaler())]:
         Xt = esc.fit_transform(X)
-        m = KMeans(n_clusters=NUM_CLUSTERS, init="k-means++",
+        m = KMeans(n_clusters=k, init="k-means++",
                    n_init=NUM_INICIALIZACIONES, random_state=SEMILLA)
         etiquetas = m.fit_predict(Xt)
         escaladores.append({
@@ -155,14 +196,14 @@ def _comparaciones(X: np.ndarray) -> dict:
     semillas = [10, 20, 30, 40, 50, SEMILLA]
     particiones = {}
     for semilla in semillas:
-        m = KMeans(n_clusters=NUM_CLUSTERS, init="k-means++",
+        m = KMeans(n_clusters=k, init="k-means++",
                    n_init=NUM_INICIALIZACIONES, random_state=semilla)
         particiones[semilla] = m.fit_predict(X_std)
     aris = [adjusted_rand_score(particiones[a], particiones[b])
             for i, a in enumerate(semillas) for b in semillas[i + 1:]]
     resumen["ari_promedio"] = round(float(np.mean(aris)), 4)
 
-    return resumen, X_std
+    return resumen
 
 
 # ------------------------------------------------------------
@@ -180,8 +221,18 @@ async def main() -> None:
     X = df[VARIABLES].to_numpy(dtype=float)
     print(f"Estudiantes: {len(reales)} reales + {N_SINTETICOS} sintéticos")
 
-    # Comparaciones preliminares.
-    resumen, X_std = _comparaciones(X)
+    CARPETA.mkdir(exist_ok=True)
+    X_std = StandardScaler().fit_transform(X)
+
+    # Método del codo + silhouette: el K no se impone, se explora.
+    print("\nBarrido de K (método del codo + silhouette):")
+    k_final, k_silhouette, tabla_k = _elegir_k(X_std)
+    tabla_k.to_csv(CARPETA / "evaluacion_k.csv", index=False, encoding="utf-8")
+    print(f"Mejor silhouette: K={k_silhouette} | "
+          f"K elegido para el proyecto (min. 3 perfiles): {k_final}")
+
+    # Comparaciones preliminares (con el K ya elegido).
+    resumen = _comparaciones(X, X_std, k_final)
     print("\nInicializaciones:", resumen["inicializaciones"])
     print("Escaladores:", resumen["escaladores"])
     print(f"ARI promedio (estabilidad): {resumen['ari_promedio']}")
@@ -189,7 +240,7 @@ async def main() -> None:
     # ------------------------------------------------------------
     # 4. Modelo final: StandardScaler + k-means++ (el de mejor silhouette)
     # ------------------------------------------------------------
-    modelo = KMeans(n_clusters=NUM_CLUSTERS, init="k-means++",
+    modelo = KMeans(n_clusters=k_final, init="k-means++",
                     n_init=NUM_INICIALIZACIONES, random_state=SEMILLA)
     etiquetas = modelo.fit_predict(X_std)
     sil_individual = silhouette_samples(X_std, etiquetas)
@@ -200,12 +251,16 @@ async def main() -> None:
     esc = StandardScaler().fit(X)
     centroides = esc.inverse_transform(modelo.cluster_centers_)
     df_centroides = pd.DataFrame(centroides, columns=VARIABLES)
-    df_centroides.insert(0, "cluster", range(NUM_CLUSTERS))
+    df_centroides.insert(0, "cluster", range(k_final))
 
     # El "mejor" segmento = mayor cobertura + carrera del centroide.
     puntaje_centroide = df_centroides["cobertura_skills_prom"] + df_centroides["carrera_match"]
     orden = puntaje_centroide.sort_values().index.tolist()  # peor -> mejor
-    nombres = {cluster: NOMBRES[i] for i, cluster in enumerate(orden)}
+    if k_final == len(NOMBRES):
+        nombres = {cluster: NOMBRES[i] for i, cluster in enumerate(orden)}
+    else:
+        # Con otro K no inventamos etiquetas académicas: nombres genéricos.
+        nombres = {cluster: f"Perfil {i + 1}" for i, cluster in enumerate(orden)}
     print("Centroides:")
     print(df_centroides.round(3).to_string(index=False))
     print("Nombre de cada cluster:", nombres)
@@ -243,7 +298,6 @@ async def main() -> None:
     # ------------------------------------------------------------
     # 6. Guardar artefactos
     # ------------------------------------------------------------
-    CARPETA.mkdir(exist_ok=True)
     reporte.to_csv(CARPETA / "reporte_integral.csv", index=False, encoding="utf-8")
     df_centroides.to_csv(CARPETA / "centroides.csv", index=False, encoding="utf-8")
     perfiles.to_csv(CARPETA / "perfiles.csv", index=False, encoding="utf-8")
@@ -257,6 +311,13 @@ async def main() -> None:
         "variables": VARIABLES,
         "total_estudiantes": len(reporte),
         "estudiantes_reales": len(reales),
+        "k_elegido": k_final,
+        "k_mejor_silhouette": k_silhouette,
+        "justificacion_k": (
+            f"Silhouette máximo en K={k_silhouette}; se eligió K={k_final} "
+            "porque el caso de uso necesita al menos tres niveles de "
+            "acompañamiento (el codo y silhouette se reportan igual)."),
+        "evaluacion_k": tabla_k.to_dict("records"),
         "silhouette": round(sil_total, 4),
         "ari_promedio": resumen["ari_promedio"],
         "inicializaciones": resumen["inicializaciones"],

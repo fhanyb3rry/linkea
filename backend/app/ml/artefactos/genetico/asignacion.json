@@ -1,0 +1,860 @@
+{
+  "metodo_ganador": "genetico",
+  "fitness_genetico": 600,
+  "fitness_voraz": 600,
+  "generaciones": 200,
+  "curva_fitness": [
+    {
+      "mejor": 563,
+      "promedio": 149.05
+    },
+    {
+      "mejor": 563,
+      "promedio": 212.42
+    },
+    {
+      "mejor": 563,
+      "promedio": 257.08
+    },
+    {
+      "mejor": 563,
+      "promedio": 347.42
+    },
+    {
+      "mejor": 563,
+      "promedio": 425.37
+    },
+    {
+      "mejor": 563,
+      "promedio": 480.1
+    },
+    {
+      "mejor": 563,
+      "promedio": 526.67
+    },
+    {
+      "mejor": 563,
+      "promedio": 549.03
+    },
+    {
+      "mejor": 563,
+      "promedio": 545.9
+    },
+    {
+      "mejor": 563,
+      "promedio": 536.53
+    },
+    {
+      "mejor": 563,
+      "promedio": 537.57
+    },
+    {
+      "mejor": 563,
+      "promedio": 540.25
+    },
+    {
+      "mejor": 563,
+      "promedio": 539.63
+    },
+    {
+      "mejor": 563,
+      "promedio": 545.9
+    },
+    {
+      "mejor": 563,
+      "promedio": 543.18
+    },
+    {
+      "mejor": 563,
+      "promedio": 542.98
+    },
+    {
+      "mejor": 563,
+      "promedio": 541.32
+    },
+    {
+      "mejor": 563,
+      "promedio": 542.77
+    },
+    {
+      "mejor": 563,
+      "promedio": 543.4
+    },
+    {
+      "mejor": 563,
+      "promedio": 539.43
+    },
+    {
+      "mejor": 563,
+      "promedio": 538.8
+    },
+    {
+      "mejor": 563,
+      "promedio": 533.4
+    },
+    {
+      "mejor": 563,
+      "promedio": 543.4
+    },
+    {
+      "mejor": 563,
+      "promedio": 532.97
+    },
+    {
+      "mejor": 563,
+      "promedio": 536.32
+    },
+    {
+      "mejor": 563,
+      "promedio": 532.98
+    },
+    {
+      "mejor": 563,
+      "promedio": 532.78
+    },
+    {
+      "mejor": 563,
+      "promedio": 537.15
+    },
+    {
+      "mejor": 563,
+      "promedio": 542.58
+    },
+    {
+      "mejor": 563,
+      "promedio": 550.5
+    },
+    {
+      "mejor": 563,
+      "promedio": 540.7
+    },
+    {
+      "mejor": 563,
+      "promedio": 535.03
+    },
+    {
+      "mejor": 563,
+      "promedio": 536.73
+    },
+    {
+      "mejor": 563,
+      "promedio": 547.57
+    },
+    {
+      "mejor": 563,
+      "promedio": 540.48
+    },
+    {
+      "mejor": 563,
+      "promedio": 533.62
+    },
+    {
+      "mejor": 563,
+      "promedio": 551.12
+    },
+    {
+      "mejor": 563,
+      "promedio": 535.9
+    },
+    {
+      "mejor": 563,
+      "promedio": 540.92
+    },
+    {
+      "mejor": 563,
+      "promedio": 542.98
+    },
+    {
+      "mejor": 563,
+      "promedio": 549.87
+    },
+    {
+      "mejor": 563,
+      "promedio": 546.1
+    },
+    {
+      "mejor": 563,
+      "promedio": 546.12
+    },
+    {
+      "mejor": 563,
+      "promedio": 540.9
+    },
+    {
+      "mejor": 563,
+      "promedio": 539.22
+    },
+    {
+      "mejor": 563,
+      "promedio": 534.45
+    },
+    {
+      "mejor": 563,
+      "promedio": 543.38
+    },
+    {
+      "mejor": 563,
+      "promedio": 520.68
+    },
+    {
+      "mejor": 563,
+      "promedio": 530.28
+    },
+    {
+      "mejor": 563,
+      "promedio": 533.6
+    },
+    {
+      "mejor": 563,
+      "promedio": 542.15
+    },
+    {
+      "mejor": 563,
+      "promedio": 546.73
+    },
+    {
+      "mejor": 563,
+      "promedio": 540.48
+    },
+    {
+      "mejor": 563,
+      "promedio": 553.4
+    },
+    {
+      "mejor": 563,
+      "promedio": 537.58
+    },
+    {
+      "mejor": 563,
+      "promedio": 539.63
+    },
+    {
+      "mejor": 563,
+      "promedio": 540.9
+    },
+    {
+      "mejor": 563,
+      "promedio": 536.12
+    },
+    {
+      "mejor": 563,
+      "promedio": 525.45
+    },
+    {
+      "mejor": 563,
+      "promedio": 535.92
+    },
+    {
+      "mejor": 563,
+      "promedio": 541.93
+    },
+    {
+      "mejor": 563,
+      "promedio": 534.03
+    },
+    {
+      "mejor": 563,
+      "promedio": 535.88
+    },
+    {
+      "mejor": 563,
+      "promedio": 530.9
+    },
+    {
+      "mejor": 563,
+      "promedio": 535.45
+    },
+    {
+      "mejor": 563,
+      "promedio": 540.27
+    },
+    {
+      "mejor": 563,
+      "promedio": 543.2
+    },
+    {
+      "mejor": 563,
+      "promedio": 536.73
+    },
+    {
+      "mejor": 563,
+      "promedio": 533.62
+    },
+    {
+      "mejor": 563,
+      "promedio": 535.88
+    },
+    {
+      "mejor": 563,
+      "promedio": 540.28
+    },
+    {
+      "mejor": 563,
+      "promedio": 540.9
+    },
+    {
+      "mejor": 563,
+      "promedio": 534.65
+    },
+    {
+      "mejor": 563,
+      "promedio": 542.97
+    },
+    {
+      "mejor": 563,
+      "promedio": 538.18
+    },
+    {
+      "mejor": 563,
+      "promedio": 549.23
+    },
+    {
+      "mejor": 563,
+      "promedio": 534.02
+    },
+    {
+      "mejor": 563,
+      "promedio": 535.07
+    },
+    {
+      "mejor": 563,
+      "promedio": 540.07
+    },
+    {
+      "mejor": 563,
+      "promedio": 552.58
+    },
+    {
+      "mejor": 563,
+      "promedio": 540.48
+    },
+    {
+      "mejor": 563,
+      "promedio": 530.48
+    },
+    {
+      "mejor": 563,
+      "promedio": 538.38
+    },
+    {
+      "mejor": 563,
+      "promedio": 539.63
+    },
+    {
+      "mejor": 563,
+      "promedio": 543.62
+    },
+    {
+      "mejor": 563,
+      "promedio": 540.48
+    },
+    {
+      "mejor": 563,
+      "promedio": 549.02
+    },
+    {
+      "mejor": 563,
+      "promedio": 549.87
+    },
+    {
+      "mejor": 563,
+      "promedio": 536.92
+    },
+    {
+      "mejor": 563,
+      "promedio": 545.48
+    },
+    {
+      "mejor": 600,
+      "promedio": 554.87
+    },
+    {
+      "mejor": 600,
+      "promedio": 547.75
+    },
+    {
+      "mejor": 600,
+      "promedio": 540.62
+    },
+    {
+      "mejor": 600,
+      "promedio": 542.18
+    },
+    {
+      "mejor": 600,
+      "promedio": 550.87
+    },
+    {
+      "mejor": 600,
+      "promedio": 552.07
+    },
+    {
+      "mejor": 600,
+      "promedio": 572.8
+    },
+    {
+      "mejor": 600,
+      "promedio": 577.1
+    },
+    {
+      "mejor": 600,
+      "promedio": 556.67
+    },
+    {
+      "mejor": 600,
+      "promedio": 575.0
+    },
+    {
+      "mejor": 600,
+      "promedio": 571.67
+    },
+    {
+      "mejor": 600,
+      "promedio": 576.67
+    },
+    {
+      "mejor": 600,
+      "promedio": 573.33
+    },
+    {
+      "mejor": 600,
+      "promedio": 570.0
+    },
+    {
+      "mejor": 600,
+      "promedio": 581.67
+    },
+    {
+      "mejor": 600,
+      "promedio": 573.33
+    },
+    {
+      "mejor": 600,
+      "promedio": 571.67
+    },
+    {
+      "mejor": 600,
+      "promedio": 573.33
+    },
+    {
+      "mejor": 600,
+      "promedio": 585.0
+    },
+    {
+      "mejor": 600,
+      "promedio": 576.67
+    },
+    {
+      "mejor": 600,
+      "promedio": 581.67
+    },
+    {
+      "mejor": 600,
+      "promedio": 573.33
+    },
+    {
+      "mejor": 600,
+      "promedio": 573.33
+    },
+    {
+      "mejor": 600,
+      "promedio": 580.0
+    },
+    {
+      "mejor": 600,
+      "promedio": 575.0
+    },
+    {
+      "mejor": 600,
+      "promedio": 563.33
+    },
+    {
+      "mejor": 600,
+      "promedio": 576.67
+    },
+    {
+      "mejor": 600,
+      "promedio": 576.67
+    },
+    {
+      "mejor": 600,
+      "promedio": 581.67
+    },
+    {
+      "mejor": 600,
+      "promedio": 584.37
+    },
+    {
+      "mejor": 600,
+      "promedio": 570.0
+    },
+    {
+      "mejor": 600,
+      "promedio": 576.67
+    },
+    {
+      "mejor": 600,
+      "promedio": 570.0
+    },
+    {
+      "mejor": 600,
+      "promedio": 580.0
+    },
+    {
+      "mejor": 600,
+      "promedio": 575.0
+    },
+    {
+      "mejor": 600,
+      "promedio": 571.67
+    },
+    {
+      "mejor": 600,
+      "promedio": 578.33
+    },
+    {
+      "mejor": 600,
+      "promedio": 581.67
+    },
+    {
+      "mejor": 600,
+      "promedio": 573.33
+    },
+    {
+      "mejor": 600,
+      "promedio": 573.33
+    },
+    {
+      "mejor": 600,
+      "promedio": 578.33
+    },
+    {
+      "mejor": 600,
+      "promedio": 580.0
+    },
+    {
+      "mejor": 600,
+      "promedio": 567.92
+    },
+    {
+      "mejor": 600,
+      "promedio": 568.33
+    },
+    {
+      "mejor": 600,
+      "promedio": 576.67
+    },
+    {
+      "mejor": 600,
+      "promedio": 575.0
+    },
+    {
+      "mejor": 600,
+      "promedio": 583.33
+    },
+    {
+      "mejor": 600,
+      "promedio": 563.33
+    },
+    {
+      "mejor": 600,
+      "promedio": 566.67
+    },
+    {
+      "mejor": 600,
+      "promedio": 586.67
+    },
+    {
+      "mejor": 600,
+      "promedio": 580.0
+    },
+    {
+      "mejor": 600,
+      "promedio": 575.0
+    },
+    {
+      "mejor": 600,
+      "promedio": 578.33
+    },
+    {
+      "mejor": 600,
+      "promedio": 570.0
+    },
+    {
+      "mejor": 600,
+      "promedio": 575.0
+    },
+    {
+      "mejor": 600,
+      "promedio": 578.33
+    },
+    {
+      "mejor": 600,
+      "promedio": 565.0
+    },
+    {
+      "mejor": 600,
+      "promedio": 571.67
+    },
+    {
+      "mejor": 600,
+      "promedio": 571.67
+    },
+    {
+      "mejor": 600,
+      "promedio": 577.7
+    },
+    {
+      "mejor": 600,
+      "promedio": 577.92
+    },
+    {
+      "mejor": 600,
+      "promedio": 575.0
+    },
+    {
+      "mejor": 600,
+      "promedio": 583.33
+    },
+    {
+      "mejor": 600,
+      "promedio": 583.33
+    },
+    {
+      "mejor": 600,
+      "promedio": 566.67
+    },
+    {
+      "mejor": 600,
+      "promedio": 586.67
+    },
+    {
+      "mejor": 600,
+      "promedio": 580.0
+    },
+    {
+      "mejor": 600,
+      "promedio": 581.67
+    },
+    {
+      "mejor": 600,
+      "promedio": 580.0
+    },
+    {
+      "mejor": 600,
+      "promedio": 581.67
+    },
+    {
+      "mejor": 600,
+      "promedio": 561.67
+    },
+    {
+      "mejor": 600,
+      "promedio": 580.0
+    },
+    {
+      "mejor": 600,
+      "promedio": 580.0
+    },
+    {
+      "mejor": 600,
+      "promedio": 576.67
+    },
+    {
+      "mejor": 600,
+      "promedio": 580.0
+    },
+    {
+      "mejor": 600,
+      "promedio": 576.67
+    },
+    {
+      "mejor": 600,
+      "promedio": 575.0
+    },
+    {
+      "mejor": 600,
+      "promedio": 581.67
+    },
+    {
+      "mejor": 600,
+      "promedio": 571.67
+    },
+    {
+      "mejor": 600,
+      "promedio": 570.0
+    },
+    {
+      "mejor": 600,
+      "promedio": 561.67
+    },
+    {
+      "mejor": 600,
+      "promedio": 570.0
+    },
+    {
+      "mejor": 600,
+      "promedio": 570.0
+    },
+    {
+      "mejor": 600,
+      "promedio": 575.0
+    },
+    {
+      "mejor": 600,
+      "promedio": 580.0
+    },
+    {
+      "mejor": 600,
+      "promedio": 573.33
+    },
+    {
+      "mejor": 600,
+      "promedio": 568.33
+    },
+    {
+      "mejor": 600,
+      "promedio": 580.0
+    },
+    {
+      "mejor": 600,
+      "promedio": 575.0
+    },
+    {
+      "mejor": 600,
+      "promedio": 571.25
+    },
+    {
+      "mejor": 600,
+      "promedio": 587.7
+    },
+    {
+      "mejor": 600,
+      "promedio": 583.33
+    },
+    {
+      "mejor": 600,
+      "promedio": 570.0
+    },
+    {
+      "mejor": 600,
+      "promedio": 576.67
+    },
+    {
+      "mejor": 600,
+      "promedio": 585.0
+    },
+    {
+      "mejor": 600,
+      "promedio": 573.33
+    },
+    {
+      "mejor": 600,
+      "promedio": 575.0
+    },
+    {
+      "mejor": 600,
+      "promedio": 581.25
+    },
+    {
+      "mejor": 600,
+      "promedio": 573.33
+    },
+    {
+      "mejor": 600,
+      "promedio": 565.0
+    },
+    {
+      "mejor": 600,
+      "promedio": 579.37
+    },
+    {
+      "mejor": 600,
+      "promedio": 573.33
+    },
+    {
+      "mejor": 600,
+      "promedio": 573.33
+    },
+    {
+      "mejor": 600,
+      "promedio": 580.0
+    },
+    {
+      "mejor": 600,
+      "promedio": 586.67
+    },
+    {
+      "mejor": 600,
+      "promedio": 576.03
+    },
+    {
+      "mejor": 600,
+      "promedio": 566.03
+    },
+    {
+      "mejor": 600,
+      "promedio": 568.33
+    },
+    {
+      "mejor": 600,
+      "promedio": 578.33
+    },
+    {
+      "mejor": 600,
+      "promedio": 585.0
+    }
+  ],
+  "asignaciones": [
+    {
+      "estudiante_id": "6ade34e5c9d18979310b80f9",
+      "estudiante": "Ana Torres Reyes",
+      "vacante_id": "6ade34e5c9d18979310b8106",
+      "vacante": "Desarrollo backend con Python",
+      "empresa": "Soluciones Nevado",
+      "puntaje": 100
+    },
+    {
+      "estudiante_id": "6ade34e5c9d18979310b80fb",
+      "estudiante": "Carlos Rojas Medina",
+      "vacante_id": "6ade34e5c9d18979310b8109",
+      "vacante": "Desarrollo front-end con React",
+      "empresa": "Valle Digital",
+      "puntaje": 100
+    },
+    {
+      "estudiante_id": "6ade34e5c9d18979310b80fd",
+      "estudiante": "Valeria Gómez Díaz",
+      "vacante_id": "6ade34e5c9d18979310b810f",
+      "vacante": "Community manager",
+      "empresa": "Agencia Xinantécatl",
+      "puntaje": 100
+    },
+    {
+      "estudiante_id": "6ade34e5c9d18979310b80ff",
+      "estudiante": "Diego Ramírez Soto",
+      "vacante_id": "6ade34e5c9d18979310b810c",
+      "vacante": "Analista de indicadores de producción",
+      "empresa": "Manufacturas del Centro",
+      "puntaje": 100
+    },
+    {
+      "estudiante_id": "6ade34e5c9d18979310b8101",
+      "estudiante": "Fernanda López Cruz",
+      "vacante_id": "6ade34e5c9d18979310b8112",
+      "vacante": "Diseño de identidad y UI",
+      "empresa": "Estudio Matlatzinca",
+      "puntaje": 100
+    },
+    {
+      "estudiante_id": "6ade34e5c9d18979310b8103",
+      "estudiante": "Jorge Hernández Vega",
+      "vacante_id": "6ade34e5c9d18979310b8115",
+      "vacante": "Auxiliar administrativo",
+      "empresa": "Grupo Administrativo Lerma",
+      "puntaje": 100
+    }
+  ],
+  "estudiantes": 6,
+  "vacantes": 6
+}

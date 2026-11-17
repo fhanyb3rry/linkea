@@ -7,6 +7,46 @@
   ],
   "total_estudiantes": 306,
   "estudiantes_reales": 6,
+  "k_elegido": 3,
+  "k_mejor_silhouette": 2,
+  "justificacion_k": "Silhouette máximo en K=2; se eligió K=3 porque el caso de uso necesita al menos tres niveles de acompañamiento (el codo y silhouette se reportan igual).",
+  "evaluacion_k": [
+    {
+      "k": 2,
+      "inercia": 444.68,
+      "silhouette": 0.5125
+    },
+    {
+      "k": 3,
+      "inercia": 252.57,
+      "silhouette": 0.477
+    },
+    {
+      "k": 4,
+      "inercia": 224.13,
+      "silhouette": 0.3911
+    },
+    {
+      "k": 5,
+      "inercia": 200.63,
+      "silhouette": 0.3387
+    },
+    {
+      "k": 6,
+      "inercia": 184.31,
+      "silhouette": 0.3347
+    },
+    {
+      "k": 7,
+      "inercia": 170.46,
+      "silhouette": 0.2367
+    },
+    {
+      "k": 8,
+      "inercia": 157.22,
+      "silhouette": 0.2346
+    }
+  ],
   "silhouette": 0.477,
   "ari_promedio": 1.0,
   "inicializaciones": [

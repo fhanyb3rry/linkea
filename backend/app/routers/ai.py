@@ -70,6 +70,59 @@ async def pca():
     return {"disponible": True, **json.loads(archivo.read_text(encoding="utf-8"))}
 
 
+@router.get("/asignacion", dependencies=[Depends(requiere_rol(Rol.COORDINADOR, Rol.ASESOR_ACADEMICO))])
+async def asignacion():
+    """Reparto óptimo estudiante↔vacante calculado por el algoritmo genético.
+
+    Solo coordinación y asesores: es una herramienta de asignación de plazas."""
+    from app.ml.genetico import asignacion_optima
+    return await asignacion_optima()
+
+
+@router.get("/optimizacion")
+async def optimizacion():
+    """Optimización de hiperparámetros (Grid/Randomized Search, práctica 6)."""
+    archivo = ML_ARTEFACTOS / "optimizacion" / "optimizacion.json"
+    if not archivo.exists():
+        return {"disponible": False,
+                "aviso": "Corre `python -m app.ml.optimizar` para generar la optimización."}
+    import json
+    return {"disponible": True, **json.loads(archivo.read_text(encoding="utf-8"))}
+
+
+@router.get("/reporte/{student_id}")
+async def reporte(
+    student_id: str,
+    db: AsyncIOMotorDatabase = Depends(get_database),
+    usuario: dict = Depends(usuario_actual),
+):
+    """Reporte integral del motor de recomendaciones: predicción del modelo,
+    segmento K-Means, mejores vacantes y recomendaciones en lenguaje llano.
+
+    Permisos: el estudiante solo ve el suyo; una empresa, solo el de quienes
+    se postularon a sus vacantes; coordinación y asesores ven cualquiera."""
+    if es_rol(usuario, Rol.ESTUDIANTE) and student_id != usuario.get("perfil_id"):
+        raise HTTPException(status_code=403, detail="Solo puedes ver tu propio reporte")
+    if es_rol(usuario, Rol.EMPRESA):
+        # Las postulaciones no guardan empresa: se busca si el estudiante se
+        # postuló a alguna de SUS vacantes (por el user_id de la vacante).
+        mis_vacantes = [
+            str(v["_id"]) async for v in
+            db.vacancies.find({"user_id": str(usuario["_id"])}, {"_id": 1})
+        ]
+        postulo = await db.applications.find_one(
+            {"student_id": student_id, "vacancy_id": {"$in": mis_vacantes}})
+        if postulo is None:
+            raise HTTPException(
+                status_code=403,
+                detail="Solo puedes ver a quienes se postularon a tus vacantes")
+    from app.ml.recomendar import reporte_estudiante
+    resultado = await reporte_estudiante(db, student_id)
+    if resultado is None:
+        raise HTTPException(status_code=404, detail="Estudiante no encontrado")
+    return resultado
+
+
 @router.post("/test", dependencies=[Depends(requiere_rol(Rol.COORDINADOR))])
 async def test():
     """Prueba real de conexión con la API de Claude (una llamada mínima, gasta una fracción de centavo).
