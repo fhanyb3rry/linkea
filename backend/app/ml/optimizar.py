@@ -36,24 +36,24 @@ import pandas as pd
 from scipy.stats import randint
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import ConfusionMatrixDisplay, accuracy_score, f1_score, confusion_matrix
-from sklearn.model_selection import (
-    GridSearchCV,
-    RandomizedSearchCV,
-    StratifiedKFold,
-    train_test_split,
-)
+from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.tree import DecisionTreeClassifier
 
-from app.ml.datos import FEATURES
+from app.ml.datos import (
+    FEATURES,
+    dividir_por_grupo,
+    grupos_de_estudiante,
+    kfold_por_grupo,
+)
 from app.ml.generar_dataset import ARTEFACTOS, CSV
 
 CLASES = {0: "No elegible", 1: "Elegible"}
 
 SEMILLA = 42
-CV = StratifiedKFold(n_splits=5, shuffle=True, random_state=SEMILLA)
+CV = kfold_por_grupo(n_splits=5, semilla=SEMILLA)
 CARPETA = ARTEFACTOS / "optimizacion"
 
 
@@ -119,9 +119,13 @@ def main() -> None:
     df = pd.read_csv(CSV)
     X, y = df[FEATURES], df["elegible"]
 
-    # Igual que la práctica: 80% para optimizar con CV, 20% intocable.
-    X_ent, X_pru, y_ent, y_pru = train_test_split(
-        X, y, test_size=0.20, random_state=SEMILLA, stratify=y)
+    # Igual que la práctica: 80% para optimizar con CV, 20% intocable;
+    # la división es por estudiante (sin fuga de perfiles entre conjuntos).
+    grupos = grupos_de_estudiante(df)
+    i_ent, i_pru = dividir_por_grupo(X, y, grupos, 0.20, SEMILLA)
+    X_ent, X_pru = X.iloc[i_ent], X.iloc[i_pru]
+    y_ent, y_pru = y.iloc[i_ent], y.iloc[i_pru]
+    grupos_ent = grupos[i_ent]
     print(f"Optimización: {len(X_ent)} pares con CV x5 | Prueba final: {len(X_pru)}")
 
     modelos = rejillas()
@@ -131,7 +135,7 @@ def main() -> None:
     for nombre, (modelo, rejilla) in modelos.items():
         grid = GridSearchCV(modelo, rejilla, scoring="f1", cv=CV, n_jobs=-1,
                             return_train_score=True)
-        grid.fit(X_ent, y_ent)
+        grid.fit(X_ent, y_ent, groups=grupos_ent)
         filas_grid.append({
             "algoritmo": nombre, "mejor_f1": grid.best_score_,
             "combinaciones": len(grid.cv_results_["params"]),
@@ -144,7 +148,7 @@ def main() -> None:
         aleatoria = RandomizedSearchCV(modelo, rangos[nombre], n_iter=20,
                                        scoring="f1", cv=CV, n_jobs=-1,
                                        random_state=SEMILLA)
-        aleatoria.fit(X_ent, y_ent)
+        aleatoria.fit(X_ent, y_ent, groups=grupos_ent)
         filas_random.append({
             "algoritmo": nombre, "mejor_f1": aleatoria.best_score_,
             "combinaciones": 20,

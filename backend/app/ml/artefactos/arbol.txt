@@ -1,7 +1,7 @@
-|--- minutos <= 44.80
-|   |--- razon_horas <= 1.00
-|   |   |--- class: 0
-|   |--- razon_horas >  1.00
+|--- razon_horas <= 1.00
+|   |--- class: 0
+|--- razon_horas >  1.00
+|   |--- minutos <= 45.05
 |   |   |--- cobertura_skills <= 0.00
 |   |   |   |--- carrera <= 0.50
 |   |   |   |   |--- class: 0
@@ -9,5 +9,5 @@
 |   |   |   |   |--- class: 1
 |   |   |--- cobertura_skills >  0.00
 |   |   |   |--- class: 1
-|--- minutos >  44.80
-|   |--- class: 0
+|   |--- minutos >  45.05
+|   |   |--- class: 0

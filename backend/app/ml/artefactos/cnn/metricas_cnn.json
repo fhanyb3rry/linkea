@@ -1,0 +1,43 @@
+{
+  "problema": "tendencia de la estadía a partir de sus bitácoras",
+  "clases": [
+    "Descendente",
+    "Estable",
+    "Favorable"
+  ],
+  "mejor_epoca": 39,
+  "mejor_perdida_validacion": 0.30387521339090245,
+  "cnn": {
+    "accuracy": 0.9078947368421053,
+    "precision_macro": 0.9238816738816739,
+    "recall_macro": 0.9122023809523809,
+    "f1_macro": 0.9176355902162353
+  },
+  "random_forest": {
+    "accuracy": 0.868421052631579,
+    "precision_macro": 0.8935574229691876,
+    "recall_macro": 0.8690476190476191,
+    "f1_macro": 0.8796536796536797
+  },
+  "ganador": "CNN 1D",
+  "matriz_confusion": [
+    [
+      15,
+      1,
+      0
+    ],
+    [
+      0,
+      29,
+      3
+    ],
+    [
+      0,
+      3,
+      25
+    ]
+  ],
+  "parametros_entrenables": 1331,
+  "epocas_entrenadas": 40,
+  "advertencia": "La etiqueta de tendencia se deriva de las mismas horas usadas como entrada y la mayoría de las secuencias son sintéticas: es un ejercicio metodológico, no una prueba de rendimiento real."
+}

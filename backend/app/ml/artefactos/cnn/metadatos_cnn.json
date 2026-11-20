@@ -1,0 +1,46 @@
+{
+  "proyecto": "Linkea",
+  "problema": "tendencia de la estadía (clasificación)",
+  "forma_entrada": [
+    2,
+    3
+  ],
+  "canales": [
+    "horas_promedio_por_tramo",
+    "fraccion_validada_por_tramo"
+  ],
+  "tramos": [
+    "inicio",
+    "medio",
+    "final"
+  ],
+  "mapa_etiquetas": {
+    "Descendente": 0,
+    "Estable": 1,
+    "Favorable": 2
+  },
+  "secuencias": {
+    "total": 501,
+    "reales": 1,
+    "sinteticas": 500
+  },
+  "separacion": {
+    "entrenamiento": 349,
+    "validacion": 76,
+    "prueba": 76,
+    "metodo": "GroupShuffleSplit por student_id (sin fuga por estudiante)"
+  },
+  "normalizacion": {
+    "metodo": "Z-score por canal, solo con entrenamiento",
+    "media": [
+      9.169132232666016,
+      0.7224489450454712
+    ],
+    "desviacion": [
+      2.1241133213043213,
+      0.10953256487846375
+    ]
+  },
+  "semilla": 42,
+  "advertencia": "Las tendencias se derivan de la misma serie; son un experimento metodológico, no una predicción real de desempeño."
+}

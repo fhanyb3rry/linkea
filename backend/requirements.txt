@@ -14,3 +14,4 @@ scikit-learn
 scipy
 matplotlib
 joblib
+torch

@@ -26,6 +26,7 @@ Deja en app/ml/artefactos/:
 import json
 
 import joblib
+import numpy as np
 import pandas as pd
 from sklearn.base import clone
 from sklearn.metrics import (
@@ -36,14 +37,16 @@ from sklearn.metrics import (
     precision_score,
     recall_score,
 )
-from sklearn.model_selection import (
-    StratifiedKFold,
-    cross_val_score,
-    train_test_split,
-)
+from sklearn.model_selection import cross_val_score
 from sklearn.tree import DecisionTreeClassifier, export_text
 
-from app.ml.datos import FEATURES, regla_elegible
+from app.ml.datos import (
+    FEATURES,
+    dividir_por_grupo,
+    grupos_de_estudiante,
+    kfold_por_grupo,
+    regla_elegible,
+)
 from app.ml.generar_dataset import ARTEFACTOS, CSV
 
 SEMILLA = 42
@@ -77,15 +80,22 @@ def main() -> None:
     y = df["elegible"]
 
     # ------------------------------------------------------------
-    # 2. División 60% entrenamiento / 20% validación / 20% prueba
+    # 2. División 60% entrenamiento / 20% validación / 20% prueba,
+    #    POR ESTUDIANTE: todas las filas de un mismo alumno caen en un
+    #    solo conjunto (sin fuga de información entre train y test).
     # ------------------------------------------------------------
-    X_ent, X_tmp, y_ent, y_tmp = train_test_split(
-        X, y, test_size=0.40, random_state=SEMILLA, stratify=y
-    )
-    X_val, X_pru, y_val, y_pru = train_test_split(
-        X_tmp, y_tmp, test_size=0.50, random_state=SEMILLA, stratify=y_tmp
-    )
+    grupos = grupos_de_estudiante(df)
+    i_ent, i_tmp = dividir_por_grupo(X, y, grupos, 0.40, SEMILLA)
+    i_val, i_pru = dividir_por_grupo(
+        X.iloc[i_tmp], y.iloc[i_tmp], grupos[i_tmp], 0.50, SEMILLA)
+    i_val, i_pru = i_tmp[i_val], i_tmp[i_pru]
+
+    X_ent, X_val, X_pru = X.iloc[i_ent], X.iloc[i_val], X.iloc[i_pru]
+    y_ent, y_val, y_pru = y.iloc[i_ent], y.iloc[i_val], y.iloc[i_pru]
+    grupos_final = np.concatenate([grupos[i_ent], grupos[i_val]])
     print(f"\nEntrenamiento: {len(X_ent)} | Validación: {len(X_val)} | Prueba: {len(X_pru)}")
+    print(f"Estudiantes distintos por conjunto: {len(set(grupos[i_ent]))} / "
+          f"{len(set(grupos[i_val]))} / {len(set(grupos[i_pru]))}")
 
     # ------------------------------------------------------------
     # 3. Entrenar árboles con distintas profundidades
@@ -196,9 +206,10 @@ def main() -> None:
     # 7. Validación cruzada estratificada sobre entrenamiento + validación
     #    (la prueba sigue sin participar)
     # ------------------------------------------------------------
-    cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=SEMILLA)
+    cv = kfold_por_grupo(n_splits=5, semilla=SEMILLA)
     puntuaciones_cv = cross_val_score(
-        clone(modelo), X_final, y_final, cv=cv, scoring="accuracy"
+        clone(modelo), X_final, y_final, cv=cv, scoring="accuracy",
+        groups=grupos_final,
     )
     print("\n=== VALIDACIÓN CRUZADA (5 folds, stratified) ===")
     print("Particiones:", [round(float(p), 4) for p in puntuaciones_cv])

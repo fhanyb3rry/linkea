@@ -1,17 +1,17 @@
 {
-  "ganador": "Random Forest",
+  "ganador": "Arbol de decision",
   "mejores_hiperparametros": {
     "Arbol de decision": {
       "criterion": "gini",
-      "max_depth": 3,
+      "max_depth": 2,
       "min_samples_leaf": 1,
       "min_samples_split": 2
     },
     "Random Forest": {
-      "max_depth": 3,
+      "max_depth": 5,
       "min_samples_leaf": 1,
       "min_samples_split": 2,
-      "n_estimators": 200
+      "n_estimators": 50
     },
     "KNN": {
       "clasificador__metric": "manhattan",
@@ -20,28 +20,28 @@
     }
   },
   "f1_gridsearch": {
-    "Arbol de decision": 0.9845956354300384,
-    "Random Forest": 0.9894736842105264,
-    "KNN": 0.8752493957372007
+    "Arbol de decision": 0.9702127659574469,
+    "Random Forest": 0.959686450167973,
+    "KNN": 0.8641174364482636
   },
   "f1_randomizedsearch": {
-    "Arbol de decision": 0.9845956354300384,
-    "Random Forest": 0.9894736842105264,
-    "KNN": 0.8752493957372007
+    "Arbol de decision": 0.9702127659574469,
+    "Random Forest": 0.9548084013874852,
+    "KNN": 0.8682030636908686
   },
   "prueba": {
-    "accuracy": 1.0,
-    "f1": 1.0,
+    "accuracy": 0.9333333333333333,
+    "f1": 0.8888888888888888,
     "matriz_confusion": [
       [
-        61,
-        0
+        60,
+        6
       ],
       [
         0,
-        25
+        24
       ]
     ]
   },
-  "nota": "Random Forest gano en esta busqueda; candidato a promover si el proyecto deja de requerir las explicaciones paso a paso del arbol."
+  "nota": "El ganador coincide con el modelo de produccion."
 }

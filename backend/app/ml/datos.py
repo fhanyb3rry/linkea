@@ -12,6 +12,10 @@ La etiqueta y (elegible) la define la regla del filtro 1, aplicada sobre estas
 mismas variables: (carrera O skills) Y horas suficientes Y traslado <= 45 min.
 """
 
+import numpy as np
+import pandas as pd
+from sklearn.model_selection import GroupShuffleSplit, StratifiedGroupKFold
+
 from app.models.company import Vacancy
 from app.models.student import Student
 from app.search.traslado import LIMITE_TRASLADO_MIN, _clave, tiempo_traslado
@@ -59,3 +63,29 @@ def regla_elegible(f: dict) -> int:
         and f["razon_horas"] >= 1.0
         and f["minutos"] <= LIMITE_TRASLADO_MIN
     )
+
+
+# ---- División por estudiante (sin fuga de información) ----------------------
+#
+# Varios pares comparten al mismo estudiante (misma carrera, horas y skills).
+# Si un par de Ana cae en entrenamiento y otro en prueba, la prueba ya no mide
+# generalización: mide memorización de su perfil. Por eso la división se hace
+# por GRUPO (GroupShuffleSplit), como en la Etapa 15/18.1 de las prácticas.
+
+def grupos_de_estudiante(df: pd.DataFrame) -> np.ndarray:
+    """Un grupo por estudiante real; cada fila sintética es su propio grupo."""
+    if "student_id" not in df.columns:
+        return df.index.astype(str).to_numpy()
+    sinteticos = pd.Series("syn-" + df.index.astype(str), index=df.index)
+    return df["student_id"].fillna(sinteticos).to_numpy()
+
+
+def dividir_por_grupo(X, y, grupos, test_size: float, semilla: int = 42):
+    """Un GroupShuffleSplit: devuelve (indices_a, indices_b) sin grupos repetidos."""
+    sep = GroupShuffleSplit(n_splits=1, test_size=test_size, random_state=semilla)
+    return next(sep.split(X, y, groups=grupos))
+
+
+def kfold_por_grupo(n_splits: int = 5, semilla: int = 42) -> StratifiedGroupKFold:
+    """Validación cruzada que además respeta los grupos (no mezcla estudiantes)."""
+    return StratifiedGroupKFold(n_splits=n_splits, shuffle=True, random_state=semilla)

@@ -1,0 +1,74 @@
+{
+  "postulaciones": {
+    "total": 5,
+    "por_estado": {
+      "enviada": 2,
+      "en_revision": 1,
+      "aceptada": 1,
+      "asignada": 1
+    },
+    "por_vacante": [
+      {
+        "postulaciones": 1,
+        "aceptadas": 0,
+        "rechazadas": 0,
+        "vacante": "Community manager",
+        "vacante_id": "6ade34e5c9d18979310b810f",
+        "tasa_aceptacion": 0.0
+      },
+      {
+        "postulaciones": 1,
+        "aceptadas": 1,
+        "rechazadas": 0,
+        "vacante": "Analista de indicadores de producción",
+        "vacante_id": "6ade34e5c9d18979310b810c",
+        "tasa_aceptacion": 100.0
+      },
+      {
+        "postulaciones": 1,
+        "aceptadas": 0,
+        "rechazadas": 0,
+        "vacante": "Desarrollo backend con Python",
+        "vacante_id": "6ade34e5c9d18979310b8106",
+        "tasa_aceptacion": 0.0
+      },
+      {
+        "postulaciones": 1,
+        "aceptadas": 0,
+        "rechazadas": 0,
+        "vacante": "Desarrollo front-end con React",
+        "vacante_id": "6ade34e5c9d18979310b8109",
+        "tasa_aceptacion": 0.0
+      },
+      {
+        "postulaciones": 1,
+        "aceptadas": 1,
+        "rechazadas": 0,
+        "vacante": "Auxiliar administrativo",
+        "vacante_id": "6ade34e5c9d18979310b8115",
+        "tasa_aceptacion": 100.0
+      }
+    ]
+  },
+  "reportes_ia": {
+    "total": 1,
+    "por_segmento": [
+      {
+        "reportes": 1,
+        "estudiantes_unicos": 1,
+        "segmento": "Perfil medio"
+      }
+    ],
+    "probabilidad_modelo_media": 66.7
+  },
+  "compatibilidad": {
+    "consultas_guardadas": 0,
+    "por_fuente": {}
+  },
+  "seguimientos": {
+    "por_estado": {
+      "en_curso": 1
+    },
+    "incidencias_abiertas": 0
+  }
+}

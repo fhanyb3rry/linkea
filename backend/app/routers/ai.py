@@ -90,6 +90,28 @@ async def optimizacion():
     return {"disponible": True, **json.loads(archivo.read_text(encoding="utf-8"))}
 
 
+@router.get("/cnn")
+async def cnn():
+    """Métricas de la CNN 1D sobre las secuencias de estadías (Etapa 16/17)."""
+    archivo = ML_ARTEFACTOS / "cnn" / "metricas_cnn.json"
+    if not archivo.exists():
+        return {"disponible": False,
+                "aviso": "Corre `python -m app.ml.cnn_datos` y luego "
+                         "`python -m app.ml.cnn` para generar los resultados."}
+    import json
+    return {"disponible": True, **json.loads(archivo.read_text(encoding="utf-8"))}
+
+
+@router.get("/estadisticas",
+            dependencies=[Depends(requiere_rol(Rol.COORDINADOR, Rol.ASESOR_ACADEMICO))])
+async def estadisticas():
+    """Agregaciones de la base para coordinación (Etapa 7 adaptada):
+    postulaciones por estado/vacante, reportes IA por segmento, consultas
+    de compatibilidad por fuente y seguimientos con incidencias abiertas."""
+    from app.ml.estadisticas import generar_estadisticas
+    return await generar_estadisticas()
+
+
 @router.get("/reporte/{student_id}")
 async def reporte(
     student_id: str,
