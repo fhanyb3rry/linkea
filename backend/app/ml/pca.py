@@ -43,8 +43,6 @@ from sklearn.preprocessing import StandardScaler
 from app.core.database import close_mongo_connection, connect_to_mongo
 from app.ml.generar_dataset import ARTEFACTOS
 from app.ml.segmentar import (
-    NOMBRES,
-    NUM_CLUSTERS,
     NUM_INICIALIZACIONES,
     SEMILLA,
     VARIABLES,
@@ -54,6 +52,23 @@ from app.ml.segmentar import (
 
 CARPETA = ARTEFACTOS / "pca"
 VARIANZA_OBJETIVO = 0.85
+SEGMENTOS_JSON = ARTEFACTOS / "segmentos" / "segmentos.json"
+
+
+def _k_y_nombres() -> tuple[int, dict[int, str]]:
+    """El K y el nombre de cada segmento los decide segmentar.py con el
+    método del codo + silhouette; PCA solo los reutiliza para colorear,
+    así las dos vistas siempre hablan del mismo agrupamiento."""
+    try:
+        datos = json.loads(SEGMENTOS_JSON.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        raise SystemExit(
+            "Falta artefactos/segmentos/segmentos.json: corre primero "
+            "`python -m app.ml.segmentar`."
+        )
+    return int(datos["k_elegido"]), {
+        int(k): v for k, v in datos["nombres_segmentos"].items()
+    }
 
 
 async def _cargar_matriz() -> pd.DataFrame:
@@ -79,8 +94,10 @@ async def main() -> None:
     escalador = StandardScaler()
     X_std = escalador.fit_transform(X)
 
-    # Etiquetas de K-Means solo para colorear (como en la práctica).
-    etiquetas = KMeans(n_clusters=NUM_CLUSTERS, init="k-means++",
+    # Etiquetas de K-Means solo para colorear (como en la práctica), con el
+    # mismo K que eligió segmentar.py.
+    k, nombres = _k_y_nombres()
+    etiquetas = KMeans(n_clusters=k, init="k-means++",
                        n_init=NUM_INICIALIZACIONES,
                        random_state=SEMILLA).fit_predict(X_std)
 
@@ -137,14 +154,6 @@ async def main() -> None:
     plt.title("Varianza acumulada"); plt.ylabel("%"); plt.ylim(0, 105)
     plt.legend(); plt.grid(alpha=0.3); plt.tight_layout()
     plt.savefig(CARPETA / "varianza_acumulada.png", dpi=200); plt.close()
-
-    # Orden de clusters por puntaje del centroide -> nombre del segmento.
-    km_centros = KMeans(n_clusters=NUM_CLUSTERS, init="k-means++",
-                        n_init=NUM_INICIALIZACIONES,
-                        random_state=SEMILLA).fit(X_std).cluster_centers_
-    puntaje = km_centros[:, 0] + km_centros[:, 1]  # cobertura + carrera
-    orden = puntaje.argsort()
-    nombres = {int(cluster): NOMBRES[i] for i, cluster in enumerate(orden)}
 
     es_real = (df["origen"] == "real").to_numpy()
     plt.figure(figsize=(10, 7))

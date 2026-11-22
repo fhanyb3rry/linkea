@@ -18,6 +18,7 @@ import {
   Send,
   Settings,
   UserRound,
+  Users,
   X,
 } from 'lucide-react'
 
@@ -27,16 +28,18 @@ const groups = [
     items: [
       { to: '/inicio', label: 'Inicio', icon: Home },
       { to: '/coordinacion', label: 'Coordinación', icon: LayoutDashboard, roles: ['coordinador'] },
-      { to: '/vacantes', label: 'Vacantes', icon: Briefcase },
+      { to: '/asesor', label: 'Mi grupo', icon: Users, roles: ['asesor_academico'] },
+      { to: '/vacantes', label: 'Vacantes', icon: Briefcase, roles: ['estudiante', 'empresa', 'coordinador'] },
       // El directorio de estudiantes sirve a quien recluta o supervisa, no al propio estudiante.
       { to: '/estudiantes', label: 'Estudiantes', icon: GraduationCap, roles: ['empresa', 'coordinador', 'asesor_academico'] },
       // La empresa ya tiene "Mi empresa"; el directorio de empresas es para quien busca dónde hacer la estadía.
-      { to: '/organizaciones', label: 'Empresas', icon: Factory, roles: ['estudiante', 'coordinador', 'asesor_academico'] },
+      { to: '/organizaciones', label: 'Empresas', icon: Factory, roles: ['estudiante', 'coordinador'] },
       // Guardar vacantes solo tiene sentido para quien se postula.
       { to: '/guardados', label: 'Guardados', icon: Bookmark, roles: ['estudiante'] },
       { to: '/rutas', label: 'Rutas de aprendizaje', icon: Network, roles: ['estudiante'] },
-      { to: '/traslado', label: 'Traslado', icon: MapPin, roles: ['estudiante', 'coordinador', 'asesor_academico'] },
-      { to: '/prediccion', label: 'Predicción ML', icon: GitBranch },
+      { to: '/traslado', label: 'Traslado', icon: MapPin, roles: ['estudiante', 'coordinador'] },
+      // El análisis del modelo es herramienta del personal de la universidad.
+      { to: '/prediccion', label: 'Predicción ML', icon: GitBranch, roles: ['coordinador', 'asesor_academico'] },
     ],
   },
   {
@@ -79,7 +82,7 @@ const PROMO = {
   estudiante: { text: 'Conecta con oportunidades que impulsan tu futuro.', label: 'Explorar vacantes', to: '/vacantes' },
   empresa: { text: 'Encuentra estudiantes que encajan con tus vacantes.', label: 'Ver estudiantes', to: '/estudiantes' },
   coordinador: { text: 'Supervisa postulaciones y estadías en curso.', label: 'Panel de coordinación', to: '/coordinacion' },
-  asesor_academico: { text: 'Da seguimiento a tus estudiantes asignados.', label: 'Ver seguimientos', to: '/seguimientos' },
+  asesor_academico: { text: 'Supervisa a tus alumnos y sus empresas.', label: 'Ver mi grupo', to: '/asesor' },
 }
 
 export default function Sidebar({ onNavigate, onClose }) {

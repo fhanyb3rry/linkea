@@ -77,7 +77,7 @@ function ComparadorResultado({ resultado }) {
           <div className="flex items-center justify-between gap-2">
             <span className="flex items-center gap-2 font-body text-xs font-semibold uppercase tracking-wider text-muted">
               <GitBranch className="h-4 w-4 text-brand" />
-              Machine Learning · Árbol (depth={ml.max_depth})
+              Modelo de Linkea · Árbol de decisión (profundidad {ml.max_depth})
             </span>
             <span
               className={`flex items-center gap-1.5 rounded-full px-3 py-1 font-body text-xs font-semibold ${
@@ -104,7 +104,7 @@ function ComparadorResultado({ resultado }) {
 
           <div className="mt-auto flex flex-wrap items-center justify-between gap-2 pt-1 font-body text-xs text-muted">
             <span>Calificación final estimada: <b className="text-ink">{cal} / 100</b></span>
-            <span>Exactitud en prueba: <b className="text-ink">{ml.exactitud_prueba}%</b></span>
+            <span>Aciertos en las pruebas: <b className="text-ink">{ml.exactitud_prueba}%</b></span>
           </div>
         </div>
       </div>

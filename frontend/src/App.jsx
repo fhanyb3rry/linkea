@@ -2,6 +2,7 @@ import { Route, Routes } from 'react-router-dom'
 import Layout from './components/layout/Layout'
 import PublicLayout from './components/layout/PublicLayout'
 import RequireAuth from './components/layout/RequireAuth'
+import Asesor from './pages/Asesor'
 import Candidatos from './pages/Candidatos'
 import Configuracion from './pages/Configuracion'
 import Coordinacion from './pages/Coordinacion'
@@ -56,7 +57,11 @@ export default function App() {
       >
         <Route path="inicio" element={<Home />} />
 
-        <Route path="vacantes" element={<Vacantes />} />
+        {/* El asesor tiene su propio grupo en /asesor; los directorios de
+            vacantes, empresas y traslado no aplican para su trabajo. */}
+        <Route element={<RequireAuth roles={['estudiante', 'empresa', 'coordinador']} />}>
+          <Route path="vacantes" element={<Vacantes />} />
+        </Route>
         <Route path="vacantes/:id" element={<VacancyDetail />} />
 
         {/* Guardar vacantes solo sirve a quien se postula. */}
@@ -69,14 +74,19 @@ export default function App() {
         <Route element={<RequireAuth roles={['empresa', 'coordinador', 'asesor_academico']} />}>
           <Route path="estudiantes" element={<Estudiantes />} />
         </Route>
-        <Route element={<RequireAuth roles={['estudiante', 'coordinador', 'asesor_academico']} />}>
+        <Route element={<RequireAuth roles={['estudiante', 'coordinador']} />}>
           <Route path="organizaciones" element={<Organizaciones />} />
         </Route>
         <Route path="estudiantes/:id" element={<PerfilEstudiante />} />
         <Route path="organizaciones/:id" element={<OrganizacionDetalle />} />
-        <Route path="prediccion" element={<PrediccionML />} />
+        <Route element={<RequireAuth roles={['coordinador', 'asesor_academico']} />}>
+          <Route path="prediccion" element={<PrediccionML />} />
+        </Route>
+        <Route element={<RequireAuth roles={['asesor_academico']} />}>
+          <Route path="asesor" element={<Asesor />} />
+        </Route>
 
-        <Route element={<RequireAuth roles={['estudiante', 'coordinador', 'asesor_academico']} />}>
+        <Route element={<RequireAuth roles={['estudiante', 'coordinador']} />}>
           <Route path="traslado" element={<Traslado />} />
         </Route>
 
