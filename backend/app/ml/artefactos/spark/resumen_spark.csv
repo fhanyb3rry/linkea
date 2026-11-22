@@ -1,0 +1,6 @@
+origen,elegible,registros,cobertura_prom,minutos_prom
+postulacion,1,2,1.0,12.5
+real,0,20,0.0,18.0
+real,1,8,0.6875,9.375
+sintetico,0,286,0.4557937062937064,52.64755244755243
+sintetico,1,114,0.4365701754385967,21.75877192982456

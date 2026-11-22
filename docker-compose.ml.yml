@@ -1,0 +1,35 @@
+# Apache Spark para los procesos por lotes de ML (app/ml/spark_*.py).
+#
+# No forma parte del arranque normal del proyecto: Mongo ya corre en su
+# contenedor `linkea-mongo` y el backend/frontend van en Windows.
+# Este archivo solo define la imagen de Spark con el código montado.
+#
+# Uso:
+#   Levantar el contenedor una sola vez:
+#       docker compose -f docker-compose.ml.yml --profile ml up -d
+#
+#   Correr un proceso por lotes (ejemplo):
+#       docker exec -w /app linkea-spark python3 app/ml/spark_pares.py
+#
+#   Apagarlo:
+#       docker compose -f docker-compose.ml.yml --profile ml down
+#
+# Si el host tuviera Java + pyspark instalados, los mismos scripts corren
+# directo con `python -m app.ml.spark_pares` (o spark-submit).
+
+services:
+  spark:
+    build:
+      context: .
+      dockerfile: docker/spark.Dockerfile
+    image: linkea-spark:local
+    container_name: linkea-spark
+    profiles:
+      - ml
+    volumes:
+      - ./backend:/app
+    working_dir: /app
+    # El contenedor queda vivo esperando órdenes; los trabajos se lanzan
+    # con `docker exec linkea-spark python3 app/ml/<script>.py` (ver arriba).
+    command: ["tail", "-f", "/dev/null"]
+    restart: "no"
