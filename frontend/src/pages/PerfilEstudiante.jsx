@@ -11,6 +11,7 @@ import {
   MapPin,
   Pencil,
   Phone,
+  Sparkles,
 } from 'lucide-react'
 import ListState from '../components/layout/ListState'
 import PageTitle from '../components/layout/PageTitle'
@@ -19,7 +20,7 @@ import useActiveStudent from '../hooks/useActiveStudent'
 import useFetch from '../hooks/useFetch'
 import useStoredSet from '../hooks/useStoredSet'
 import { formatDate, formatSize, initials, perfilCompleto } from '../lib/perfil'
-import { descargarCV, getStudent } from '../services/api'
+import { descargarCV, getEtapaEstudiante, getStudent } from '../services/api'
 
 const estados = {
   activo: { label: 'Disponible', dot: 'bg-teal' },
@@ -64,8 +65,10 @@ export default function PerfilEstudiante() {
   const [activeId] = useActiveStudent()
   const [connections, toggleConnection] = useStoredSet('linkea-connections')
   const { data: student, error, loading } = useFetch(() => getStudent(id), [id])
+  const { data: etapaInfo } = useFetch(() => getEtapaEstudiante(id).catch(() => null), [id])
 
   const isMine = activeId === id
+  const esPersonalAcademico = usuario?.rol === 'coordinador' || usuario?.rol === 'asesor_academico'
   const enlaces = student
     ? [
         ['LinkedIn', student.enlaces?.linkedin],
@@ -269,11 +272,46 @@ export default function PerfilEstudiante() {
               </Card>
 
               {isMine && <Completitud student={student} />}
+              {etapaInfo && (isMine || esPersonalAcademico || etapaInfo.codigo_etapa === 'listo') && (
+                <EtapaPreparacion info={etapaInfo} mostrarConsejo={isMine || esPersonalAcademico} />
+              )}
             </aside>
           </div>
         </>
       )}
     </section>
+  )
+}
+
+function EtapaPreparacion({ info, mostrarConsejo }) {
+  const tono =
+    info.codigo_etapa === 'listo'
+      ? 'bg-teal text-white'
+      : info.codigo_etapa === 'intermedio'
+        ? 'bg-cocoa-soft text-cocoa'
+        : 'bg-brand-soft text-brand'
+
+  return (
+    <Card title="Preparación para estadía">
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-body text-xs font-semibold ${tono}`}>
+            <Sparkles className="h-3.5 w-3.5" />
+            {info.etapa}
+          </span>
+          {mostrarConsejo && info.es_singular && (
+            <span className="rounded-full border border-line bg-canvas px-2.5 py-0.5 font-body text-[11px] font-medium text-ink">
+              Perfil fuera de lo habitual
+            </span>
+          )}
+        </div>
+        {mostrarConsejo && (
+          <p className="font-body text-xs leading-relaxed text-muted">
+            {info.es_singular ? `${info.motivo_singular} ${info.sugerencia}` : info.sugerencia}
+          </p>
+        )}
+      </div>
+    </Card>
   )
 }
 

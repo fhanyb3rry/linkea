@@ -20,10 +20,11 @@ function initials(name) {
     .toUpperCase()
 }
 
-export default function StudentCard({ student, match, connected = false, onToggleConnect }) {
+export default function StudentCard({ student, match, etapaInfo, mostrarAcompanamiento = false, connected = false, onToggleConnect }) {
   const { nombre, carrera, semestre, ubicacion, skills = [], estado, disponibilidad } = student
   const horas = disponibilidad?.horas_por_semana ?? 0
   const status = estados[estado] ?? { label: estado, dot: 'bg-muted' }
+  const verEtapa = etapaInfo && (mostrarAcompanamiento || etapaInfo.codigo_etapa === 'listo')
 
   return (
     <article className="card group flex h-full flex-col gap-4 p-5">
@@ -70,6 +71,30 @@ export default function StudentCard({ student, match, connected = false, onToggl
         </p>
         <MatchBadge match={match} />
       </div>
+
+      {verEtapa && (
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span
+            className={`rounded-full px-2.5 py-0.5 font-body text-[11px] font-semibold ${
+              etapaInfo.codigo_etapa === 'listo'
+                ? 'bg-teal/20 text-ink'
+                : etapaInfo.codigo_etapa === 'intermedio'
+                  ? 'bg-surface border border-line text-muted'
+                  : 'bg-brand-soft text-brand'
+            }`}
+          >
+            {etapaInfo.etapa}
+          </span>
+          {mostrarAcompanamiento && etapaInfo.es_singular && (
+            <span
+              title={etapaInfo.motivo_singular}
+              className="rounded-full border border-brand/40 bg-canvas px-2 py-0.5 font-body text-[10px] font-semibold text-brand"
+            >
+              Revisión sugerida
+            </span>
+          )}
+        </div>
+      )}
 
       {skills.length > 0 && (
         <div className="flex flex-wrap gap-2">

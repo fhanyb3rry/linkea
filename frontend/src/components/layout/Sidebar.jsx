@@ -8,7 +8,6 @@ import {
   Building2,
   CalendarCheck,
   Factory,
-  GitBranch,
   GraduationCap,
   Home,
   LayoutDashboard,
@@ -17,6 +16,7 @@ import {
   MessageCircle,
   Send,
   Settings,
+  TrendingUp,
   UserRound,
   Users,
   X,
@@ -37,9 +37,9 @@ const groups = [
       // Guardar vacantes solo tiene sentido para quien se postula.
       { to: '/guardados', label: 'Guardados', icon: Bookmark, roles: ['estudiante'] },
       { to: '/rutas', label: 'Rutas de aprendizaje', icon: Network, roles: ['estudiante'] },
-      { to: '/traslado', label: 'Traslado', icon: MapPin, roles: ['estudiante', 'coordinador'] },
-      // El análisis del modelo es herramienta del personal de la universidad.
-      { to: '/prediccion', label: 'Predicción ML', icon: GitBranch, roles: ['coordinador', 'asesor_academico'] },
+      { to: '/traslado', label: 'Traslado', icon: MapPin, roles: ['estudiante', 'coordinador', 'asesor_academico'] },
+      // Estudiantes ven el pronóstico sencillo; el personal ve también el detalle técnico dentro de la página.
+      { to: '/prediccion', label: 'Pronóstico de aceptación', icon: TrendingUp },
     ],
   },
   {

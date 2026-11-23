@@ -17,6 +17,7 @@ from app.routers import (
     organizations,
     search,
     seguimientos,
+    segmentacion,
     students,
 )
 
@@ -58,6 +59,7 @@ app.include_router(applications.router)
 app.include_router(search.router)
 app.include_router(ai.router)
 app.include_router(ml.router)
+app.include_router(segmentacion.router)
 app.include_router(seguimientos.router)
 app.include_router(catalogo.router)
 app.include_router(coordinacion.router)

@@ -353,7 +353,7 @@ export default function EligibilityPanel({ vacancyId }) {
   )
 }
 
-// Compara el veredicto de Reglas Fijas contra el Árbol de Decisión entrenado (Machine Learning).
+// Muestra en lenguaje claro qué tan probable es ser aceptado según postulaciones anteriores de Linkea.
 function PrediccionMLCard({ studentId, vacancyId }) {
   const [estado, setEstado] = useState({ key: '', data: null, error: null })
   const key = `${studentId}:${vacancyId}`
@@ -371,48 +371,56 @@ function PrediccionMLCard({ studentId, vacancyId }) {
   const actual = estado.key === key ? estado : null
   const data = actual?.data
 
+  const ganador = data?.algoritmos_p05?.ganador ?? data?.ml
+  const prob = ganador?.probabilidad_aceptacion ?? 0
+  const favorable = prob >= 50
+  const nivel = prob >= 75 ? 'Alta' : prob >= 50 ? 'Moderada' : 'Por reforzar'
+
+  let mensajeUsuario = ''
+  if (data) {
+    const faltantes = data.reglas?.faltantes ?? []
+    if (prob >= 75 && faltantes.length === 0) {
+      mensajeUsuario = 'Perfiles con disponibilidad, habilidades y cercanía similares suelen ser aceptados en vacantes como esta.'
+    } else if (favorable && faltantes.length > 0) {
+      mensajeUsuario = 'Aunque un aspecto está justo, en postulaciones anteriores tus demás fortalezas han compensado favorablemente.'
+    } else if (!favorable && faltantes.length > 0) {
+      mensajeUsuario = 'En casos anteriores similares convino reforzar horas disponibles, habilidades clave o portafolio antes de postularse.'
+    } else {
+      mensajeUsuario = 'Tus datos están cerca del punto medio; revisa el simulador para ver qué ajuste te impulsa más.'
+    }
+  }
+
   return (
     <div className="flex flex-col gap-3 rounded-xl border border-line p-3">
       <p className="flex items-center gap-2 font-body text-xs font-semibold text-ink">
         <GitBranch className="h-4 w-4 text-cocoa" />
-        Modelo ML · Árbol de decisión vs reglas
+        Pronóstico según casos anteriores
       </p>
 
       {!actual && <div className="h-20 animate-pulse rounded-lg bg-canvas" aria-busy="true" />}
-      {actual?.error && <p className="font-body text-xs text-muted">No se pudo calcular: {actual.error}</p>}
+      {actual?.error && <p className="font-body text-xs text-muted">No disponible por ahora.</p>}
 
       {data && (
         <>
           <div>
             <div className="mb-1.5 flex items-center justify-between font-body text-xs">
-              <span className="text-muted">Probabilidad de aceptación (ML)</span>
-              <span className="font-semibold text-ink">{data.ml.probabilidad_aceptacion}%</span>
+              <span className="text-muted">Posibilidad estimada ({nivel})</span>
+              <span className="font-semibold text-ink">{prob}%</span>
             </div>
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-line">
               <div
-                className={`h-full rounded-full ${data.ml.prediccion === 1 ? 'bg-teal' : 'bg-brand'}`}
-                style={{ width: `${data.ml.probabilidad_aceptacion}%` }}
+                className={`h-full rounded-full ${favorable ? 'bg-teal' : 'bg-brand'}`}
+                style={{ width: `${prob}%` }}
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 font-body text-xs">
-            <div className="stat px-2.5 py-2">
-              <p className="text-[10px] uppercase tracking-wide text-muted">Reglas fijas</p>
-              <p className="mt-0.5 font-semibold text-ink">{data.reglas.etiqueta}</p>
-            </div>
-            <div className={`stat px-2.5 py-2 ${data.ml.prediccion === 1 ? 'ring-1 ring-teal/50' : ''}`}>
-              <p className="text-[10px] uppercase tracking-wide text-muted">Árbol ML</p>
-              <p className="mt-0.5 font-semibold text-ink">{data.ml.etiqueta}</p>
-            </div>
-          </div>
-
-          <p className="font-body text-[11px] leading-relaxed text-muted">{data.resumen}</p>
+          <p className="font-body text-[11px] leading-relaxed text-muted">{mensajeUsuario}</p>
           <Link
             to={`/prediccion?estudiante=${encodeURIComponent(studentId)}&vacante=${encodeURIComponent(vacancyId)}`}
             className="font-body text-xs font-semibold text-brand hover:underline"
           >
-            Abrir simulador y detalle técnico (60/20/20)
+            Simular cómo mejorar mis posibilidades →
           </Link>
         </>
       )}

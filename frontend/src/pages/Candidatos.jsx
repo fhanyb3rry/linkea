@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { BadgeCheck, Check, Download, Eye, X } from 'lucide-react'
+import { BadgeCheck, Check, Download, Eye, TrendingUp, X } from 'lucide-react'
 import EstadoBadge from '../components/cards/EstadoBadge'
 import HistorialPostulacion from '../components/cards/HistorialPostulacion'
 import MatchBadge from '../components/cards/MatchBadge'
@@ -13,6 +13,7 @@ import {
   descargarCV,
   getApplications,
   getCandidates,
+  getPronosticosVacante,
   getStudents,
   getVacancy,
   updateApplication,
@@ -34,16 +35,42 @@ function Avatar({ name }) {
   )
 }
 
+function PronosticoBadge({ info }) {
+  if (!info) return null
+  const cls =
+    info.nivel === 'Alto'
+      ? 'bg-teal/20 text-ink ring-1 ring-teal/40'
+      : info.nivel === 'Medio'
+        ? 'bg-surface text-ink border border-line'
+        : 'bg-brand-soft text-brand'
+  return (
+    <span
+      title="Estimado a partir de postulaciones cerradas similares en Linkea"
+      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-body text-xs font-semibold ${cls}`}
+    >
+      <TrendingUp className="h-3.5 w-3.5" />
+      Pronóstico {info.nivel.toLowerCase()} · {info.probabilidad}%
+    </span>
+  )
+}
+
 export default function Candidatos() {
   const { id } = useParams()
   const [actionError, setActionError] = useState(null)
   const [busyId, setBusyId] = useState(null)
 
   const { data, error, loading, reload } = useFetch(
-    () => Promise.all([getVacancy(id), getApplications({ vacancyId: id }), getCandidates(id), getStudents()]),
+    () =>
+      Promise.all([
+        getVacancy(id),
+        getApplications({ vacancyId: id }),
+        getCandidates(id),
+        getStudents(),
+        getPronosticosVacante(id).catch(() => ({})),
+      ]),
     [id],
   )
-  const [vacancy, applications, candidates, students] = data ?? [null, [], [], []]
+  const [vacancy, applications, candidates, students, pronosticos] = data ?? [null, [], [], [], {}]
 
   const studentById = useMemo(() => new Map(students.map((s) => [s.id, s])), [students])
   const matchById = useMemo(() => new Map(candidates.map((c) => [c.estudiante_id, c])), [candidates])
@@ -103,6 +130,7 @@ export default function Candidatos() {
                             {student.carrera} · {student.semestre}º semestre · {student.ubicacion.zona}
                           </p>
                         </div>
+                        <PronosticoBadge info={pronosticos[student.id]} />
                         <MatchBadge match={matchById.get(student.id)} />
                         <EstadoBadge estado={a.estado} />
                       </div>
@@ -178,6 +206,7 @@ export default function Candidatos() {
                           {student ? `${student.carrera} · ${student.ubicacion.zona}` : ''}
                         </p>
                       </div>
+                      <PronosticoBadge info={pronosticos[c.estudiante_id]} />
                       <MatchBadge match={c} />
                       <Link
                         to={`/estudiantes/${c.estudiante_id}`}

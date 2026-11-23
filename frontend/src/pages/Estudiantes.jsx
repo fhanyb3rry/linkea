@@ -4,11 +4,14 @@ import ListState from '../components/layout/ListState'
 import PageHeader from '../components/layout/PageHeader'
 import { useAuth } from '../context/auth'
 import useStoredSet from '../hooks/useStoredSet'
-import { getCandidates, getStudents, getVacancies } from '../services/api'
+import { getCandidates, getPanoramaEstudiantes, getStudents, getVacancies } from '../services/api'
 
 export default function Estudiantes() {
   const { usuario } = useAuth()
+  const esPersonalAcademico = usuario?.rol === 'coordinador' || usuario?.rol === 'asesor_academico'
   const [students, setStudents] = useState([])
+  const [etapasPorId, setEtapasPorId] = useState({})
+  const [filtroEtapa, setFiltroEtapa] = useState('todos')
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -29,6 +32,9 @@ export default function Estudiantes() {
     getVacancies()
       .then(setVacancies)
       .catch(() => setVacancies([]))
+    getPanoramaEstudiantes()
+      .then((res) => setEtapasPorId(res?.estudiantes ?? {}))
+      .catch(() => setEtapasPorId({}))
   }, [])
 
   // Compatibilidad de cada estudiante con la vacante de referencia (la calcula el backend)
@@ -56,11 +62,16 @@ export default function Estudiantes() {
     const q = search.trim().toLowerCase()
     return students.filter((s) => {
       if (carrera !== 'Todas' && s.carrera !== carrera) return false
+      if (filtroEtapa !== 'todos') {
+        const info = etapasPorId[s.id]
+        if (filtroEtapa === 'singular' && !info?.es_singular) return false
+        if (filtroEtapa !== 'singular' && info?.codigo_etapa !== filtroEtapa) return false
+      }
       if (!q) return true
       const text = [s.nombre, s.matricula, s.carrera, s.ubicacion?.zona, ...(s.skills ?? []), ...(s.intereses ?? [])].join(' ').toLowerCase()
       return text.includes(q)
     })
-  }, [students, search, carrera])
+  }, [students, search, carrera, filtroEtapa, etapasPorId])
 
   const sorted = useMemo(() => {
     if (!matches || matches.size === 0) return filtered
@@ -100,23 +111,44 @@ export default function Estudiantes() {
         </div>
       )}
 
-      {refVacancies.length > 0 && (
+      <div className="flex flex-wrap items-center gap-4">
+        {refVacancies.length > 0 && (
+          <label className="flex flex-wrap items-center gap-2 font-body text-xs text-muted">
+            Ver compatibilidad con la vacante
+            <select
+              value={refVacancy}
+              onChange={(e) => setRefVacancy(e.target.value)}
+              className="w-full min-w-0 max-w-full rounded-xl border border-line bg-surface px-3 py-2 text-ink outline-none focus:ring-2 focus:ring-cocoa/30 sm:w-auto"
+            >
+              <option value="">Ninguna</option>
+              {refVacancies.map((v) => (
+                <option key={v.id} value={v.id}>
+                  {v.titulo || v.sector} · {v.nombre_empresa}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+
         <label className="flex flex-wrap items-center gap-2 font-body text-xs text-muted">
-          Ver compatibilidad con la vacante
+          Etapa de preparación
           <select
-            value={refVacancy}
-            onChange={(e) => setRefVacancy(e.target.value)}
-            className="w-full min-w-0 max-w-full rounded-xl border border-line bg-surface px-3 py-2 text-ink outline-none focus:ring-2 focus:ring-cocoa/30 sm:w-auto"
+            value={filtroEtapa}
+            onChange={(e) => setFiltroEtapa(e.target.value)}
+            className="rounded-xl border border-line bg-surface px-3 py-2 text-ink outline-none focus:ring-2 focus:ring-cocoa/30"
           >
-            <option value="">Ninguna</option>
-            {refVacancies.map((v) => (
-              <option key={v.id} value={v.id}>
-                {v.titulo || v.sector} · {v.nombre_empresa}
-              </option>
-            ))}
+            <option value="todos">Todas</option>
+            <option value="listo">Listos para estadía</option>
+            {esPersonalAcademico && (
+              <>
+                <option value="intermedio">En preparación intermedia</option>
+                <option value="acompanamiento">Conviene acompañamiento</option>
+                <option value="singular">Perfiles por revisar con asesoría</option>
+              </>
+            )}
           </select>
         </label>
-      )}
+      </div>
 
       <ListState
         loading={loading}
@@ -136,6 +168,8 @@ export default function Estudiantes() {
               key={student.id}
               student={student}
               match={matches?.get(student.id)}
+              etapaInfo={etapasPorId[student.id]}
+              mostrarAcompanamiento={esPersonalAcademico}
               connected={connections.has(student.id)}
               onToggleConnect={() => toggleConnection(student.id)}
             />

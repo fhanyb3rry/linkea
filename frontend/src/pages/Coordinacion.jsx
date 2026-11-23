@@ -1,4 +1,5 @@
 import { useSearchParams } from 'react-router-dom'
+import AcompanamientoMapa from '../components/coordinacion/AcompanamientoMapa'
 import CatalogoDocumentos from '../components/coordinacion/CatalogoDocumentos'
 import IncidenciasLista from '../components/coordinacion/IncidenciasLista'
 import Indicadores from '../components/coordinacion/Indicadores'
@@ -8,6 +9,7 @@ import PageTitle from '../components/layout/PageTitle'
 
 const PESTANAS = [
   { id: 'panel', label: 'Panel', Componente: Indicadores },
+  { id: 'acompanamiento', label: 'Acompañamiento y mapa', Componente: AcompanamientoMapa },
   { id: 'postulaciones', label: 'Postulaciones', Componente: PostulacionesTabla },
   { id: 'incidencias', label: 'Incidencias', Componente: IncidenciasLista },
   { id: 'documentos', label: 'Documentos', Componente: CatalogoDocumentos },

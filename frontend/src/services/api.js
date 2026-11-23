@@ -383,6 +383,10 @@ export function getPrediccionML(studentId, vacancyId) {
   return request(`/ml/predict/${studentId}/${vacancyId}`)
 }
 
+export function getPronosticosVacante(vacancyId) {
+  return request(`/ml/pronostico-vacante/${vacancyId}`)
+}
+
 export function simularML(caracteristicas) {
   return postJSON('/ml/simular', caracteristicas)
 }
@@ -395,4 +399,92 @@ export async function obtenerGraficaBlobML(nombre) {
 
 export function descargarGraficaML(nombre, archivo = `${nombre}.png`) {
   return descargar(`/ml/grafica/${nombre}`, archivo)
+}
+
+// ---- Práctica 04 (Entrenamiento, Validación, Prueba y Diagnóstico de Ajuste) -------------
+
+export function getEstadoP04() {
+  return request('/ml/p04/estado')
+}
+
+export function entrenarP04({ cantidad = 500, semilla = 42, usar_reales = true } = {}) {
+  return postJSON('/ml/p04/entrenar', { cantidad, semilla, usar_reales })
+}
+
+export async function obtenerArchivoBlobP04(nombre) {
+  const response = await send(`/ml/p04/archivo/${nombre}`)
+  if (!response.ok) throw new Error('No se pudo cargar el archivo de Práctica 04')
+  return response.blob()
+}
+
+export function descargarArchivoP04(nombre, archivo) {
+  return descargar(`/ml/p04/archivo/${nombre}`, archivo)
+}
+
+// ---- Práctica 05 (Comparación de Algoritmos: Decision Tree, Random Forest y KNN) ---------
+
+export function getEstadoP05() {
+  return request('/ml/p05/estado')
+}
+
+export function entrenarP05({ cantidad = 500, semilla = 42, usar_reales = true } = {}) {
+  return postJSON('/ml/p05/entrenar', { cantidad, semilla, usar_reales })
+}
+
+export async function obtenerArchivoBlobP05(nombre) {
+  const response = await send(`/ml/p05/archivo/${nombre}`)
+  if (!response.ok) throw new Error('No se pudo cargar el archivo de Práctica 05')
+  return response.blob()
+}
+
+export function descargarArchivoP05(nombre, archivo) {
+  return descargar(`/ml/p05/archivo/${nombre}`, archivo)
+}
+
+// ---- Práctica 06 (Optimización de Hiperparámetros: GridSearchCV vs RandomizedSearchCV) ----
+
+export function getEstadoP06() {
+  return request('/ml/p06/estado')
+}
+
+export function entrenarP06({ cantidad = 500, semilla = 42, usar_reales = true } = {}) {
+  return postJSON('/ml/p06/entrenar', { cantidad, semilla, usar_reales })
+}
+
+export async function obtenerArchivoBlobP06(nombre) {
+  const response = await send(`/ml/p06/archivo/${nombre}`)
+  if (!response.ok) throw new Error('No se pudo cargar el archivo de optimización')
+  return response.blob()
+}
+
+export function descargarArchivoP06(nombre, archivo) {
+  return descargar(`/ml/p06/archivo/${nombre}`, archivo)
+}
+
+// ---- Acompañamiento, Mapa de Generación y Segmentación (P07, P08 y P09) ------------------
+
+export function getPanoramaEstudiantes() {
+  return request('/segmentacion/estudiantes')
+}
+
+export function getEtapaEstudiante(studentId) {
+  return request(`/segmentacion/estudiante/${studentId}`)
+}
+
+export function getAuditoriaSegmentacion() {
+  return request('/segmentacion/auditoria')
+}
+
+export function recalibrarSegmentacion(config = {}) {
+  return postJSON('/segmentacion/recalibrar', config)
+}
+
+export async function obtenerArchivoBlobSeg(practica, nombre) {
+  const response = await send(`/segmentacion/${practica}/archivo/${nombre}`)
+  if (!response.ok) throw new Error('No se pudo cargar la gráfica')
+  return response.blob()
+}
+
+export function descargarArchivoSeg(practica, nombre, archivo) {
+  return descargar(`/segmentacion/${practica}/archivo/${nombre}`, archivo)
 }
